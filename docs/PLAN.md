@@ -89,7 +89,11 @@ cep-vscode/
 ├── scripts/
 │   ├── sync-upstream.mjs            # §5.5.1
 │   ├── check-keywords.mjs           # §5.5.2
-│   └── check-upstream.mjs           # §5.5.3
+│   ├── check-upstream.mjs           # §5.5.3
+│   ├── check-fixtures.mjs           # §5.5.4
+│   ├── check-vsix.mjs               # §5.5.5
+│   ├── check-clean.mjs              # §5.5.6
+│   └── check-toolchain.mjs          # §5.5.7 (built)
 ├── test/
 │   ├── upstream/
 │   │   ├── keywords.go              # byte copy of cep's internal/parser/keywords.go
@@ -99,60 +103,34 @@ cep-vscode/
 │   │   ├── examples/*.cep (+ .cep.snap)   # 10 files
 │   │   ├── torture/*.cep  (+ .cep.snap)   # 2 files
 │   │   └── invalid/*.cep  (+ .cep.snap)   # 7 files
-│   └── checker.test.mjs             # §6.3
+│   ├── checker.test.mjs             # §6.3
+│   ├── grammar.test.mjs             # scope lint + language configuration (plan check card lines 1, 9)
+│   ├── tools.test.mjs               # §6.4
+│   └── toolchain.test.mjs           # §5.5.7 (built)
 ├── docs/PLAN.md                     # this file
 ├── .github/workflows/ci.yml         # §5.6
 ├── .vscode/launch.json              # §5.4
-├── .vscodeignore  .gitignore  .gitattributes  .nvmrc   # §5.4
+├── .gitignore  .gitattributes  .nvmrc  .npmrc   # §5.4 (no .vscodeignore: package.json "files")
 ```
 
 ## 5. File specs
 
+*v1.1 (2026-11-08, after G0). This version applies the owner's G0 answers and the S1 plan check's §10 dispositions. §5.1 and §5.4 describe the built scaffold. §5.5.1, §5.5.3 and §5.6 gain test seams and the gate. §5.5.4–§5.5.7 are new. The grammar (§5.3) and the unit tests (§6.1) are unchanged until the design panel answers the plan check's P1–P8; they become v2 at G1.*
+
 ### 5.1 `package.json`
 
-```json
-{
-  "name": "cep",
-  "displayName": "CEP Language",
-  "description": "Syntax highlighting for the CEP rule language (CEPS, .cep files).",
-  "version": "0.1.0",
-  "publisher": "vorsar",
-  "license": "Apache-2.0",
-  "private": true,
-  "repository": { "type": "git", "url": "https://github.com/VORSAR/cep-vscode.git" },
-  "engines": { "vscode": "^1.90.0" },
-  "categories": ["Programming Languages"],
-  "keywords": ["cep", "ceps", "complex event processing"],
-  "contributes": {
-    "languages": [
-      {
-        "id": "cep",
-        "aliases": ["CEP", "cep"],
-        "extensions": [".cep"],
-        "configuration": "./language-configuration.json"
-      }
-    ],
-    "grammars": [
-      { "language": "cep", "scopeName": "source.cep", "path": "./syntaxes/cep.tmLanguage.json" }
-    ]
-  },
-  "scripts": {
-    "test": "npm run test:unit && npm run test:snap && npm run test:keywords && npm run test:checker",
-    "test:unit": "vscode-tmgrammar-test \"test/unit/**/*.test.cep\"",
-    "test:snap": "vscode-tmgrammar-snap \"test/fixtures/**/*.cep\"",
-    "test:snap:update": "vscode-tmgrammar-snap --updateSnapshot \"test/fixtures/**/*.cep\"",
-    "test:keywords": "node scripts/check-keywords.mjs",
-    "test:checker": "node --test test/checker.test.mjs",
-    "package": "vsce package"
-  },
-  "devDependencies": {
-    "@vscode/vsce": "4.0.0",
-    "vscode-tmgrammar-test": "0.1.3"
-  }
-}
-```
+Built in the scaffold. The file itself is the reference. It holds:
+- the identity and `contributes` fields of v1 (D5);
+- the plan check's S2 `scripts` block;
+- the S4 `files` allowlist, which replaces `.vscodeignore` (owner, Q4);
+- the two exact pins (D2).
 
-Both test tools read `contributes.grammars` from `package.json`, so they need no `-g` flag. The glob quotes are required, because the tools expand the globs themselves.
+The scripts that matter:
+- `npm test`: the whole suite.
+- `npm run gate`: T3 and CI. It runs `npm test`, then `package`, which is `vsce package --no-dependencies` (plan check §0 finding 5), then `test:vsix` and `test:clean`.
+- `npm run test:lane-a` and `npm run test:lane-b`: each lane's T2.
+
+Both test tools read `contributes.grammars` from `package.json`, so they need no `-g` flag. The glob quotes are required, because the tools expand the globs themselves. Both exit −1 when a glob finds nothing. `vscode-tmgrammar-snap` without `--updateSnapshot` writes any missing `.snap` and exits 0, which is why `test:fixtures` (§5.5.4) runs before it.
 
 ### 5.2 `language-configuration.json`
 
@@ -357,27 +335,21 @@ language|param|stream|table|rule|intent|partition|by|of|ttl|from|every|once|with
 }
 ```
 
-`.vscodeignore` keeps everything except the extension itself out of the `.vsix`:
-
-```
-.github/**
-.vscode/**
-docs/**
-scripts/**
-test/**
-node_modules/**
-CLAUDE.md
-.nvmrc
-.gitignore
-.gitattributes
-**/*.vsix
-```
+~~`.vscodeignore`~~: replaced by the `files` allowlist in `package.json` (owner, 2026-11-08, Q4). A denylist packs any stray folder, such as an agent worktree inside the repo (probed in the plan check's review). vsce refuses to combine the two.
 
 `.gitignore`:
 
 ```
 node_modules/
 *.vsix
+.claude/worktrees/
+```
+
+`.npmrc` (owner, 2026-11-08, Q2) keeps every install script from running and every optional package, including vsce-sign's native binary, off disk:
+
+```
+ignore-scripts=true
+omit=optional
 ```
 
 `.gitattributes` keeps fixture bytes exact. `torture/comments.cep` has 5 CRLF line endings that are under test, and must survive any `core.autocrlf` setting:
@@ -391,11 +363,19 @@ test/upstream/** -text
 
 ### 5.5 Scripts
 
-All three are ES modules run with `node` and use only Node built-ins (`node:fs`, `node:path`, `node:child_process`, `node:process`, global `fetch`). Subprocesses use `execFileSync` with an argument array, never a shell string. Exit codes are 0 for pass and 1 for any failure. A missing or unparsable input is a failure, never a pass. Messages start with the script name, for example `check-keywords: …`.
+All scripts are ES modules run with `node`, and they use only Node built-ins (`node:fs`, `node:path`, `node:child_process`, `node:process`, `node:zlib`, global `fetch`).
+- Subprocesses use `execFileSync` with an argument array, never a shell string.
+- The exit code is 0 for a pass and 1 for any failure. A missing or unparsable input is a failure, never a pass.
+- Every message starts with the script's name, for example `check-keywords: …`. A failure message also names the input or the item at fault.
+- Every default path resolves from the script's own location (`import.meta.dirname`), not the current directory, so a script behaves the same from any worktree.
+- Each script's tests (§6.3, §6.4) assert its message, not just its exit code, because Node itself exits 1 for a missing script. They also include a passing case.
 
-#### 5.5.1 `scripts/sync-upstream.mjs <path-to-cep-clone> [--ref <git-ref>]`
+#### 5.5.1 `scripts/sync-upstream.mjs <path-to-cep-clone> [--ref <git-ref>] [--out <dir>]`
 
 The script reads files from a git ref, `main` by default, through git's object store. It never reads or changes the cep working tree, so it works whatever branch the cep clone has checked out (the owner's clone is usually on a sprint branch). Run `git -C ../cep fetch origin` first and pass `--ref origin/main` to sync with the remote's `main`.
+
+- **`--out <dir>`** is the root that the paths below are written under. It defaults to the repo root. The tests pass a temporary directory and a throwaway git repo as the "cep clone", so they never need a real cep or touch this repo's tree.
+- **In S1** the sync runs pinned to the sprint's target: `node scripts/sync-upstream.mjs <absolute path of the cep clone> --ref 1fa3a5bb9d3bbabfe0c26ca3daa62086c8093c49`.
 
 1. Fail if no path is given, or if `git -C <cep> rev-parse --verify <ref>^{commit}` fails.
 2. Read each file with `git -C <cep> cat-file blob <ref>:<path>` through `execFileSync(…, { encoding: 'buffer' })`. That gives raw bytes, with no line-ending conversion. Write the Buffer as-is, creating directories as needed:
@@ -424,13 +404,63 @@ The defaults are `syntaxes/cep.tmLanguage.json` and `test/upstream/keywords.go`.
    - (g) the top-level `patterns` list differs from the skeleton list in §5.3, which is held in the script as a constant.
 4. On pass, print `check-keywords: ok (<n> keywords, <m> reserved, <k> categories)`. At the pinned commit that is `115 keywords, 17 reserved, 11 categories`.
 
-#### 5.5.3 `scripts/check-upstream.mjs` (CI only)
+#### 5.5.3 `scripts/check-upstream.mjs [--url <url>] [--local <path>]` (CI's scheduled job)
 
-1. Fetch `https://raw.githubusercontent.com/VORSAR/cep/main/internal/parser/keywords.go` with `fetch` and `AbortSignal.timeout(30000)`.
-2. A network error or a non-200 status is a failure: `check-upstream: could not fetch …: <reason>`.
-3. If the fetched bytes equal `test/upstream/keywords.go`, exit 0. Otherwise exit 1 with `check-upstream: cep main's keyword table differs from test/upstream (synced at <SOURCE line>); run sync-upstream, update the grammar, review the snapshots`.
+1. Fetch `--url` with `fetch` and `AbortSignal.timeout(30000)`. The default is `https://raw.githubusercontent.com/VORSAR/cep/main/internal/parser/keywords.go`.
+2. A network error or a non-200 status is a failure: `check-upstream: could not fetch <url>: <reason or status>`.
+3. Compare the fetched bytes with `--local`, which defaults to `test/upstream/keywords.go`, read with `test/upstream/SOURCE` beside it.
+   - If they are equal, exit 0 with `check-upstream: ok (matches <SOURCE line>)`.
+   - Otherwise exit 1 with `check-upstream: cep main's keyword table differs from test/upstream (synced at <SOURCE line>); run sync-upstream, update the grammar, review the snapshots`.
+
+The tests use three seams, since Node's `fetch` cannot read `file:` URLs:
+- a `data:` URL for the same bytes (exit 0) and for a changed copy (exit 1);
+- a port with nothing listening, for a refused connection;
+- a `node:http` server on `127.0.0.1` that answers 404.
 
 This script is not part of `npm test`, so local runs stay offline and deterministic.
+
+#### 5.5.4 `scripts/check-fixtures.mjs [--root <dir>]`
+
+This is the guard that `test:snap` lacks: the snapshot tool writes a missing snapshot and passes.
+
+1. `--root` defaults to the repo root. List the files under `<root>/test/fixtures/` on disk, and list the tracked ones with `git -C <root> ls-files -- test/fixtures`. Tracked means staged or committed.
+2. Fail, with one line per problem, if:
+   - (a) the `.cep` counts are not exactly 10 in `examples/`, 2 in `torture/` and 7 in `invalid/` (constants in the script);
+   - (b) a `.cep` has no tracked `<name>.cep.snap` beside it;
+   - (c) a `.cep.snap` has no `.cep` beside it;
+   - (d) any other file is there.
+3. On a pass, print `check-fixtures: ok (19 fixtures, 19 tracked snapshots)`.
+
+Its tests build a throwaway git repo in a temporary directory.
+
+#### 5.5.5 `scripts/check-vsix.mjs <file.vsix>`
+
+1. Read the file with `node:fs`. Find the zip's end-of-central-directory record, signature `0x06054b50`, searching back from the end over at most 65,557 bytes. Then read every central-directory entry, signature `0x02014b50`, and collect the file names. A missing file, or a file that is not a zip, is a failure.
+2. Compare the names, as a set, with the 8 of the S1 plan check's S4 (a constant):
+
+   ```
+   extension.vsixmanifest
+   [Content_Types].xml
+   extension/package.json
+   extension/readme.md
+   extension/changelog.md
+   extension/LICENSE.txt
+   extension/language-configuration.json
+   extension/syntaxes/cep.tmLanguage.json
+   ```
+
+   Fail with one line per missing name and one per extra name.
+3. On a pass, print `check-vsix: ok (8 files)`.
+
+Its tests write small zips with `node:zlib` (stored or deflated) into a temporary directory: the S4 set (exit 0), an empty zip, one with an extra `extension/test/x`, one without the grammar, and a non-zip file.
+
+#### 5.5.6 `scripts/check-clean.mjs [--root <dir>]`
+
+Run `git -C <root> status --porcelain --untracked-files=all`. Ignored files (`node_modules/`, `*.vsix`) are not listed. Any output is a failure, and the message lists each path. This is how `npm run gate` catches a snapshot or any other file written during the run. On a pass, print `check-clean: ok`. Its tests use a throwaway git repo: a clean one, one with an untracked file, and one with a changed file.
+
+#### 5.5.7 `scripts/check-toolchain.mjs [--nvmrc <path>] [--node <version>]`
+
+Built in the scaffold. It fails unless the running Node (or `--node`) equals the exact `x.y.z` in `.nvmrc`, accepting a leading `v` in either. A missing, unreadable or inexact `.nvmrc` is a failure. On a pass it prints `check-toolchain: ok (node <version>)`. Its tests are `test/toolchain.test.mjs`. Whether it should also check npm's version is open for the panel (plan check A17).
 
 ### 5.6 `.github/workflows/ci.yml`
 
@@ -456,13 +486,13 @@ jobs:
         with:
           node-version-file: .nvmrc
       - run: npm ci
-      - run: npm test
-      - run: npm run package
+      - run: npm run gate
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: vsix
           path: "*.vsix"
   upstream:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
@@ -472,7 +502,9 @@ jobs:
       - run: node scripts/check-upstream.mjs
 ```
 
-The weekly `schedule` makes a cep keyword change show up within a week, even when nobody touches this repo.
+The test job runs exactly T3 (`npm ci`, then `npm run gate`; owner, 2026-11-08, Q5). A tooling test (§6.4) fails unless it does. `npm run gate` includes the `.vsix` check and the clean-tree check.
+
+The `upstream` job runs only on the weekly `schedule` and by hand (owner, 2026-11-08, Q8). A cep keyword change then shows up within a week, even when nobody touches this repo, but it never blocks a PR or a merge here. A red scheduled run starts a re-sync sprint.
 
 ## 6. Tests
 
@@ -638,6 +670,35 @@ Each test copies the real grammar JSON into a temporary directory (`fs.mkdtempSy
 7. `fails when the top-level pattern order differs`: swap the first two `patterns` entries. Status 1, output contains `comments`.
 8. `fails when the keyword table is missing`: `--keywords <tmp>/absent.go`. Status 1.
 9. `fails when the grammar is missing`: `--grammar <tmp>/absent.json`. Status 1.
+10. `fails when a category word is not in keywordList`: add `month` to `keywords-unit`. Status 1, output contains `month`. This is rule (d); `month` is SPEC §2.4's calendar trap.
+11. `fails when the keyword table has no keywordList block`: a `--keywords` file without it. Status 1, output contains `keywordList`.
+12. `fails when the grammar is not JSON`: a `--grammar` file holding `{`. Status 1.
+
+Every test also asserts that the output has a line starting with `check-keywords:` (v1.1; plan check Q3). Red first: the tests run once against a stub `check-keywords.mjs` that always exits 0, and every failing test is recorded.
+
+### 6.4 Tooling tests: `test/tools.test.mjs` (`node:test`, no dependencies) (v1.1)
+
+Each test owns its world: a temporary directory and, where git is involved, a throwaway repo made with `git init` and an empty identity set with `-c user.name=t -c user.email=t@t`. No test reads `../cep` or writes into this repo. Each script gets a passing case and asserts its own message.
+
+- **`sync-upstream`** (§5.5.1), against a throwaway "cep" repo that has the cep paths with a few small files:
+  - a sync writes the files and `SOURCE` under `--out`;
+  - an unknown `--ref` → 1;
+  - a stale `.cep` already under `--out` → 1, naming it;
+  - a missing invalid fixture in the source → 1, naming it;
+  - a second run → the files are unchanged, byte for byte.
+- **`check-upstream`** (§5.5.3): the same bytes as a `data:` URL → 0; a changed copy → 1, saying it differs; a refused connection → 1; a 404 → 1, naming the status.
+- **`check-fixtures`** (§5.5.4):
+  - 10 + 2 + 7 tracked pairs → 0;
+  - a missing `.snap` → 1;
+  - an untracked `.snap` → 1;
+  - an orphan `.snap` → 1;
+  - 18 fixtures → 1;
+  - an extra file → 1.
+- **`check-vsix`** (§5.5.5): the S4 set → 0; an empty zip, an extra file, a missing file, or a non-zip → 1, each naming the problem.
+- **`check-clean`** (§5.5.6): a clean repo → 0; an untracked or a changed file → 1, naming the path.
+- **`ci.yml`**: the test job's `run:` steps are exactly `npm ci` then `npm run gate`, and the `upstream` job has the schedule-or-dispatch `if:` → passes. Red first against v1's §5.6 file.
+
+`test/toolchain.test.mjs` (built) covers `check-toolchain` (§5.5.7).
 
 ## 7. Build steps, in order
 
