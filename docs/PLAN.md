@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-08):** D1–D6 answered (§2); nothing built. Sprint S1 is at its plan check ([s1-plan-check.md](sprints/s1-plan-check.md)), under architecture and QA review. Next: the owner answers its §11 (G0).
+**Status (2026-11-08):** D1–D6 answered (§2); nothing built. Sprint S1's plan check ([s1-plan-check.md](sprints/s1-plan-check.md)) is reviewed by architecture and QA and revised to v2. Next: the owner answers its §11 Q1–Q9 (G0).
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 
