@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-08):** plan written; nothing built. Next: the owner answers D1–D6 (§2), then §7 step 1.
+**Status (2026-11-08):** D1–D6 answered (§2); nothing built. Sprint S1 is at its plan check ([s1-plan-check.md](sprints/s1-plan-check.md)), under architecture and QA review. Next: the owner answers its §11 (G0).
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 
@@ -21,12 +21,13 @@ Not in v1: error squiggles, hover, go-to-definition, formatting (these need a la
 
 **Made (owner, 2026-11-08):** the extension lives in its own repo, VORSAR/cep-vscode, not inside cep. It keeps Node out of cep's pinned toolchain and gate, lets it release on its own tags, and keeps any store token out of the engine's CI.
 
-**Open (recommendation first; the owner answers, then this list is annotated):**
+**Answered (owner, 2026-11-08; each answer is marked under its question, "≠ R" where it differs from the recommendation):**
 
 - **D1. v1 scope.**
   - (a) Highlighting and editor basics as in §1. *Recommended:* a few days of declarative work.
   - (b) (a) plus snippets, for example an empty rule with its clauses in the fixed order.
   - (c) (a) plus live error checking. That needs the language server (§9), which is cep engine work.
+  - **Owner, 2026-11-08: (a), as recommended.**
 - **D2. Tools.**
   - The tools themselves. *Recommended:* allow two exact-pinned dev dependencies, with `package-lock.json` committed:
     - `@vscode/vsce` 4.0.0 (MIT, released 2026-09-14). 4.1.0 came out on 2026-10-28 and is under two weeks old.
@@ -36,21 +37,26 @@ Not in v1: error squiggles, hover, go-to-definition, formatting (these need a la
   - The script language.
     - *Recommended:* plain Node with no npm packages, because Node is already required.
     - The alternative is stdlib Python, the owner's usual choice, but it adds a second toolchain to pin.
+  - **Owner, 2026-11-08: both dev dependencies, exact-pinned, Node 26.13.0 in `.nvmrc`, plain Node scripts; as recommended.** The S1 plan check found a licence and an age question in their transitive tree (its §11 Q2, Q3).
 - **D3. Release channel.**
   - *Recommended:* a `.vsix` attached to a GitHub Release, installed with `code --install-extension`.
   - Later: VS Code Marketplace plus Open VSX (for Cursor and VSCodium). Both are public listings that need a `vorsar` publisher account and a token secret in CI.
+  - **Owner, 2026-11-08: a `.vsix` on a GitHub Release; as recommended.**
 - **D4. Keyword drift.**
   - *Recommended:*
     - a vendored copy of cep's `keywords.go`;
     - an offline check in `npm test` that the grammar matches it;
     - a CI job that compares the copy with cep `main` and goes red when cep changes.
   - The alternative is to compare by hand.
+  - **Owner, 2026-11-08: the vendored copy, the offline check and the CI job; as recommended.**
 - **D5. Identity.**
   - *Recommended:* extension name `cep`, publisher `vorsar` (so the Marketplace ID is `vorsar.cep`), display name "CEP Language", language id `cep`, root scope `source.cep`.
   - The publisher name is only reserved when a Marketplace account is created (D3).
+  - **Owner, 2026-11-08: `vorsar.cep`, "CEP Language", language id `cep`, scope `source.cep`; as recommended.**
 - **D6. Process.**
   - *Recommended:* the light rules in `CLAUDE.md`, as one PR for v1.
   - The alternative is cep's full sprint model (G0–G5, design and QA panels), which is heavy for a few declarative files.
+  - **Owner, 2026-11-08: cep's full sprint model (≠ R).** v1 runs as sprint S1 through the full loop; §7 below is the build order inside the loop's lanes, as mapped in [the S1 plan check §1](sprints/s1-plan-check.md#1-routine-shape-waves).
 
 ## 3. Where the language is defined
 
