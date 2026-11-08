@@ -1,0 +1,74 @@
+{
+  "name": "cep",
+  "displayName": "CEP Language",
+  "description": "Syntax highlighting for the CEP rule language (CEPS, .cep files).",
+  "version": "0.1.0",
+  "publisher": "vorsar",
+  "license": "Apache-2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VORSAR/cep-vscode.git"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "cep",
+    "ceps",
+    "complex event processing"
+  ],
+  "files": [
+    "syntaxes/cep.tmLanguage.json",
+    "language-configuration.json",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "cep",
+        "aliases": [
+          "CEP",
+          "cep"
+        ],
+        "extensions": [
+          ".cep"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "cep",
+        "scopeName": "source.cep",
+        "path": "./syntaxes/cep.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "test": "npm run test:toolchain && npm run test:unit && npm run test:keywords && npm run test:checker && npm run test:grammar && npm run test:tools && npm run test:fixtures && npm run test:snap",
+    "test:toolchain": "node scripts/check-toolchain.mjs",
+    "test:unit": "vscode-tmgrammar-test \"test/unit/**/*.test.cep\"",
+    "test:keywords": "node scripts/check-keywords.mjs",
+    "test:checker": "node --test test/checker.test.mjs",
+    "test:grammar": "node --test test/grammar.test.mjs",
+    "test:tools": "node --test test/tools.test.mjs test/toolchain.test.mjs",
+    "test:fixtures": "node scripts/check-fixtures.mjs",
+    "test:snap": "vscode-tmgrammar-snap \"test/fixtures/**/*.cep\"",
+    "test:snap:update": "vscode-tmgrammar-snap --updateSnapshot \"test/fixtures/**/*.cep\"",
+    "test:vsix": "node scripts/check-vsix.mjs cep-0.1.0.vsix",
+    "test:clean": "node scripts/check-clean.mjs",
+    "test:lane-a": "npm run test:toolchain && npm run test:tools",
+    "test:lane-b": "npm run test:toolchain && npm run test:unit && npm run test:keywords && npm run test:checker && npm run test:grammar",
+    "package": "vsce package --no-dependencies",
+    "gate": "npm test && npm run package && npm run test:vsix && npm run test:clean"
+  },
+  "devDependencies": {
+    "@vscode/vsce": "4.0.0",
+    "vscode-tmgrammar-test": "0.1.3"
+  }
+}
