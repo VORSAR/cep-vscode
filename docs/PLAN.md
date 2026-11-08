@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-08):** D1–D6 answered (§2); nothing built. Sprint S1's plan check ([s1-plan-check.md](sprints/s1-plan-check.md)) is reviewed by architecture and QA and revised to v2. Next: the owner answers its §11 Q1–Q9 (G0).
+**Status (2026-11-08):** Sprint S1 passed G0 ([record](sprints/s1-record.md)); the scaffold and the gate's toolchain check are built. Next: the design panel on §5–§6 (two waves), then design v2 and G1.
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 
@@ -37,7 +37,7 @@ Not in v1: error squiggles, hover, go-to-definition, formatting (these need a la
   - The script language.
     - *Recommended:* plain Node with no npm packages, because Node is already required.
     - The alternative is stdlib Python, the owner's usual choice, but it adds a second toolchain to pin.
-  - **Owner, 2026-11-08: both dev dependencies, exact-pinned, Node 26.13.0 in `.nvmrc`, plain Node scripts; as recommended.** The S1 plan check found a licence and an age question in their transitive tree (its §11 Q2, Q3).
+  - **Owner, 2026-11-08: both dev dependencies, exact-pinned, Node 26.13.0 in `.nvmrc`, plain Node scripts; as recommended.** The S1 plan check found a licence and an age question in their transitive tree (its §11 Q2, Q3). **Owner, 2026-11-08, at G0:** keep vsce with install scripts and optional packages off, with a rule 5 exception for `@vscode/vsce-sign`; resolve the lockfile with `--before` (today − 14 days), again on or after 2026-11-13 ([S1 record](sprints/s1-record.md#decisions-at-the-gates)).
 - **D3. Release channel.**
   - *Recommended:* a `.vsix` attached to a GitHub Release, installed with `code --install-extension`.
   - Later: VS Code Marketplace plus Open VSX (for Cursor and VSCodium). Both are public listings that need a `vorsar` publisher account and a token secret in CI.
