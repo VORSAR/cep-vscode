@@ -1,4 +1,4 @@
-// check-fixtures: fail unless test/fixtures holds exactly the 19 fixtures, each with a tracked snapshot.
+// check-fixtures: fail unless test/fixtures holds exactly the 20 fixtures, each with a tracked snapshot.
 // Usage: node scripts/check-fixtures.mjs [--root <dir>]
 // The snapshot tool writes a missing .cep.snap and passes; this is the guard it lacks. --root
 // (default: this repo's root) exists for the tests.
@@ -21,8 +21,8 @@ for (let i = 0; i < args.length; i++) {
   root = args[++i];
 }
 
-// The .cep count each folder must hold. A total of 19 is not enough.
-const COUNTS = { examples: 10, torture: 2, invalid: 7 };
+// The .cep count each folder must hold. A total of 20 is not enough.
+const COUNTS = { examples: 10, torture: 2, invalid: 8 };
 
 function lsFiles(gitArgs) {
   try {
