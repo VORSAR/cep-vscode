@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-09):** Sprint S1 passed G1 ([record](sprints/s1-record.md)): the scaffold and the toolchain check are built, and §5–§6 are at v2 after the design panel and the owner's G1 decisions. Next: wave W1, with lane A (tooling) and lane B (grammar).
+**Status (2026-11-09):** Delivery is incremental, as a release ladder (§7.0, owner 2026-11-09). v0.0.1 is being prepared for CI to release from the owner's tag: the design-reviewed reference grammar plus the release job. S1 passed G1; its lanes A (tooling) and B (grammar) are building v0.1.0.
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 
@@ -515,6 +515,66 @@ jobs:
 
 The test job runs exactly T3 (`npm ci`, then `npm run gate`; owner, 2026-11-08, Q5). A tooling test (§6.4) fails unless it does. `npm run gate` includes the `.vsix` check and the clean-tree check.
 
+#### 5.6.1 `.github/workflows/release.yml` and `scripts/check-release.mjs` (owner, 2026-11-09: CI cuts the releases)
+
+**Why a separate workflow.** CI cuts each release when the owner pushes a `v*` tag. The owner still decides when; agents never tag. This is its own workflow, so `ci.yml` and its test stay as they are, and the write permission lives only here.
+
+```yaml
+name: release
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run every step except creating the release"
+        type: boolean
+        default: true
+permissions:
+  contents: read
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - run: npm run gate
+      - run: node scripts/check-release.mjs --ref "$GITHUB_REF_NAME" --notes release-notes.md
+      - if: github.event_name == 'push'
+        run: gh release create "$GITHUB_REF_NAME" "cep-${GITHUB_REF_NAME#v}.vsix" --verify-tag --title "$GITHUB_REF_NAME" --notes-file release-notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}
+```
+
+**How it is used.**
+- It adds no action or dependency: `gh` is on GitHub's runners, and the two action SHAs are `ci.yml`'s.
+- `workflow_dispatch` lets the owner run it once by hand, as a dry run, after the PR that adds it is merged and before the first tag. That follows cep's rule that a new workflow runs once by hand: a tag-only workflow cannot run on the PR.
+
+**`scripts/check-release.mjs --ref <ref> [--notes <path>] [--root <dir>]`:**
+1. On a tag push the ref is the tag, so it must be exactly `v` + `package.json`'s `version`; otherwise fail, naming both. On a dispatch the ref is a branch, so it checks that the branch is `main` and uses `package.json`'s version.
+2. `CHANGELOG.md` must have a `## <version>` section; otherwise fail, naming the version.
+3. Write that section's body to `--notes`. Check that `cep-<version>.vsix` exists in the root.
+4. On a pass, print `check-release: ok (v<version>, notes <n> lines)`.
+
+It uses Node built-ins only, like every script in §5.5.
+
+**Tests** (in `test/release.test.mjs`, a file of their own, so they never collide with lane A's `test/tools.test.mjs`):
+- `check-release` on a temp root:
+  - a matching tag → 0, and writes the notes;
+  - a tag that does not match the version → 1;
+  - a missing CHANGELOG section → 1;
+  - a missing `.vsix` → 1;
+  - a dispatch from a branch other than `main` → 1.
+- `release.yml` read with the same line reader as `ci.yml`. Its triggers must be `push: tags v*` and `workflow_dispatch`. Top-level permissions must be `contents: read`, and `contents: write` only on the release job. Its `run:` steps must be `npm ci`, `npm run gate`, the `check-release` line, then the `gh release create` line guarded by `github.event_name == 'push'`.
+- Red first against a copy without the guard and a copy with top-level `contents: write`.
+
+**Release notes come from `CHANGELOG.md`.** So each rung of the ladder (§7.0) adds a `## <version>` section, and bumps `package.json`'s version in the same PR.
+
 The `upstream` job runs only on the weekly `schedule` and by hand (owner, 2026-11-08, Q8). A cep keyword change then shows up within a week, even when nobody touches this repo, but it never blocks a PR or a merge here. A red scheduled run starts a re-sync sprint.
 
 ## 6. Tests
@@ -873,6 +933,22 @@ Red first: tests 1 and 2 fail on the placeholder grammar, and test 4 fails befor
 
 ## 7. Build steps, in order
 
+### 7.0 The release ladder (owner, 2026-11-09)
+
+The owner wants a working product as early as possible, then iteration towards the finish line, and several released versions are fine. So v1 ships as a ladder of releases. Each release comes from a tag on `main` that the owner makes, with the `.vsix` that CI built attached to a GitHub Release (D3).
+
+| Version | What it adds | When |
+|---|---|---|
+| **v0.0.1** (preview) | The design-reviewed reference grammar (the architect's candidate for §5.3 v2), PLAN §5.2's editor configuration, §6.1's verbatim `literals.test.cep` (run red first), and the release job (§5.6.1), released by CI from the owner's tag (owner, 2026-11-09: "an immediate release from CI"). **Its gate is what exists at that rung**: the toolchain check, the literals test, the release tests and packaging. `.vsix` content was checked by hand (8 files). The full gate comes with v0.1.0. | 2026-11-09 |
+| **v0.1.0** (sprint S1) | The repo-built extension: lane B's test-first grammar and configuration, and lane A's tooling and CI. Then the 19 snapshots generated and reviewed, T3 (`npm ci && npm run gate`), CI green on the owner's PR, the owner's quick check (Dark 2026 and Light 2026, the editor basics, typing `'''`), merge and tag. | target 2026-11-09 |
+| **v0.1.1** (S1.1) | The review and break-it of the combined build (architect, QA, the-fool), moved here from S1 by the owner (≠ R). Then one fix round, the owner's feedback from the preview and v0.1.0, and the full owner's check in four themes. | after v0.1.0 |
+| **v0.1.x** | The lockfile re-resolved with `--before` (today − 14 days), so the `@azure/identity` 4.14.1 fix is in; `npm audit` recorded (plan check card line 10). Moved here from before T3 by the owner, amending G0 Q3. It folds into v0.1.1 if that ships on or after the 13th. | on or after 2026-11-13 |
+| **later** | §9's items (snippets, store publishing, the language server) as the owner picks them, one release each. | — |
+
+Every release still runs the gate (`npm ci && npm run gate`) and CI before its merge, and every snapshot change is reviewed.
+
+### 7.1 The steps
+
 Commit after each step. Commit messages say what changed and why, with no AI attribution. The owner pushes; agents do not.
 
 *v2 note: S1 runs these steps inside cep's full loop. Steps 0–1 are done (G0, the scaffold). Steps 2 and 8 are lane A, steps 3–4 are lane B, and steps 5–7 are the coordinator's after combine (plan check §1, §4). Where a step below and §5–§6 v2 differ, §5–§6 v2 win:*
@@ -902,6 +978,8 @@ Commit after each step. Commit messages say what changed and why, with no AI att
 9. **Release (owner).** Merge, tag `v0.1.0`, and create a GitHub Release with `cep-0.1.0.vsix` attached (D3).
 
 ## 8. Done when
+
+*For v0.1.0 (S1), the owner's check is the quick check of the §7.0 ladder; the four-theme check and the review of the combined build come in v0.1.1. The list below is v1 as a whole, reached across the ladder.*
 
 - [ ] `npm test` exits 0 on a clean checkout after `npm ci`; the exit code was read, not assumed.
 - [ ] All 19 snapshots were reviewed by hand per §6.2.

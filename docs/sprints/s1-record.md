@@ -104,7 +104,12 @@ PLAN §6.1's unit files and plan check §6's 47 counter-examples cover the rest.
 
 ## Scope changes
 
-None.
+**2026-11-09, the owner: incremental delivery.** The owner asked for a working product as early as possible, then iteration, and said several released versions are fine. PLAN §7.0 now holds the release ladder. Decisions, in order:
+1. **The release ladder** (PLAN §7.0): v0.0.1 preview, then v0.1.0 (S1), then v0.1.1 (S1.1), then v0.1.x (lockfile), then later items.
+2. **v0.1.0 ships before the review and break-it of the combined build**, which move to v0.1.1 (S1.1) with the one fix round (≠ R: the recommendation was to review before v0.1.0). S1's G3 row moves with them. v0.1.0's owner's check is the quick check (Dark 2026 and Light 2026, the editor basics, typing `'''`); the four-theme check comes in v0.1.1.
+3. **The lockfile re-resolve moves from before T3 to a patch release on or after 2026-11-13**, as recommended. This amends G0 Q3. v0.1.0 ships with today's lockfile: every package is at least two weeks old, and the four advisories are recorded as known issues. Card line 10 moves with it.
+4. **CI cuts each release when the owner pushes a `v*` tag**, as recommended. The added scope is `release.yml` and `scripts/check-release.mjs`, with `test/release.test.mjs` (PLAN §5.6.1).
+5. **"An immediate release from CI."** v0.0.1 is cut by CI from the design-reviewed reference grammar, with PLAN §6.1's verbatim `literals.test.cep` and the release job, ahead of the lanes' tested v0.1.0. Its gate is what exists at that rung (PLAN §7.0). The coordinator builds it on a branch, `release/v0.0.1`; the owner pushes, merges and tags.
 
 ## Findings
 
@@ -193,7 +198,8 @@ Design (G1)  ☑ architecture + the-fool findings resolved (placed in PLAN §5�
 Build (G2)   ☐ every lane at T2 ☐ T3 `npm ci && npm run gate` exit 0
              ☐ a test for every token class and error scope shipped
              ☐ tests on the real code ☐ every breaker's red test committed
-Review (G3)  ☐ architecture review of the combined diff: no drift
+Review (G3)  → moved to S1.1 / v0.1.1 (owner, 2026-11-09, ≠ R; see Scope changes)
+             ☐ architecture review of the combined diff: no drift
              ☐ QA break-it run ☐ every finding fixed, forwarded (owner consent for blockers) or rejected with reason
 Verify (G4)  ☐ T4 CI exit 0 on the draft PR, both jobs, logs read ☐ owner's check passed
              ☐ every acceptance line met by its named proof
