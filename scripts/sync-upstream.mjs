@@ -53,6 +53,7 @@ function git(gitArgs, what, encoding = 'utf8') {
 // 1. The ref must name a commit. Everything below reads that one commit, by its sha.
 const sha = git(['rev-parse', '--verify', '--quiet', `${ref}^{commit}`], `${ref} is not a commit in ${cep}`).trim();
 if (!/^[0-9a-f]{40,64}$/.test(sha)) fail(`${ref} is not a commit in ${cep}`);
+const at = ref === sha ? sha : `${ref} (${sha})`;
 
 // 2. The copy set: cep path -> path under --out.
 const INVALID = [
@@ -77,12 +78,12 @@ const targets = [
 ];
 const invalidUpstream = new Set(listCep('docs/language/invalid/'));
 const missing = INVALID.map((n) => `docs/language/invalid/${n}`).filter((src) => !invalidUpstream.has(src));
-if (missing.length > 0) fail(...missing.map((src) => `${ref} (${sha}) has no ${src}`));
+if (missing.length > 0) fail(...missing.map((src) => `${at} has no ${src}`));
 for (const n of INVALID) targets.push({ src: `docs/language/invalid/${n}`, dest: `test/fixtures/invalid/${n}` });
 
 // Read every blob first, as raw bytes with no line-ending conversion, so a failure writes nothing.
 for (const t of targets) {
-  t.bytes = git(['cat-file', 'blob', `${sha}:${t.src}`], `cannot read ${t.src} at ${ref} (${sha})`, 'buffer');
+  t.bytes = git(['cat-file', 'blob', `${sha}:${t.src}`], `cannot read ${t.src} at ${at}`, 'buffer');
 }
 
 // 3. SOURCE names the commit the copy came from.
@@ -105,7 +106,7 @@ if (check) {
   for (const f of files) {
     const have = readOrNull(outPath(f.dest));
     if (have === null) problems.push(`${f.dest} is missing`);
-    else if (!have.equals(f.bytes)) problems.push(`${f.dest} differs from ${ref} (${sha})`);
+    else if (!have.equals(f.bytes)) problems.push(`${f.dest} differs from ${at}`);
   }
   if (problems.length > 0) fail(...problems);
   console.log(`${name}: ok (${targets.length} files match ${sha})`);
@@ -135,7 +136,7 @@ const stale = (fs.existsSync(fixturesDir) ? fs.readdirSync(fixturesDir, { recurs
   .filter((rel) => !copied.has(rel))
   .sort();
 if (stale.length > 0) {
-  fail(...stale.map((rel) => `stale fixture ${rel} is not in cep at ${ref} (${sha}); remove it and its snapshot by hand`));
+  fail(...stale.map((rel) => `stale fixture ${rel} is not in cep at ${at}; remove it and its snapshot by hand`));
 }
 
 console.log(`${name}: next: npm test, then review every snapshot diff`);
