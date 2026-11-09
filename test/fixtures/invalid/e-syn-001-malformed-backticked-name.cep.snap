@@ -1,0 +1,37 @@
+>-- expect: E-SYN-001 (a backticked name starts with a letter or `_`) @ 3:8
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>language cep/0.1;
+#^^^^^^^^ source.cep storage.type.declaration.cep
+#        ^ source.cep
+#         ^^^^^^^ source.cep constant.other.version.cep
+#                ^ source.cep punctuation.terminator.statement.cep
+>stream `1abc` (a string, ts timestamp) time ts watermark bounded 1 min;
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^ source.cep
+#        ^ source.cep constant.numeric.cep
+#         ^^^ source.cep
+#            ^^^ source.cep
+#               ^ source.cep
+#                ^ source.cep
+#                 ^^^^^^ source.cep storage.type.primitive.cep
+#                       ^ source.cep punctuation.separator.comma.cep
+#                        ^ source.cep
+#                         ^^ source.cep
+#                           ^ source.cep
+#                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                     ^^ source.cep
+#                                       ^^^^ source.cep keyword.control.clause.cep
+#                                           ^ source.cep
+#                                            ^^ source.cep
+#                                              ^ source.cep
+#                                               ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                                                        ^ source.cep
+#                                                         ^^^^^^^ source.cep keyword.control.clause.cep
+#                                                                ^ source.cep
+#                                                                 ^ source.cep constant.numeric.cep
+#                                                                  ^ source.cep
+#                                                                   ^^^ source.cep keyword.other.unit.cep
+#                                                                      ^ source.cep punctuation.terminator.statement.cep
+>
