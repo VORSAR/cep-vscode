@@ -1,0 +1,41 @@
+-- SYNTAX TEST "source.cep" "literals and declarations"
+language cep/0.1;
+-- <-------- storage.type.declaration.cep
+--       ^^^^^^^ constant.other.version.cep
+--              ^ punctuation.terminator.statement.cep
+param grace duration = 1 hour 30 min;
+-- <----- storage.type.declaration.cep
+--    ^^^^^ variable.other.constant.param.cep
+--          ^^^^^^^^ storage.type.primitive.cep
+--                   ^ keyword.operator.assignment.cep
+--                     ^ constant.numeric.cep
+--                       ^^^^ keyword.other.unit.cep
+--                            ^^ constant.numeric.cep
+--                               ^^^ keyword.other.unit.cep
+param threshold float = 2.5e-3;
+--                      ^^^^^^ constant.numeric.cep
+param strict bool = true;
+--                  ^^^^ constant.language.cep
+stream `agent-events` (id string, ts timestamp) time ts watermark bounded 2 min;
+--     ^^^^^^^^^^^^^^ entity.name.type.stream.cep
+--                                   ^^^^^^^^^ storage.type.primitive.cep
+--                                              ^^^^ keyword.control.clause.cep
+--                                                      ^^^^^^^^^ keyword.control.clause.cep
+  partition by id of `agent-events` ttl ${grace}
+--^^^^^^^^^ keyword.control.clause.cep
+--                   ^^^^^^^^^^^^^^ variable.other.quoted.cep
+--                                      ^^^^^^^^ variable.other.constant.param.cep
+  from S[ts > timestamp '2026-01-01T00:00:00Z' and text has_ci 'it\'s']
+--            ^^^^^^^^^ storage.type.primitive.cep
+--                      ^^^^^^^^^^^^^^^^^^^^^^ string.quoted.single.cep
+--                                             ^^^ keyword.operator.logical.cep
+--                                                      ^^^^^^ keyword.operator.text.cep
+--                                                                ^^ constant.character.escape.cep
+  select math:round(risk) as scaled, Select
+--       ^^^^ entity.name.namespace.cep
+--            ^^^^^ support.function.cep
+--                        ^^ keyword.control.clause.cep
+--                                   ^^^^^^ invalid.illegal.keyword-case.cep
+  group by a -- not a 'string'
+--^^^^^ invalid.illegal.reserved.cep
+--           ^^^^^^^^^^^^^^^^^ comment.line.double-dash.cep
