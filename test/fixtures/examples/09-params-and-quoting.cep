@@ -1,0 +1,34 @@
+-- constructs: params-every-type backticked-identifier expect ns-call arithmetic
+--             rate-limit-unpartitioned defeat-path-expect
+language cep/0.1;
+
+param threshold float = 0.75;
+param lookback duration = 1 hour 30 min;
+param label string = 'prod';
+param strict bool = true;
+
+stream `agent-events` (agentId string, risk float, env string, ts timestamp)
+  time ts watermark bounded 2 min;
+
+stream RiskAlerts (agentId string, scaled float, ts timestamp);
+
+rule HighRisk
+  intent 'Alert when a scaled risk score crosses the configured threshold.'
+  from `agent-events`[risk * 100 / 100 > ${threshold} and env == ${label}]
+  expect given `agent-events` [ {agentId: 'a1', risk: 0.9, env: 'prod', ts: timestamp '2026-01-01T00:00:01Z'} ]
+         then RiskAlerts [ {agentId: 'a1', scaled: 1.0, ts: timestamp '2026-01-01T00:00:01Z'} ]
+  expect given `agent-events` [ {agentId: 'a1', risk: 0.9, env: 'prod', ts: timestamp '2026-01-01T00:00:01Z'},
+                                {agentId: 'a2', risk: 0.8, env: 'prod', ts: timestamp '2026-01-01T00:30:00Z'},
+                                {agentId: 'a1', risk: 0.9, env: 'prod', ts: timestamp '2026-01-01T01:30:01Z'},
+                                {agentId: 'a2', risk: 0.8, env: 'prod', ts: timestamp '2026-01-01T01:30:01.001Z'} ]
+         then RiskAlerts [ {agentId: 'a1', scaled: 1.0, ts: timestamp '2026-01-01T00:00:01Z'},
+                           {agentId: 'a2', scaled: 1.0, ts: timestamp '2026-01-01T01:30:01.001Z'} ]
+  expect given `agent-events` [ {agentId: 'a1', risk: 0.75, env: 'prod', ts: timestamp '2026-01-01T00:00:01Z'},
+                                {agentId: 'a2', risk: 0.5, env: 'prod', ts: timestamp '2026-01-01T00:01:00Z'} ]
+         then RiskAlerts [ ]
+  expect given `agent-events` [ {agentId: 'a1', risk: 0.9, env: 'staging', ts: timestamp '2026-01-01T00:00:01Z'},
+                                {agentId: 'a1', risk: 0.9, env: 'prod', ts: timestamp '2026-01-01T00:10:00Z'} ]
+         then RiskAlerts [ {agentId: 'a1', scaled: 1.0, ts: timestamp '2026-01-01T00:10:00Z'} ]
+  select agentId, math:round(risk) as scaled
+  output first every ${lookback}
+  insert into RiskAlerts;
