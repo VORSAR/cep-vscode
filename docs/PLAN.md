@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-09):** v0.0.1, v0.1.0 and **v0.1.1** are released ([releases](https://github.com/VORSAR/cep-vscode/releases)); v0.1.1 re-synced to cep `75f541e`. Next on the ladder (§7.0): v0.1.2 (S1.1), the review and break-it of the combined build with one fix round and the four-theme check; then v0.1.x, the lockfile refresh on or after 2026-11-13.
+**Status (2026-11-09):** v0.0.1, v0.1.0 and v0.1.1 are released ([releases](https://github.com/VORSAR/cep-vscode/releases)). **v0.1.2 is being prepared:** the re-sync to cep `ebb8496` and a unit guard for the end of every declaration keyword. Next on the ladder (§7.0): v0.1.3 (S1.1), the review and break-it with one fix round and the four-theme check; then v0.1.x, the lockfile refresh on or after 2026-11-13.
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 
@@ -60,7 +60,7 @@ Not in v1: error squiggles, hover, go-to-definition, formatting (these need a la
 
 ## 3. Where the language is defined
 
-cep is the source of truth. The files used, pinned at **cep `main` = `75f541e4b874bb69d8dedc332c22ec8c180328e3` (2026-11-09)**. They were first pinned at `1fa3a5b` (2026-11-08) and re-synced when cep fixed this repo's findings F1–F4:
+cep is the source of truth. The files used, pinned at **cep `main` = `ebb8496636564086400f27f3c0d06ad49e5dcd22` (2026-11-09)**. They were first pinned at `1fa3a5b` (2026-11-08), re-synced to `75f541e` when cep fixed this repo's findings F1–F4, and to `ebb8496`, which changed none of the vendored files except `SOURCE`:
 
 | cep path | What this repo takes from it |
 |---|---|
@@ -774,6 +774,10 @@ lead.agentId, x                               "." → punctuation.accessor.cep; 
   - `  from S window batch()` → `batch` likewise;
   - `  where text has_any_ci(${t})` → `has_any_ci` is `keyword.operator.text.cep ≠ support.function.cep`;
   - `select count (x)` → `count` is `support.function.cep`.
+- **Keywords glued to a name** (2026-11-09, after cep `ebb8496` began reading keywords as whole words):
+  - `x languagecep/0.1;` → `languagecep` is `≠ storage.type.declaration.cep`; `/` is arithmetic and `0.1` a number;
+  - `x streamS (a string)` and `x tableT (a string)` → the name is `support.function.cep`, not a declaration and not a stream or table name;
+  - `x ruleR;`, `x paramp int = 1;`, `insert intoT;` and `x givenT [ … ]` → the glued word carries neither the keyword scope nor the declared-name scope.
 - **Input cep rejects:**
   - `x ${ grace }` → `${` is `≠ variable.other.constant.param.cep`;
   - `` x `a/b` `` → the backtick is `≠ variable.other.quoted.cep`.
@@ -797,6 +801,7 @@ lead.agentId, x                               "." → punctuation.accessor.cep; 
    - `function-call` moved before the keyword rules → `key (`, `delay(`, `raw(`;
    - `backticked` removed → `` `select` ``;
    - `given`'s inner `table` rule removed → `T` in `given table T`.
+   - the trailing edge `R` dropped from one declaration region (`language`, `stream`, `table`, `rule`, `param`, `into` or `given`) → that keyword's glued line. Each of the seven was shown red (2026-11-09).
 
 ### 6.2 Snapshot tests: `test/fixtures/**/*.cep` (v2)
 
@@ -944,8 +949,9 @@ The owner wants a working product as early as possible, then iteration towards t
 | **v0.0.1** (preview) | The design-reviewed reference grammar (the architect's candidate for §5.3 v2), PLAN §5.2's editor configuration, §6.1's verbatim `literals.test.cep` (run red first), and the release job (§5.6.1), released by CI from the owner's tag (owner, 2026-11-09: "an immediate release from CI"). **Its gate is what exists at that rung**: the toolchain check, the literals test, the release tests and packaging. `.vsix` content was checked by hand (8 files). The full gate comes with v0.1.0. | 2026-11-09 |
 | **v0.1.0** (sprint S1) | The repo-built extension: lane B's test-first grammar and configuration, and lane A's tooling and CI. Then the 19 snapshots generated and reviewed, T3 (`npm ci && npm run gate`), CI green on the owner's PR, the owner's quick check (Dark 2026 and Light 2026, the editor basics, typing `'''`), merge and tag. | target 2026-11-09 |
 | **v0.1.1** | Re-sync to cep `75f541e`, which fixed this repo's findings F1–F4 (owner, 2026-11-09). `risk/2.5` divides in cep now, as the grammar already showed. Backticked names take cep's rule, a letter or `_` first, tested first. cep's new `e-syn-001-malformed-backticked-name.cep` is an 8th invalid fixture. | 2026-11-09 |
-| **v0.1.2** (S1.1) | The review and break-it of the combined build (architect, QA, the-fool), moved here from S1 by the owner (≠ R). Then one fix round, the owner's feedback from the preview and v0.1.0, and the full owner's check in four themes. | after v0.1.1 |
-| **v0.1.x** | The lockfile re-resolved with `--before` (today − 14 days), so the `@azure/identity` 4.14.1 fix is in; `npm audit` recorded (plan check card line 10). Moved here from before T3 by the owner, amending G0 Q3. It folds into v0.1.2 if that ships on or after the 13th. | on or after 2026-11-13 |
+| **v0.1.2** | Re-sync to cep `ebb8496` (only `SOURCE` changed; cep now reads keywords as whole words and added invalid examples for it). A unit guard for the end of every declaration keyword, which no test covered (owner, 2026-11-09: "if there is a change required lets do it and ship a new release"). | 2026-11-09 |
+| **v0.1.3** (S1.1) | The review and break-it of the combined build (architect, QA, the-fool), moved here from S1 by the owner (≠ R). Then one fix round, the owner's feedback from the preview and v0.1.0, and the full owner's check in four themes. | after v0.1.2 |
+| **v0.1.x** | The lockfile re-resolved with `--before` (today − 14 days), so the `@azure/identity` 4.14.1 fix is in; `npm audit` recorded (plan check card line 10). Moved here from before T3 by the owner, amending G0 Q3. It folds into v0.1.3 if that ships on or after the 13th. | on or after 2026-11-13 |
 | **later** | §9's items (snippets, store publishing, the language server) as the owner picks them, one release each. | — |
 
 Every release still runs the gate (`npm ci && npm run gate`) and CI before its merge, and every snapshot change is reviewed.

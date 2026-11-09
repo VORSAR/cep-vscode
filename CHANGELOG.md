@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- Re-synced to cep `ebb8496`; no sample file or lexer rule changed, so colours are the same as 0.1.1.
+- New tests make sure a keyword glued to a name is not coloured as a keyword: `languagecep/0.1` is not a version pragma, and `streamS` is not the `stream` keyword. cep now reads keywords as whole words.
+
 ## 0.1.1
 
 - Re-synced to cep `75f541e`, which fixed four issues this extension's review found in cep. `risk/2.5` now divides in cep too, which is how the extension already coloured it.
