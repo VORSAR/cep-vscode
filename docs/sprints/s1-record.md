@@ -49,7 +49,27 @@ The architect and QA reviewed v1 blind and found 3 blockers, 20 should-fix and 1
 
 **G0 passed 2026-11-08**, on the owner's answers above.
 
-**The design (G1) — the owner, YYYY-MM-DD:** *(after the panel and design v2)*
+**The design (G1) — the owner, 2026-11-09.** The panel ran:
+- the breaker, blind, re-deriving the grammar from cep's sources;
+- QA on testability (271 mutant grammars);
+- the architect with the-fool.
+
+Their reports are [breaker](../reviews/s1-design-breaker.md), [QA](../reviews/s1-design-qa.md) and [architecture](../reviews/s1-design-architecture.md). The owner then answered eight questions, each as recommended:
+
+1. **G1-1 — the grammar's structure: (c), the mix.** Keep PLAN §5.3's skeleton, its eleven `keywords-*` keys, the `(?i)` wrong-case rule and the check-keywords model. The grammar stays hand-written, with no build step. Add from the breaker:
+   - ASCII word edges and an unscoped identifier rule;
+   - bounded declaration regions that can cross lines;
+   - declared names that exclude keywords;
+   - E-STR-001 as a one-line match.
+
+   The evidence: the architect's candidate equals the breaker's grammar on all 42 counter-examples and passes PLAN's verbatim unit test.
+2. **G1-2 — E-STR-001: mark the whole unclosed string**, from its quote to the end of the line.
+3. **G1-3 — word operators also carry `keyword.operator.wordlike.cep`**, so the default themes colour them like keywords.
+4. **G1-4 — watch `lexer.go` too.** It is vendored beside `keywords.go`, and `check-upstream` compares both. This amends D4.
+5. **G1-5 — the owner's check uses four themes:** Dark 2026, Light 2026 (VS Code 1.145's defaults), Dark Modern and Light Modern.
+6. **G1-6 — triple quotes: test first.** There are no extra auto-closing pairs yet. The owner's check types `'''` and `"""` and records what appears.
+7. **G1-7 — the breaker's three cep findings are forwarded** to cep's known issues, beside F1 (Findings: F2–F4).
+8. **G1-8 — the scheduled job's 60-day pause** becomes a known issue, with a monthly check in CLAUDE.md.
 
 ## How it runs
 
@@ -91,9 +111,13 @@ The plan check's 38 review findings and their dispositions are in [plan check §
 | # | From | Severity | Finding | Disposition |
 |---|---|---|---|---|
 | F1 | plan check §0 finding 10 | later (cep) | cep lexes `risk/2.5` (no spaces) as one `Pragma` token: `Pragma` (`internal/parser/lexer.go:25`) is tried before `Ident` (`:31`). Probed with cep's rules on participle v2.1.4: `Pragma("risk/2.5")`, while `risk / 2.5` and `Risk/2.5` lex as arithmetic. Confirmed with cep's real parser (a copy equal to `1fa3a5b`, 2026-11-09): `from S[risk/2.5 > 1.0]` fails with `E-SYN-001: unexpected token "risk/2.5"`, and `risk / 2.5` parses. SPEC §2.5 does not say division needs spaces. | forwarded to cep's known issues (owner, Q7); this repo shows it as arithmetic |
+| F2 | design breaker, cep finding 2 | later (cep) | The backticked-name rule differs across `lexer.go` (`` `[A-Za-z0-9_\-. ]*` ``), `grammar.lark` (a letter or `_` first) and `grammar.ebnf` ("any-but-backtick"). The engine accepts `` stream `1abc` ``, an empty name and an all-space name (the breaker's runs of cep's parser). | forwarded to cep's known issues (owner, G1-7); this repo follows `lexer.go` |
+| F3 | design breaker, cep finding 3 | later (cep) | E-LATE-001's fix text (`docs/language/errors.md` line 31 and `errors.go`) offers `late events allow <duration>`, which SPEC §6.3 rev 3 makes E-LATE-002. | forwarded to cep's known issues (owner, G1-7) |
+| F4 | design breaker, cep finding 4 | later (cep) | The E-STR-001 message, "a single-quoted string does not end on its line", is also given for an unclosed double-quoted string (`parse.go` `lexError`). | forwarded to cep's known issues (owner, G1-7) |
 
 ## Known issues
 
+- **GitHub pauses a public repo's scheduled workflows after 60 days with no commits** (from GitHub's documentation; not tested here). The weekly `upstream` drift job would then stop silently. *Mitigation (owner, G1-8):* the owner checks the job's last-run date monthly, as CLAUDE.md says, and re-enables it if paused.
 - **`minimatch` 10.2.6, GHSA-g3hv-75wg-m249 (moderate).** It comes through `@vscode/vsce` 4.x, which requires `^10.2.6`, so there is no fix within vsce 4.x. The DoS needs hostile glob patterns, and this repo's only globs are its own. Forward: the next vsce major.
 
 ## Done-done

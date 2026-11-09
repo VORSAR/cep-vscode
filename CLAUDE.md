@@ -10,6 +10,7 @@ The language is defined in the engine repo, VORSAR/cep (local clone: `../cep`): 
 - `npm test` runs the toolchain check, unit tests, keyword check, checker, grammar and tooling tests, fixture guard and snapshot tests. Green means its exit code is 0, read yourself.
 - `npm run gate` is the full gate: `npm test`, then package, the `.vsix` check and a clean-tree check. CI runs `npm ci && npm run gate`. A lane's own check is `npm run test:lane-a` or `npm run test:lane-b`.
 - `npm install --before=<today minus 14 days>` re-resolves the lockfile so every package is at least two weeks old. Record `npm audit` after.
+- Monthly: check the `upstream` CI job's last run. GitHub pauses scheduled workflows after 60 days without commits; re-enable it if paused (owner, 2026-11-09).
 - `npm run test:snap:update` rewrites the snapshots. Run it only after reviewing the diff line by line.
 - `node scripts/sync-upstream.mjs ../cep` refreshes the vendored keyword table and fixtures from cep's `main` branch. It reads through git and never touches cep's working tree.
 - `npm run package` builds the `.vsix`.
