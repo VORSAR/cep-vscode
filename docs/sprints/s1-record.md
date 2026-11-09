@@ -90,7 +90,7 @@ The plan check's 38 review findings and their dispositions are in [plan check §
 
 | # | From | Severity | Finding | Disposition |
 |---|---|---|---|---|
-| F1 | plan check §0 finding 10 | later (cep) | cep lexes `risk/2.5` (no spaces) as one `Pragma` token: `Pragma` (`internal/parser/lexer.go:25`) is tried before `Ident` (`:31`). Probed with cep's rules on participle v2.1.4: `Pragma("risk/2.5")`, while `risk / 2.5` and `Risk/2.5` lex as arithmetic. | forwarded to cep's known issues (owner, Q7); this repo shows it as arithmetic |
+| F1 | plan check §0 finding 10 | later (cep) | cep lexes `risk/2.5` (no spaces) as one `Pragma` token: `Pragma` (`internal/parser/lexer.go:25`) is tried before `Ident` (`:31`). Probed with cep's rules on participle v2.1.4: `Pragma("risk/2.5")`, while `risk / 2.5` and `Risk/2.5` lex as arithmetic. Confirmed with cep's real parser (a copy equal to `1fa3a5b`, 2026-11-09): `from S[risk/2.5 > 1.0]` fails with `E-SYN-001: unexpected token "risk/2.5"`, and `risk / 2.5` parses. SPEC §2.5 does not say division needs spaces. | forwarded to cep's known issues (owner, Q7); this repo shows it as arithmetic |
 
 ## Known issues
 
