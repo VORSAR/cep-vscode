@@ -1,0 +1,26 @@
+-- SYNTAX TEST "source.cep" "operators and punctuation"
+-> follow = S[a == b and c != d]
+-- <-- keyword.operator.arrow.cep
+--        ^ keyword.operator.assignment.cep
+--              ^^ keyword.operator.comparison.cep
+--                         ^^ keyword.operator.comparison.cep
+risk >= 2 or risk <= 1 or a > b or a < b
+--   ^^ keyword.operator.comparison.cep
+--                ^^ keyword.operator.comparison.cep
+--                          ^ keyword.operator.comparison.cep
+--                                   ^ keyword.operator.comparison.cep
+risk * 100 / 100 + 1 - 2 % 3
+--   ^ keyword.operator.arithmetic.cep
+--         ^ keyword.operator.arithmetic.cep
+--               ^ keyword.operator.arithmetic.cep
+--                   ^ keyword.operator.arithmetic.cep
+--                       ^ keyword.operator.arithmetic.cep
+param floor int = -1;
+--                ^ keyword.operator.arithmetic.cep
+--                 ^ constant.numeric.cep
+--                  ^ punctuation.terminator.statement.cep
+lead.agentId, x
+--  ^ punctuation.accessor.cep
+--          ^ punctuation.separator.comma.cep
+{agentId: 'a1'}
+--      ^ punctuation.separator.key-value.cep

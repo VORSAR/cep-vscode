@@ -1,0 +1,186 @@
+-- SYNTAX TEST "source.cep" "plan check counter-examples 1-39"
+-- strings: items 1-14
+x 'it\'
+--^^^^^ string.quoted.single.cep invalid.illegal.newline.cep
+--^ string.quoted.single.cep invalid.illegal.newline.cep punctuation.definition.string.begin.cep
+y 'z'
+--^^^ string.quoted.single.cep - invalid.illegal.newline.cep
+--^ string.quoted.single.cep punctuation.definition.string.begin.cep
+--  ^ string.quoted.single.cep punctuation.definition.string.end.cep
+x 'abc\
+--^^^^^ string.quoted.single.cep invalid.illegal.newline.cep
+--    ^ string.quoted.single.cep invalid.illegal.newline.cep
+y 'z'
+--^^^ string.quoted.single.cep - invalid.illegal.newline.cep
+--^ string.quoted.single.cep punctuation.definition.string.begin.cep
+--  ^ string.quoted.single.cep punctuation.definition.string.end.cep
+x '
+--^ string.quoted.single.cep invalid.illegal.newline.cep punctuation.definition.string.begin.cep
+y 'z'
+--^^^ string.quoted.single.cep - invalid.illegal.newline.cep
+--^ string.quoted.single.cep punctuation.definition.string.begin.cep
+--  ^ string.quoted.single.cep punctuation.definition.string.end.cep
+x "it\"
+--^^^^^ string.quoted.double.cep invalid.illegal.newline.cep
+--^ string.quoted.double.cep invalid.illegal.newline.cep punctuation.definition.string.begin.cep
+y "z"
+--^^^ string.quoted.double.cep - invalid.illegal.newline.cep
+--^ string.quoted.double.cep punctuation.definition.string.begin.cep
+--  ^ string.quoted.double.cep punctuation.definition.string.end.cep
+x "abc\
+--^^^^^ string.quoted.double.cep invalid.illegal.newline.cep
+y "z"
+--^^^ string.quoted.double.cep - invalid.illegal.newline.cep
+--^ string.quoted.double.cep punctuation.definition.string.begin.cep
+--  ^ string.quoted.double.cep punctuation.definition.string.end.cep
+x "
+--^ string.quoted.double.cep invalid.illegal.newline.cep punctuation.definition.string.begin.cep
+y "z"
+--^^^ string.quoted.double.cep - invalid.illegal.newline.cep
+--^ string.quoted.double.cep punctuation.definition.string.begin.cep
+--  ^ string.quoted.double.cep punctuation.definition.string.end.cep
+x 'abc  
+--^^^^^^ string.quoted.single.cep invalid.illegal.newline.cep
+y 'z'
+--^^^ string.quoted.single.cep - invalid.illegal.newline.cep
+--^ string.quoted.single.cep punctuation.definition.string.begin.cep
+--  ^ string.quoted.single.cep punctuation.definition.string.end.cep
+x '  
+--^^^ string.quoted.single.cep invalid.illegal.newline.cep
+--^ string.quoted.single.cep invalid.illegal.newline.cep punctuation.definition.string.begin.cep
+y 'z'
+--^^^ string.quoted.single.cep - invalid.illegal.newline.cep
+--^ string.quoted.single.cep punctuation.definition.string.begin.cep
+--  ^ string.quoted.single.cep punctuation.definition.string.end.cep
+x ''
+--^^ string.quoted.single.cep
+--^ string.quoted.single.cep punctuation.definition.string.begin.cep
+-- ^ string.quoted.single.cep punctuation.definition.string.end.cep
+x ''''''
+--^^^^^^ string.quoted.triple.single.cep
+'''a''''
+-- <------- string.quoted.triple.single.cep - invalid.illegal.newline.cep
+--     ^ string.quoted.single.cep invalid.illegal.newline.cep
+x '\u12' '\u'
+-- ^^^^ string.quoted.single.cep invalid.illegal.escape.cep
+--        ^^ string.quoted.single.cep invalid.illegal.escape.cep
+x '\u00e9' '\u00E9'
+-- ^^^^^^ string.quoted.single.cep constant.character.escape.cep
+--          ^^^^^^ string.quoted.single.cep constant.character.escape.cep
+x '\U00e9'
+-- ^^ string.quoted.single.cep invalid.illegal.escape.cep
+--   ^^^^ string.quoted.single.cep - constant.character.escape.cep invalid.illegal.escape.cep
+x 'a\\' 'b'
+--  ^^ constant.character.escape.cep
+--    ^ string.quoted.single.cep punctuation.definition.string.end.cep
+--      ^^^ string.quoted.single.cep
+--      ^ string.quoted.single.cep punctuation.definition.string.begin.cep
+x '\'' "it\'s" 'say \"hi\"'
+-- ^^ string.quoted.single.cep constant.character.escape.cep
+--        ^^ string.quoted.double.cep constant.character.escape.cep
+--                  ^^ string.quoted.single.cep constant.character.escape.cep
+--                      ^^ string.quoted.single.cep constant.character.escape.cep
+x 'it''s'
+--^^^^ string.quoted.single.cep
+--   ^ string.quoted.single.cep punctuation.definition.string.end.cep
+--    ^ string.quoted.single.cep punctuation.definition.string.begin.cep
+--    ^^^ string.quoted.single.cep
+-- numbers and durations: items 15-17
+x 2min
+--^ constant.numeric.cep
+-- ^^^ keyword.other.unit.cep
+x 1e3 2.5e-3 1.
+--^^^ constant.numeric.cep
+--    ^^^^^^ constant.numeric.cep
+--           ^ constant.numeric.cep
+--            ^ punctuation.accessor.cep - constant.numeric.cep
+y ts_min x1
+--^^^^^^ - keyword.other.unit.cep
+--       ^^ - constant.numeric.cep
+-- comments: items 18-26 (item 24 is the last two source lines)
+x a--b
+--^ - comment.line.double-dash.cep
+-- ^^^ comment.line.double-dash.cep
+x a<--b
+-- ^ keyword.operator.comparison.cep - comment.line.double-dash.cep
+--  ^^^ comment.line.double-dash.cep
+x -> y
+--^^ keyword.operator.arrow.cep - comment.line.double-dash.cep
+x -->
+--^^^ comment.line.double-dash.cep
+x /* a */ */
+--^^^^^^^ comment.block.cep
+--        ^ keyword.operator.arithmetic.cep - comment.block.cep
+--         ^ keyword.operator.arithmetic.cep - comment.block.cep
+x /* /* x */ y
+--^^^^^^^^^^ comment.block.cep
+--           ^ - comment.block.cep
+/**/ y
+-- <---- comment.block.cep
+--   ^ - comment.block.cep
+/*/ y */ z
+-- <-------- comment.block.cep
+--       ^ - comment.block.cep
+x -- don't
+--   ^^^^^ comment.line.double-dash.cep
+y 'z'
+--^^^ string.quoted.single.cep - invalid.illegal.newline.cep
+--^ string.quoted.single.cep punctuation.definition.string.begin.cep
+--  ^ string.quoted.single.cep punctuation.definition.string.end.cep
+x '/*'
+--^^^^ string.quoted.single.cep - comment.block.cep
+-- keywords and names: items 27-39
+x INTO iNtO GROUP
+--^^^^ invalid.illegal.keyword-case.cep
+--     ^^^^ invalid.illegal.keyword-case.cep
+--          ^^^^^ invalid.illegal.keyword-case.cep - invalid.illegal.reserved.cep
+x SELECTED Select_ _FROM FROM1 fromx
+--^^^^^^^^ - invalid.illegal.keyword-case.cep invalid.illegal.reserved.cep keyword.control.clause.cep
+--         ^^^^^^^ - invalid.illegal.keyword-case.cep invalid.illegal.reserved.cep keyword.control.clause.cep
+--                 ^^^^^ - invalid.illegal.keyword-case.cep invalid.illegal.reserved.cep keyword.control.clause.cep
+--                       ^^^^^ - invalid.illegal.keyword-case.cep invalid.illegal.reserved.cep keyword.control.clause.cep
+--                             ^^^^^ - invalid.illegal.keyword-case.cep invalid.illegal.reserved.cep keyword.control.clause.cep
+x session_id ordered
+--^^^^^^^^^^ - invalid.illegal.keyword-case.cep invalid.illegal.reserved.cep
+--           ^^^^^^^ - invalid.illegal.keyword-case.cep invalid.illegal.reserved.cep
+x minimum(
+--^^^^^^^ support.function.cep - keyword.other.unit.cep
+x sort (
+--^^^^ keyword.other.window.cep - support.function.cep
+x `from`
+--^^^^^^ variable.other.quoted.cep - keyword.control.clause.cep
+x ${min}
+--^^^^^^ variable.other.constant.param.cep - keyword.other.unit.cep
+language CEP/0.1
+-- <-------- storage.type.declaration.cep
+--       ^^^ - constant.other.version.cep
+--          ^ keyword.operator.arithmetic.cep - constant.other.version.cep
+--           ^^^ constant.numeric.cep - constant.other.version.cep
+x risk/2.5
+--    ^ keyword.operator.arithmetic.cep
+--     ^^^ constant.numeric.cep
+stream Foo(a string)
+--     ^^^ entity.name.type.stream.cep - support.function.cep
+stream
+-- <------ storage.type.declaration.cep
+Foo (a string)
+-- <--- entity.name.type.stream.cep - support.function.cep
+given table T [
+-- <----- keyword.control.clause.cep
+--    ^^^^^ storage.type.declaration.cep
+--          ^ - entity.name.type.table.cep
+stream SeleCT (
+--     ^^^^^^ invalid.illegal.keyword-case.cep - entity.name.type.stream.cep support.function.cep
+x ''''
+--^^^^ string.quoted.triple.single.cep
+still raw'''
+-- <--------- string.quoted.triple.single.cep
+language
+-- <-------- storage.type.declaration.cep
+cep/0.1;
+-- <------- constant.other.version.cep
+--     ^ punctuation.terminator.statement.cep
+/* open
+-- <------- comment.block.cep
+stream T (a string);
+-- <-------------------- comment.block.cep - storage.type.declaration.cep

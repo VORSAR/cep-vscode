@@ -1,0 +1,108 @@
+-- SYNTAX TEST "source.cep" "names, declarations and calls"
+stream Findings (agentId string)
+-- <------ storage.type.declaration.cep
+--     ^^^^^^^^ entity.name.type.stream.cep - support.function.cep
+table Blocked (agentId string) primary key (agentId)
+-- <----- storage.type.declaration.cep
+--    ^^^^^^^ entity.name.type.table.cep - support.function.cep
+--                                     ^^^ storage.modifier.cep - support.function.cep
+rule LexicalTorture
+-- <---- storage.type.declaration.cep
+--   ^^^^^^^^^^^^^^ entity.name.function.rule.cep
+  insert into Findings;
+--^^^^^^ keyword.control.clause.cep
+--       ^^^^ keyword.control.clause.cep
+--            ^^^^^^^^ entity.name.type.stream.cep
+@sink(type = 'http', @map(type = 'json'))
+-- <- punctuation.definition.annotation.cep
+-- <~---- storage.type.annotation.cep
+--                   ^ punctuation.definition.annotation.cep
+--                    ^^^ storage.type.annotation.cep
+select count() as n, coalesce(text, 'none')
+--     ^^^^^ support.function.cep
+--                   ^^^^^^^^ support.function.cep
+  from S window delay(${pause})
+--              ^^^^^ keyword.other.window.cep - support.function.cep
+raw(text) contains_cs 'café'
+-- <--- support.function.builtin.cep - support.function.cep
+`select` == "double"
+-- <-------- variable.other.quoted.cep - keyword.control.clause.cep
+x `agent events`
+--^^^^^^^^^^^^^^ variable.other.quoted.cep
+insert into `agent-events`;
+--          ^^^^^^^^^^^^^^ entity.name.type.stream.cep
+table Blocked (a string)
+-- <----- storage.type.declaration.cep
+--    ^^^^^^^ entity.name.type.table.cep
+stream  Foo (a string)
+--      ^^^ entity.name.type.stream.cep - support.function.cep
+select upstream as u
+--     ^^^^^^^^ - storage.type.declaration.cep entity.name.type.stream.cep
+--              ^^ keyword.control.clause.cep
+stream
+-- <------ storage.type.declaration.cep
+U (a string)
+-- <- entity.name.type.stream.cep - support.function.cep
+stream /* c */ U (a string)
+--     ^^^^^^^ comment.block.cep
+--             ^ entity.name.type.stream.cep - support.function.cep
+rule
+-- <---- storage.type.declaration.cep
+R
+-- <- entity.name.function.rule.cep
+param
+-- <----- storage.type.declaration.cep
+grace duration = 1 min;
+-- <----- variable.other.constant.param.cep
+--    ^^^^^^^^ storage.type.primitive.cep
+insert
+-- <------ keyword.control.clause.cep
+into T;
+-- <---- keyword.control.clause.cep
+--   ^ entity.name.type.stream.cep
+language
+-- <-------- storage.type.declaration.cep
+cep/0.1;
+-- <------- constant.other.version.cep
+@ sink(type = 'log')
+-- <- punctuation.definition.annotation.cep
+--^^^^ storage.type.annotation.cep - support.function.cep
+stream events (a string)
+--     ^^^^^^ keyword.control.clause.cep - entity.name.type.stream.cep
+stream SeleCT (a string)
+--     ^^^^^^ invalid.illegal.keyword-case.cep - entity.name.type.stream.cep
+  expect given table T [ {a: 1} ]
+--^^^^^^ keyword.control.clause.cep
+--       ^^^^^ keyword.control.clause.cep
+--             ^^^^^ storage.type.declaration.cep
+--                   ^ - entity.name.type.table.cep
+given
+-- <----- keyword.control.clause.cep
+table T
+-- <----- storage.type.declaration.cep
+--    ^ - entity.name.type.table.cep
+math:round(x)
+-- <---- entity.name.namespace.cep
+--  ^ punctuation.separator.namespace.cep
+--   ^^^^^ support.function.cep
+math : round (x)
+-- <---- entity.name.namespace.cep
+--   ^ punctuation.separator.namespace.cep
+--     ^^^^^ support.function.cep
+x {agentId:lead}
+-- ^^^^^^^ - entity.name.namespace.cep
+--        ^ punctuation.separator.key-value.cep - punctuation.separator.namespace.cep
+  from S window cron('0 0 * * *', 'UTC')
+--              ^^^^ keyword.other.window.cep - support.function.cep
+  from S window batch()
+--              ^^^^^ keyword.other.window.cep - support.function.cep
+  where text has_any_ci(${t})
+--           ^^^^^^^^^^ keyword.operator.text.cep - support.function.cep
+select count (x)
+--     ^^^^^ support.function.cep
+x ${ grace }
+--^^ - variable.other.constant.param.cep
+--   ^^^^^ - variable.other.constant.param.cep
+x `a/b`
+--^ - variable.other.quoted.cep
+--    ^ - variable.other.quoted.cep

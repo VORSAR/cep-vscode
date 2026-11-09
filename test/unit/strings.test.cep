@@ -1,0 +1,47 @@
+-- SYNTAX TEST "source.cep" "strings"
+"say \"hi\" and a \\ backslash"
+--   ^^ constant.character.escape.cep
+--                ^^ constant.character.escape.cep
+-- <------------------------------- string.quoted.double.cep
+'caf\u00e9'
+--  ^^^^^^ constant.character.escape.cep
+'bad \x escape'
+--   ^^ invalid.illegal.escape.cep
+'''raw \n stays'''
+--     ^^ string.quoted.triple.single.cep - constant.character.escape.cep
+"""raw "double" and 'single' quotes"""
+--     ^^^^^^^^ string.quoted.triple.double.cep
+--                  ^^^^^^^^ string.quoted.triple.double.cep
+  intent '''first line
+--^^^^^^ keyword.control.clause.cep
+--       ^^^^^^^^^^^^^ string.quoted.triple.single.cep
+  -- not a comment
+--^^ string.quoted.triple.single.cep - comment.line.double-dash.cep
+--   ^^^^^^^^^^^^^ string.quoted.triple.single.cep - comment.line.double-dash.cep
+last'''
+-- <---- string.quoted.triple.single.cep
+x '\n\t\r' "\n\t\r"
+-- ^^ constant.character.escape.cep
+--   ^^ constant.character.escape.cep
+--     ^^ constant.character.escape.cep
+--          ^^ constant.character.escape.cep
+--            ^^ constant.character.escape.cep
+--              ^^ constant.character.escape.cep
+x '\0 \$ \a'
+-- ^^ string.quoted.single.cep invalid.illegal.escape.cep
+--    ^^ string.quoted.single.cep invalid.illegal.escape.cep
+--       ^^ string.quoted.single.cep invalid.illegal.escape.cep
+x """raw \n stays"""
+--       ^^ string.quoted.triple.double.cep - constant.character.escape.cep
+x 'read'
+--^ string.quoted.single.cep punctuation.definition.string.begin.cep
+--     ^ string.quoted.single.cep punctuation.definition.string.end.cep
+-- ^^^^ string.quoted.single.cep - punctuation.definition.string.begin.cep punctuation.definition.string.end.cep
+  intent 'this intent
+--                  ^ string.quoted.single.cep invalid.illegal.newline.cep
+--       ^^^^^^^^^^^^ string.quoted.single.cep invalid.illegal.newline.cep
+--       ^ string.quoted.single.cep invalid.illegal.newline.cep punctuation.definition.string.begin.cep
+y 'z'
+--^^^ string.quoted.single.cep - invalid.illegal.newline.cep
+--^ string.quoted.single.cep punctuation.definition.string.begin.cep
+--  ^ string.quoted.single.cep punctuation.definition.string.end.cep

@@ -1,0 +1,25 @@
+-- SYNTAX TEST "source.cep" "comments"
+-- a whole-line comment
+-- <-- punctuation.definition.comment.cep
+-- ^^^^^^^^^^^^^^^^^^^^ comment.line.double-dash.cep
+x /* inline */ y
+--^^^^^^^^^^^^ comment.block.cep
+--^^ comment.block.cep punctuation.definition.comment.cep
+--          ^^ comment.block.cep punctuation.definition.comment.cep
+--             ^ - comment.block.cep
+/* first line
+-- <-- comment.block.cep punctuation.definition.comment.cep
+-- ^^^^^^^^^^ comment.block.cep
+   second line */
+-- ^^^^^^^^^^^ comment.block.cep
+--             ^^ comment.block.cep punctuation.definition.comment.cep
+a == /* between */ 'read'
+--   ^^^^^^^^^^^^^ comment.block.cep
+--                 ^^^^^^ string.quoted.single.cep
+resource == 'vault -- not a comment'
+--                 ^^ string.quoted.single.cep - comment.line.double-dash.cep
+/* has -- and 'quote' */
+--            ^^^^^^^ comment.block.cep - string.quoted.single.cep
+--     ^^ comment.block.cep - comment.line.double-dash.cep
+after /* x */ match skip past last
+--            ^^^^^ keyword.control.clause.cep
