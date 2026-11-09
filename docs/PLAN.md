@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-09):** **v0.0.1 is released**, cut by CI from tag `v0.0.1` ([release](https://github.com/VORSAR/cep-vscode/releases/tag/v0.0.1)). It ships the design-reviewed reference grammar. Delivery is incremental, as a release ladder (§7.0). S1 passed G1; its lanes A (tooling) and B (grammar) are building v0.1.0. Next: combine the lanes onto `main`'s v0.0.1, restore the full S2 scripts block, review the snapshots, run the gate, and open the v0.1.0 PR.
+**Status (2026-11-09):** **v0.0.1 is released**, cut by CI from tag `v0.0.1` ([release](https://github.com/VORSAR/cep-vscode/releases/tag/v0.0.1)). It ships the design-reviewed reference grammar. Delivery is incremental, as a release ladder (§7.0). For v0.1.0 (S1), both lanes are combined onto v0.0.1 and the 19 snapshots are reviewed. T3 (`npm ci && npm run gate`) exits 0. Next: the v0.1.0 PR with CI, the owner's quick check, then merge and tag.
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 

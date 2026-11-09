@@ -112,7 +112,36 @@ At most two agents at once.
   - **Card line 4:** `sync-upstream --check` gave `ok (21 files match 1fa3a5bb…)`, exit 0. It went red with one byte flipped. `comments.cep` is `i/mixed attr/-text`.
   - **Card line 7:** the real `check-upstream` run printed `ok (keywords.go and lexer.go match VORSAR/cep 1fa3a5bb… 2026-11-08)`, exit 0.
   - **On the combined branch:** the tooling, toolchain and release tests passed 62/62, exit 0.
-  - **Lane A's open items, for later:**
+  - **Lane A's open items, for later:** listed below.
+- **Lane B, grammar (2026-11-09):** 3 commits. The coordinator re-ran the checks in lane B's worktree:
+  - **Ownership and attribution:** it touched only its 12 owned files, no commit carries attribution, and the `'caf\u00e9'` escape bytes are intact.
+  - **T2:** `npm run test:lane-b` exited 0. All 7 unit files pass; `check-keywords` reports `115 keywords, 17 reserved, 11 categories, 5 name exclusions`; the checker passes 19/19 and the grammar tests 4/4.
+  - **Red first, against the placeholder:** 442 assertions failed. Per file: comments 15/16, counter 107/122, keywords 179/185, literals 31/31, names 59/67, operators 19/19, strings 32/32. Grammar tests 1, 2 and 4 failed.
+  - **The checker's stub runs** gave no `TypeError`. Removing each rule (a)–(i) and the empty-list stop turned its named tests red.
+  - **The 8 named mutants** each made `test:unit` exit 255.
+  - **Spec errors, to fix in PLAN:**
+    - `ts_min` cannot go red under the fifth mutant, because the leading edge already guards it; pair it with dropping the leading edge from `keywords-unit`.
+    - §5.3's table lists four categories (type, modifier, constant, reserved) in an order other than `keywords.go`'s, which rule (i) requires.
+  - **The grammar matches v0.0.1:** it tokenizes identically to v0.0.1's on all 19 fixtures, the 42 counter-examples and the breaker's 85 cases (coordinator's diff, 0 runs).
+- **Combine (2026-11-09):**
+  - Lane A applied cleanly.
+  - Lane B conflicted, as expected, on `syntaxes/cep.tmLanguage.json` and `language-configuration.json`, which v0.0.1 had added. Both were resolved to lane B's files, keeping the grammar's three metadata fields (`$schema`, `name`, `fileTypes`).
+  - The configuration was identical in content, and the grammar differed only in keyword-list order (rule i) and the metadata.
+  - `literals.test.cep` matched byte for byte.
+  - `package.json` regained the S2 scripts block plus `test:release`, at version 0.1.0.
+- **Snapshots:**
+  - `check-fixtures` exited 1 with no snapshots (19 missing).
+  - The 19 were generated; no valid file carries an `invalid.*` scope.
+  - A 25-item check script from §6.2 v2 passes 25/25, and goes red on 8 items against PLAN v1's snapshots. The comments torture file was also read line by line.
+  - Red run: renaming `constant.numeric.cep` made `test:snap` exit 255 on all 19 fixtures.
+- **T3 (2026-11-09):** `npm ci` exit 0, then `npm run gate` exit 0:
+  - toolchain ok;
+  - 7/7 unit files;
+  - keywords ok;
+  - checker 19/19, grammar 4/4, tooling 52/52, release 10/10;
+  - fixtures ok (19, 19 tracked), and the snapshots pass;
+  - package, `check-vsix` ok (8 files), `check-clean` ok.
+- **Lane A's open items, for later:**
     - `--check` compares only the 21 targets, so an extra stale `.cep` is caught by `check-fixtures`, not by `--check`;
     - each sync test takes about 1.3 s;
     - beyond §6.4, the tests also isolate `XDG_CONFIG_HOME` and set `GIT_CEILING_DIRECTORIES`.
