@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.0
+
+- The grammar is now built test-first: 7 unit files with every keyword asserted in its class, the escape, name, punctuation and call cases, and the design review's counter-examples; a keyword check that ties the grammar to cep's keyword table (115 words, 17 reserved, 11 classes). Colours are unchanged from 0.0.1.
+- Tooling: cep's lexer, keyword table and 19 sample files are vendored at cep 1fa3a5b and checked byte for byte; snapshots of all 19 samples; checks on the .vsix contents, the fixtures and a clean tree; CI runs the full gate on every change, and a weekly job watches cep for drift.
+
 ## 0.0.1
 
 - First preview release: syntax highlighting for CEP rule files (`.cep`, `language cep/0.1`), from the design-reviewed reference grammar. Keywords by class, the four lexical errors (wrong-case keyword, reserved word, unclosed one-line string, bad escape) in the error colour, comments, strings, numbers and durations, declarations, annotations and calls.

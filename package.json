@@ -2,7 +2,7 @@
   "name": "cep",
   "displayName": "CEP Language",
   "description": "Syntax highlighting for the CEP rule language (CEPS, .cep files).",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "vorsar",
   "license": "Apache-2.0",
   "private": true,
@@ -50,13 +50,14 @@
     ]
   },
   "scripts": {
-    "test": "npm run test:toolchain && npm run test:unit && npm run test:release",
+    "test": "npm run test:toolchain && npm run test:unit && npm run test:keywords && npm run test:checker && npm run test:grammar && npm run test:tools && npm run test:release && npm run test:fixtures && npm run test:snap",
     "test:toolchain": "node scripts/check-toolchain.mjs",
     "test:unit": "vscode-tmgrammar-test \"test/unit/**/*.test.cep\"",
     "test:keywords": "node scripts/check-keywords.mjs",
     "test:checker": "node --test test/checker.test.mjs",
     "test:grammar": "node --test test/grammar.test.mjs",
     "test:tools": "node --test test/tools.test.mjs test/toolchain.test.mjs",
+    "test:release": "node --test test/release.test.mjs",
     "test:fixtures": "node scripts/check-fixtures.mjs",
     "test:snap": "vscode-tmgrammar-snap \"test/fixtures/**/*.cep\"",
     "test:snap:update": "vscode-tmgrammar-snap --updateSnapshot \"test/fixtures/**/*.cep\"",
@@ -65,8 +66,7 @@
     "test:lane-a": "npm run test:toolchain && npm run test:tools",
     "test:lane-b": "npm run test:toolchain && npm run test:unit && npm run test:keywords && npm run test:checker && npm run test:grammar",
     "package": "vsce package --no-dependencies",
-    "gate": "npm test && npm run package",
-    "test:release": "node --test test/release.test.mjs test/toolchain.test.mjs"
+    "gate": "npm test && npm run package && npm run test:vsix && npm run test:clean"
   },
   "devDependencies": {
     "@vscode/vsce": "4.0.0",
