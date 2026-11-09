@@ -73,6 +73,13 @@ Their reports are [breaker](../reviews/s1-design-breaker.md), [QA](../reviews/s1
 
 **G1 passed 2026-11-09.** Design v2 (PLAN §5–§6) places every review finding (Findings table below) and applies G1-1 to G1-8. Two scaffold changes came with v2: `.DS_Store` in `.gitignore` (D-A11), and `test:vsix` with no argument (D-A13).
 
+**During the build — the owner, 2026-11-09:**
+- **"An immediate release from CI"**, and then "u need to commit files to github". The owner asked the coordinator to push, and chose "do all of it for me" for v0.0.1. That is **a one-off exception to CLAUDE.md rule 7** (agents never push, merge or tag) for this release only.
+  - The coordinator pushed `release/v0.0.1` and opened PR #1.
+  - It then fast-forwarded `main` to the tested commit `288768b`; GitHub marked PR #1 merged.
+  - It pushed the annotated tag `v0.0.1`.
+  - Rule 7 stands for every later release unless the owner says otherwise.
+
 ## How it runs
 
 At most two agents at once.
@@ -88,6 +95,15 @@ At most two agents at once.
 ## Measured results
 
 *(filled as the work lands: each acceptance line's measurement, as a number)*
+
+- **v0.0.1 released by CI (2026-11-09):**
+  - Locally on `288768b`:
+    - `npm run gate` exited 0: the toolchain check, `literals.test.cep` (31 assertions red before), the release and toolchain tests (15/15; 9 of the 10 release tests red before), and an 8-file `cep-0.0.1.vsix`;
+    - `check-release` accepted `v0.0.1`.
+  - The release workflow, run 42574432117 on tag `v0.0.1`, exited 0 in 15 s. Every step was green: `npm ci`, `npm run gate`, `check-release` and `gh release create`.
+  - The published asset was downloaded and checked: exactly the 8 S4 files, and its grammar is byte-equal to `v0.0.1`'s `syntaxes/cep.tmLanguage.json`.
+  - <https://github.com/VORSAR/cep-vscode/releases/tag/v0.0.1>
+  - The run printed one notice: the `ubuntu-latest` runner label moves to Ubuntu 26 from 2026-10-19 (informational).
 
 ## Test material
 
