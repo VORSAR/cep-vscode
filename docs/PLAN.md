@@ -544,7 +544,7 @@ jobs:
           node-version-file: .nvmrc
       - run: npm ci
       - run: npm run gate
-      - run: node scripts/check-release.mjs --ref "$GITHUB_REF_NAME" --notes release-notes.md
+      - run: node scripts/check-release.mjs --ref "$GITHUB_REF_NAME" --ref-type "$GITHUB_REF_TYPE" --notes release-notes.md
       - if: github.event_name == 'push'
         run: gh release create "$GITHUB_REF_NAME" "cep-${GITHUB_REF_NAME#v}.vsix" --verify-tag --title "$GITHUB_REF_NAME" --notes-file release-notes.md
         env:
@@ -555,7 +555,7 @@ jobs:
 - It adds no action or dependency: `gh` is on GitHub's runners, and the two action SHAs are `ci.yml`'s.
 - `workflow_dispatch` lets the owner run it once by hand, as a dry run, after the PR that adds it is merged and before the first tag. That follows cep's rule that a new workflow runs once by hand: a tag-only workflow cannot run on the PR.
 
-**`scripts/check-release.mjs --ref <ref> [--notes <path>] [--root <dir>]`:**
+**`scripts/check-release.mjs --ref <ref> --ref-type <tag|branch> [--notes <path>] [--root <dir>]`:**
 1. On a tag push the ref is the tag, so it must be exactly `v` + `package.json`'s `version`; otherwise fail, naming both. On a dispatch the ref is a branch, so it checks that the branch is `main` and uses `package.json`'s version.
 2. `CHANGELOG.md` must have a `## <version>` section; otherwise fail, naming the version.
 3. Write that section's body to `--notes`. Check that `cep-<version>.vsix` exists in the root.

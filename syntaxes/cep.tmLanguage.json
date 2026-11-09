@@ -1,1 +1,506 @@
-{ "scopeName": "source.cep", "patterns": [], "repository": {} }
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "CEP",
+  "scopeName": "source.cep",
+  "fileTypes": [
+    "cep"
+  ],
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#param-ref"
+    },
+    {
+      "include": "#backticked"
+    },
+    {
+      "include": "#declarations"
+    },
+    {
+      "include": "#annotation"
+    },
+    {
+      "include": "#number"
+    },
+    {
+      "include": "#keywords-declaration"
+    },
+    {
+      "include": "#keywords-type"
+    },
+    {
+      "include": "#keywords-modifier"
+    },
+    {
+      "include": "#keywords-clause"
+    },
+    {
+      "include": "#keywords-window"
+    },
+    {
+      "include": "#keywords-unit"
+    },
+    {
+      "include": "#keywords-logical"
+    },
+    {
+      "include": "#keywords-constant"
+    },
+    {
+      "include": "#keywords-builtin"
+    },
+    {
+      "include": "#keywords-text"
+    },
+    {
+      "include": "#keywords-reserved"
+    },
+    {
+      "include": "#keywords-wrong-case"
+    },
+    {
+      "include": "#function-call"
+    },
+    {
+      "include": "#identifier"
+    },
+    {
+      "include": "#operators"
+    },
+    {
+      "include": "#punctuation"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-dash.cep",
+          "match": "(--).*$",
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.comment.cep"
+            }
+          }
+        },
+        {
+          "name": "comment.block.cep",
+          "begin": "/\\*",
+          "end": "\\*/",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.cep"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.comment.cep"
+            }
+          }
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.triple.single.cep",
+          "begin": "'''",
+          "end": "'''"
+        },
+        {
+          "name": "string.quoted.triple.double.cep",
+          "begin": "\"\"\"",
+          "end": "\"\"\""
+        },
+        {
+          "match": "((')(?:[^'\\\\\\n]|\\\\.)*\\\\?)$",
+          "name": "string.quoted.single.cep",
+          "captures": {
+            "1": {
+              "name": "invalid.illegal.newline.cep"
+            },
+            "2": {
+              "name": "punctuation.definition.string.begin.cep"
+            }
+          }
+        },
+        {
+          "begin": "'(?=(?:[^'\\\\\\n]|\\\\.)*')",
+          "end": "'",
+          "name": "string.quoted.single.cep",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.cep"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.cep"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#string-escapes"
+            }
+          ]
+        },
+        {
+          "match": "((\")(?:[^\"\\\\\\n]|\\\\.)*\\\\?)$",
+          "name": "string.quoted.double.cep",
+          "captures": {
+            "1": {
+              "name": "invalid.illegal.newline.cep"
+            },
+            "2": {
+              "name": "punctuation.definition.string.begin.cep"
+            }
+          }
+        },
+        {
+          "begin": "\"(?=(?:[^\"\\\\\\n]|\\\\.)*\")",
+          "end": "\"",
+          "name": "string.quoted.double.cep",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.begin.cep"
+            }
+          },
+          "endCaptures": {
+            "0": {
+              "name": "punctuation.definition.string.end.cep"
+            }
+          },
+          "patterns": [
+            {
+              "include": "#string-escapes"
+            }
+          ]
+        }
+      ]
+    },
+    "string-escapes": {
+      "patterns": [
+        {
+          "name": "constant.character.escape.cep",
+          "match": "\\\\(?:[\\\\'\"ntr]|u[0-9A-Fa-f]{4})"
+        },
+        {
+          "name": "invalid.illegal.escape.cep",
+          "match": "\\\\(?:u[0-9A-Fa-f]{0,3}|.)"
+        }
+      ]
+    },
+    "param-ref": {
+      "name": "variable.other.constant.param.cep",
+      "match": "\\$\\{[A-Za-z_][A-Za-z0-9_]*\\}"
+    },
+    "backticked": {
+      "name": "variable.other.quoted.cep",
+      "match": "`[A-Za-z0-9_\\-. ]*`"
+    },
+    "declarations": {
+      "patterns": [
+        {
+          "begin": "(?<![A-Za-z_])(language)(?![A-Za-z0-9_])",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration.cep"
+            }
+          },
+          "end": "([a-z][a-z0-9_]*/[0-9]+\\.[0-9]+)|(?=\\S)",
+          "endCaptures": {
+            "1": {
+              "name": "constant.other.version.cep"
+            }
+          },
+          "applyEndPatternLast": true,
+          "patterns": [
+            {
+              "include": "#comments"
+            }
+          ]
+        },
+        {
+          "begin": "(?<![A-Za-z_])(stream)(?![A-Za-z0-9_])",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration.cep"
+            }
+          },
+          "end": "((?!(?i:language|param|stream|table|rule|intent|partition|by|of|ttl|from|every|once|within|for|after|match|skip|past|last|late|events|drop|allow|route|to|select|as|output|first|insert|into|window|sort|cron|delay|batch|emit|on|close|change|due|end|time|arrival|watermark|bounded|ascending|punctuated|idle|primary|key|optional|expect|given|then|todo|and|or|not|in|is|null|true|false|raw|timestamp|string|int|float|bool|duration|object|asc|desc|ms|sec|min|hour|day|week|has_ci|has_cs|contains_ci|contains_cs|starts_with_ci|starts_with_cs|ends_with_ci|ends_with_cs|has_any_ci|has_any_cs|has_all_ci|has_all_cs|contains_any_ci|contains_any_cs|contains_all_ci|contains_all_cs|matches_ci|matches_cs|contains_match_ci|contains_match_cs|group|having|order|limit|offset|join|trigger|aggregation|sequence|session|tumbling|hopping|sliding|processing)(?![A-Za-z0-9_]))[A-Za-z_][A-Za-z0-9_]*)|(`[A-Za-z0-9_\\-. ]*`)|(?=\\S)",
+          "endCaptures": {
+            "1": {
+              "name": "entity.name.type.stream.cep"
+            },
+            "2": {
+              "name": "entity.name.type.stream.cep"
+            }
+          },
+          "applyEndPatternLast": true,
+          "patterns": [
+            {
+              "include": "#comments"
+            }
+          ]
+        },
+        {
+          "begin": "(?<![A-Za-z_])(table)(?![A-Za-z0-9_])",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration.cep"
+            }
+          },
+          "end": "((?!(?i:language|param|stream|table|rule|intent|partition|by|of|ttl|from|every|once|within|for|after|match|skip|past|last|late|events|drop|allow|route|to|select|as|output|first|insert|into|window|sort|cron|delay|batch|emit|on|close|change|due|end|time|arrival|watermark|bounded|ascending|punctuated|idle|primary|key|optional|expect|given|then|todo|and|or|not|in|is|null|true|false|raw|timestamp|string|int|float|bool|duration|object|asc|desc|ms|sec|min|hour|day|week|has_ci|has_cs|contains_ci|contains_cs|starts_with_ci|starts_with_cs|ends_with_ci|ends_with_cs|has_any_ci|has_any_cs|has_all_ci|has_all_cs|contains_any_ci|contains_any_cs|contains_all_ci|contains_all_cs|matches_ci|matches_cs|contains_match_ci|contains_match_cs|group|having|order|limit|offset|join|trigger|aggregation|sequence|session|tumbling|hopping|sliding|processing)(?![A-Za-z0-9_]))[A-Za-z_][A-Za-z0-9_]*)|(`[A-Za-z0-9_\\-. ]*`)|(?=\\S)",
+          "endCaptures": {
+            "1": {
+              "name": "entity.name.type.table.cep"
+            },
+            "2": {
+              "name": "entity.name.type.table.cep"
+            }
+          },
+          "applyEndPatternLast": true,
+          "patterns": [
+            {
+              "include": "#comments"
+            }
+          ]
+        },
+        {
+          "begin": "(?<![A-Za-z_])(rule)(?![A-Za-z0-9_])",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration.cep"
+            }
+          },
+          "end": "((?!(?i:language|param|stream|table|rule|intent|partition|by|of|ttl|from|every|once|within|for|after|match|skip|past|last|late|events|drop|allow|route|to|select|as|output|first|insert|into|window|sort|cron|delay|batch|emit|on|close|change|due|end|time|arrival|watermark|bounded|ascending|punctuated|idle|primary|key|optional|expect|given|then|todo|and|or|not|in|is|null|true|false|raw|timestamp|string|int|float|bool|duration|object|asc|desc|ms|sec|min|hour|day|week|has_ci|has_cs|contains_ci|contains_cs|starts_with_ci|starts_with_cs|ends_with_ci|ends_with_cs|has_any_ci|has_any_cs|has_all_ci|has_all_cs|contains_any_ci|contains_any_cs|contains_all_ci|contains_all_cs|matches_ci|matches_cs|contains_match_ci|contains_match_cs|group|having|order|limit|offset|join|trigger|aggregation|sequence|session|tumbling|hopping|sliding|processing)(?![A-Za-z0-9_]))[A-Za-z_][A-Za-z0-9_]*)|(`[A-Za-z0-9_\\-. ]*`)|(?=\\S)",
+          "endCaptures": {
+            "1": {
+              "name": "entity.name.function.rule.cep"
+            },
+            "2": {
+              "name": "entity.name.function.rule.cep"
+            }
+          },
+          "applyEndPatternLast": true,
+          "patterns": [
+            {
+              "include": "#comments"
+            }
+          ]
+        },
+        {
+          "begin": "(?<![A-Za-z_])(param)(?![A-Za-z0-9_])",
+          "beginCaptures": {
+            "1": {
+              "name": "storage.type.declaration.cep"
+            }
+          },
+          "end": "((?!(?i:language|param|stream|table|rule|intent|partition|by|of|ttl|from|every|once|within|for|after|match|skip|past|last|late|events|drop|allow|route|to|select|as|output|first|insert|into|window|sort|cron|delay|batch|emit|on|close|change|due|end|time|arrival|watermark|bounded|ascending|punctuated|idle|primary|key|optional|expect|given|then|todo|and|or|not|in|is|null|true|false|raw|timestamp|string|int|float|bool|duration|object|asc|desc|ms|sec|min|hour|day|week|has_ci|has_cs|contains_ci|contains_cs|starts_with_ci|starts_with_cs|ends_with_ci|ends_with_cs|has_any_ci|has_any_cs|has_all_ci|has_all_cs|contains_any_ci|contains_any_cs|contains_all_ci|contains_all_cs|matches_ci|matches_cs|contains_match_ci|contains_match_cs|group|having|order|limit|offset|join|trigger|aggregation|sequence|session|tumbling|hopping|sliding|processing)(?![A-Za-z0-9_]))[A-Za-z_][A-Za-z0-9_]*)|(`[A-Za-z0-9_\\-. ]*`)|(?=\\S)",
+          "endCaptures": {
+            "1": {
+              "name": "variable.other.constant.param.cep"
+            },
+            "2": {
+              "name": "variable.other.constant.param.cep"
+            }
+          },
+          "applyEndPatternLast": true,
+          "patterns": [
+            {
+              "include": "#comments"
+            }
+          ]
+        },
+        {
+          "begin": "(?<![A-Za-z_])(into)(?![A-Za-z0-9_])",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.clause.cep"
+            }
+          },
+          "end": "((?!(?i:language|param|stream|table|rule|intent|partition|by|of|ttl|from|every|once|within|for|after|match|skip|past|last|late|events|drop|allow|route|to|select|as|output|first|insert|into|window|sort|cron|delay|batch|emit|on|close|change|due|end|time|arrival|watermark|bounded|ascending|punctuated|idle|primary|key|optional|expect|given|then|todo|and|or|not|in|is|null|true|false|raw|timestamp|string|int|float|bool|duration|object|asc|desc|ms|sec|min|hour|day|week|has_ci|has_cs|contains_ci|contains_cs|starts_with_ci|starts_with_cs|ends_with_ci|ends_with_cs|has_any_ci|has_any_cs|has_all_ci|has_all_cs|contains_any_ci|contains_any_cs|contains_all_ci|contains_all_cs|matches_ci|matches_cs|contains_match_ci|contains_match_cs|group|having|order|limit|offset|join|trigger|aggregation|sequence|session|tumbling|hopping|sliding|processing)(?![A-Za-z0-9_]))[A-Za-z_][A-Za-z0-9_]*)|(`[A-Za-z0-9_\\-. ]*`)|(?=\\S)",
+          "endCaptures": {
+            "1": {
+              "name": "entity.name.type.stream.cep"
+            },
+            "2": {
+              "name": "entity.name.type.stream.cep"
+            }
+          },
+          "applyEndPatternLast": true,
+          "patterns": [
+            {
+              "include": "#comments"
+            }
+          ]
+        },
+        {
+          "begin": "(?<![A-Za-z_])(given)(?![A-Za-z0-9_])",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.clause.cep"
+            }
+          },
+          "end": "(?=\\S)",
+          "applyEndPatternLast": true,
+          "patterns": [
+            {
+              "include": "#comments"
+            },
+            {
+              "match": "(?<![A-Za-z_])table(?![A-Za-z0-9_])",
+              "name": "storage.type.declaration.cep"
+            }
+          ]
+        }
+      ]
+    },
+    "annotation": {
+      "begin": "@",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.annotation.cep"
+        }
+      },
+      "end": "([A-Za-z_][A-Za-z0-9_]*)|(?=\\S)",
+      "endCaptures": {
+        "1": {
+          "name": "storage.type.annotation.cep"
+        }
+      },
+      "applyEndPatternLast": true,
+      "patterns": [
+        {
+          "include": "#comments"
+        }
+      ]
+    },
+    "number": {
+      "name": "constant.numeric.cep",
+      "match": "(?<![A-Za-z0-9_])[0-9]+(?:\\.[0-9]+)?(?:[eE][+-]?[0-9]+)?"
+    },
+    "keywords-declaration": {
+      "name": "storage.type.declaration.cep",
+      "match": "(?<![A-Za-z_])(?:language|param|stream|table|rule)(?![A-Za-z0-9_])"
+    },
+    "keywords-type": {
+      "name": "storage.type.primitive.cep",
+      "match": "(?<![A-Za-z_])(?:string|int|float|bool|timestamp|duration|object)(?![A-Za-z0-9_])"
+    },
+    "keywords-modifier": {
+      "name": "storage.modifier.cep",
+      "match": "(?<![A-Za-z_])(?:optional|primary|key)(?![A-Za-z0-9_])"
+    },
+    "keywords-clause": {
+      "name": "keyword.control.clause.cep",
+      "match": "(?<![A-Za-z_])(?:intent|partition|by|of|ttl|from|every|once|within|for|after|match|skip|past|last|late|events|drop|allow|select|as|output|first|insert|into|window|emit|on|close|change|due|end|time|arrival|watermark|bounded|ascending|idle|expect|given|then|todo|asc|desc)(?![A-Za-z0-9_])"
+    },
+    "keywords-window": {
+      "name": "keyword.other.window.cep",
+      "match": "(?<![A-Za-z_])(?:sort|cron|delay|batch)(?![A-Za-z0-9_])"
+    },
+    "keywords-unit": {
+      "name": "keyword.other.unit.cep",
+      "match": "(?<![A-Za-z_])(?:ms|sec|min|hour|day|week)(?![A-Za-z0-9_])"
+    },
+    "keywords-logical": {
+      "name": "keyword.operator.logical.cep keyword.operator.wordlike.cep",
+      "match": "(?<![A-Za-z_])(?:and|or|not|in|is)(?![A-Za-z0-9_])"
+    },
+    "keywords-constant": {
+      "name": "constant.language.cep",
+      "match": "(?<![A-Za-z_])(?:true|false|null)(?![A-Za-z0-9_])"
+    },
+    "keywords-builtin": {
+      "name": "support.function.builtin.cep",
+      "match": "(?<![A-Za-z_])(?:raw)(?![A-Za-z0-9_])"
+    },
+    "keywords-text": {
+      "name": "keyword.operator.text.cep keyword.operator.wordlike.cep",
+      "match": "(?<![A-Za-z_])(?:has_ci|has_cs|contains_ci|contains_cs|starts_with_ci|starts_with_cs|ends_with_ci|ends_with_cs|has_any_ci|has_any_cs|has_all_ci|has_all_cs|contains_any_ci|contains_any_cs|contains_all_ci|contains_all_cs|matches_ci|matches_cs|contains_match_ci|contains_match_cs)(?![A-Za-z0-9_])"
+    },
+    "keywords-reserved": {
+      "name": "invalid.illegal.reserved.cep",
+      "match": "(?<![A-Za-z_])(?:group|having|order|limit|offset|join|trigger|aggregation|sequence|session|tumbling|hopping|sliding|processing|route|to|punctuated)(?![A-Za-z0-9_])"
+    },
+    "keywords-wrong-case": {
+      "name": "invalid.illegal.keyword-case.cep",
+      "match": "(?i)(?<![A-Za-z_])(?:language|param|stream|table|rule|intent|partition|by|of|ttl|from|every|once|within|for|after|match|skip|past|last|late|events|drop|allow|route|to|select|as|output|first|insert|into|window|sort|cron|delay|batch|emit|on|close|change|due|end|time|arrival|watermark|bounded|ascending|punctuated|idle|primary|key|optional|expect|given|then|todo|and|or|not|in|is|null|true|false|raw|timestamp|string|int|float|bool|duration|object|asc|desc|ms|sec|min|hour|day|week|has_ci|has_cs|contains_ci|contains_cs|starts_with_ci|starts_with_cs|ends_with_ci|ends_with_cs|has_any_ci|has_any_cs|has_all_ci|has_all_cs|contains_any_ci|contains_any_cs|contains_all_ci|contains_all_cs|matches_ci|matches_cs|contains_match_ci|contains_match_cs|group|having|order|limit|offset|join|trigger|aggregation|sequence|session|tumbling|hopping|sliding|processing)(?![A-Za-z0-9_])"
+    },
+    "function-call": {
+      "patterns": [
+        {
+          "match": "(?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*)\\s*(:)\\s*([A-Za-z_][A-Za-z0-9_]*)\\s*(?=\\()",
+          "captures": {
+            "1": {
+              "name": "entity.name.namespace.cep"
+            },
+            "2": {
+              "name": "punctuation.separator.namespace.cep"
+            },
+            "3": {
+              "name": "support.function.cep"
+            }
+          }
+        },
+        {
+          "match": "(?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*)\\s*(?=\\()",
+          "captures": {
+            "1": {
+              "name": "support.function.cep"
+            }
+          }
+        }
+      ]
+    },
+    "identifier": {
+      "match": "[A-Za-z_][A-Za-z0-9_]*"
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.arrow.cep",
+          "match": "->"
+        },
+        {
+          "name": "keyword.operator.comparison.cep",
+          "match": "==|!=|>=|<=|>|<"
+        },
+        {
+          "name": "keyword.operator.assignment.cep",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator.arithmetic.cep",
+          "match": "[+\\-*/%]"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.terminator.statement.cep",
+          "match": ";"
+        },
+        {
+          "name": "punctuation.separator.comma.cep",
+          "match": ","
+        },
+        {
+          "name": "punctuation.accessor.cep",
+          "match": "\\."
+        },
+        {
+          "name": "punctuation.separator.key-value.cep",
+          "match": ":"
+        }
+      ]
+    }
+  }
+}

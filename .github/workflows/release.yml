@@ -1,0 +1,29 @@
+name: release
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Run every step except creating the release"
+        type: boolean
+        default: true
+permissions:
+  contents: read
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - run: npm ci
+      - run: npm run gate
+      - run: node scripts/check-release.mjs --ref "$GITHUB_REF_NAME" --ref-type "$GITHUB_REF_TYPE" --notes release-notes.md
+      - if: github.event_name == 'push'
+        run: gh release create "$GITHUB_REF_NAME" "cep-${GITHUB_REF_NAME#v}.vsix" --verify-tag --title "$GITHUB_REF_NAME" --notes-file release-notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}

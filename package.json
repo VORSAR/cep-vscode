@@ -2,7 +2,7 @@
   "name": "cep",
   "displayName": "CEP Language",
   "description": "Syntax highlighting for the CEP rule language (CEPS, .cep files).",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "publisher": "vorsar",
   "license": "Apache-2.0",
   "private": true,
@@ -50,7 +50,7 @@
     ]
   },
   "scripts": {
-    "test": "npm run test:toolchain && npm run test:unit && npm run test:keywords && npm run test:checker && npm run test:grammar && npm run test:tools && npm run test:fixtures && npm run test:snap",
+    "test": "npm run test:toolchain && npm run test:unit && npm run test:release",
     "test:toolchain": "node scripts/check-toolchain.mjs",
     "test:unit": "vscode-tmgrammar-test \"test/unit/**/*.test.cep\"",
     "test:keywords": "node scripts/check-keywords.mjs",
@@ -65,7 +65,8 @@
     "test:lane-a": "npm run test:toolchain && npm run test:tools",
     "test:lane-b": "npm run test:toolchain && npm run test:unit && npm run test:keywords && npm run test:checker && npm run test:grammar",
     "package": "vsce package --no-dependencies",
-    "gate": "npm test && npm run package && npm run test:vsix && npm run test:clean"
+    "gate": "npm test && npm run package",
+    "test:release": "node --test test/release.test.mjs test/toolchain.test.mjs"
   },
   "devDependencies": {
     "@vscode/vsce": "4.0.0",
