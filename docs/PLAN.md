@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-08):** Sprint S1 passed G0 ([record](sprints/s1-record.md)); the scaffold and the gate's toolchain check are built. Next: the design panel on §5–§6 (two waves), then design v2 and G1.
+**Status (2026-11-09):** Sprint S1 passed G1 ([record](sprints/s1-record.md)): the scaffold and the toolchain check are built, and §5–§6 are at v2 after the design panel and the owner's G1 decisions. Next: wave W1, with lane A (tooling) and lane B (grammar).
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 
@@ -64,7 +64,7 @@ cep is the source of truth. The files used, pinned at **cep `main` = `1fa3a5bb9d
 
 | cep path | What this repo takes from it |
 |---|---|
-| `internal/parser/lexer.go` (the `rules` table) | Every token class and its exact regex; §5.3 mirrors it |
+| `internal/parser/lexer.go` (the `rules` table) | Every token class and its exact regex; §5.3 mirrors it. Vendored as `test/upstream/lexer.go` and watched by the scheduled job (owner, G1-4) |
 | `internal/parser/keywords.go` | `keywordList` (115 reserved words) and `reservedFuture` (17 of them that are errors in v0.1). Vendored as `test/upstream/keywords.go` |
 | `docs/language/SPEC.md` §2 | Lexical rules: keywords lowercase-only (§2.1); identifiers and backticked names (§2.3); string escapes, exhaustively `\\ \' \" \n \t \r \uXXXX`, anything else is E-STR-002 (§2.4 table) |
 | `docs/language/grammar.lark` | Where each keyword can appear; used for the categories in §5.3 |
@@ -97,8 +97,9 @@ cep-vscode/
 ├── test/
 │   ├── upstream/
 │   │   ├── keywords.go              # byte copy of cep's internal/parser/keywords.go
+│   │   ├── lexer.go                 # byte copy of cep's internal/parser/lexer.go (G1-4)
 │   │   └── SOURCE                   # "VORSAR/cep <sha> <date>" of the copy
-│   ├── unit/*.test.cep              # §6.1, 6 files
+│   ├── unit/*.test.cep              # §6.1, 7 files (the six of v1, plus counter.test.cep)
 │   ├── fixtures/
 │   │   ├── examples/*.cep (+ .cep.snap)   # 10 files
 │   │   ├── torture/*.cep  (+ .cep.snap)   # 2 files
@@ -115,7 +116,7 @@ cep-vscode/
 
 ## 5. File specs
 
-*v1.1 (2026-11-08, after G0). This version applies the owner's G0 answers and the S1 plan check's §10 dispositions. §5.1 and §5.4 describe the built scaffold. §5.5.1, §5.5.3 and §5.6 gain test seams and the gate. §5.5.4–§5.5.7 are new. The grammar (§5.3) and the unit tests (§6.1) are unchanged until the design panel answers the plan check's P1–P8; they become v2 at G1.*
+*v2 (2026-11-09, G1). This version places every finding of the S1 design review. The reviews are the [breaker](reviews/s1-design-breaker.md), [QA testability](reviews/s1-design-qa.md) and [architecture](reviews/s1-design-architecture.md); the S1 record's Findings table maps each one to where it went. It also applies the owner's G1 decisions G1-1 to G1-8. §5.1 and §5.4 describe the built scaffold. (v1.1, 2026-11-08, applied the G0 answers and added the tooling specs.)*
 
 ### 5.1 `package.json`
 
@@ -154,130 +155,110 @@ Both test tools read `contributes.grammars` from `package.json`, so they need no
 
 Folding is not configured. VS Code's default indentation folding already folds a `rule` and its indented clauses.
 
-### 5.3 `syntaxes/cep.tmLanguage.json`
+### 5.3 `syntaxes/cep.tmLanguage.json` (v2)
 
-**How TextMate picks a rule.** At each position it tries every pattern in the current list. The match that **starts earliest** wins; on a tie, the pattern **listed first** wins. Every ordering rule below follows from that.
+*v2 (2026-11-09, G1). The structure is the owner's G1-1, (c): PLAN v1's skeleton, keyword keys, `(?i)` wrong-case rule and checker model, plus these changes from the design panel:*
+- *ASCII word edges and an unscoped identifier rule;*
+- *bounded declaration regions that can cross lines;*
+- *declared names that exclude keywords;*
+- *E-STR-001 as a one-line match that marks the whole unclosed string (G1-2);*
+- *word operators that also carry `keyword.operator.wordlike.cep` (G1-3).*
 
-**Skeleton.** The top-level `patterns` MUST be exactly this list, in this order. `check-keywords.mjs` enforces the order.
+*The reference build is the architect's candidate, which equals the blind breaker's grammar on all 42 plan-check counter-examples and passes §6.1's verbatim `literals.test.cep` ([architecture review](reviews/s1-design-architecture.md)). The grammar is hand-written; there is no build step.*
 
-```json
-{
-  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-  "name": "CEP",
-  "scopeName": "source.cep",
-  "fileTypes": ["cep"],
-  "patterns": [
-    { "include": "#comments" },
-    { "include": "#strings" },
-    { "include": "#pragma" },
-    { "include": "#param-ref" },
-    { "include": "#backticked" },
-    { "include": "#annotation" },
-    { "include": "#declarations" },
-    { "include": "#insert-target" },
-    { "include": "#number" },
-    { "include": "#keywords-declaration" },
-    { "include": "#keywords-type" },
-    { "include": "#keywords-modifier" },
-    { "include": "#keywords-clause" },
-    { "include": "#keywords-window" },
-    { "include": "#keywords-unit" },
-    { "include": "#keywords-logical" },
-    { "include": "#keywords-constant" },
-    { "include": "#keywords-builtin" },
-    { "include": "#keywords-text" },
-    { "include": "#keywords-reserved" },
-    { "include": "#keywords-wrong-case" },
-    { "include": "#function-call" },
-    { "include": "#operators" },
-    { "include": "#punctuation" }
-  ],
-  "repository": {
-    "comments": {
-      "patterns": [
-        {
-          "name": "comment.line.double-dash.cep",
-          "match": "(--).*$",
-          "captures": { "1": { "name": "punctuation.definition.comment.cep" } }
-        },
-        {
-          "name": "comment.block.cep",
-          "begin": "/\\*",
-          "end": "\\*/",
-          "beginCaptures": { "0": { "name": "punctuation.definition.comment.cep" } },
-          "endCaptures": { "0": { "name": "punctuation.definition.comment.cep" } }
-        }
-      ]
-    },
-    "keywords-unit": { "name": "keyword.other.unit.cep", "match": "\\b(?:ms|sec|min|hour|day|week)\\b" }
-  }
-}
+**How TextMate picks a rule.** At each position it tries every pattern in the current list. The match that **starts earliest** wins; on a tie, the pattern **listed first** wins. A begin/end region with `applyEndPatternLast` tries its inner patterns before its end. Every ordering rule below follows from that.
+
+**Notation.** The regexes below are written plain. When writing the JSON, escape every backslash, so `\$` becomes `"\\$"`. Five names stand for exact text:
+- `L` = `(?<![A-Za-z_])`: a word starts here.
+- `R` = `(?![A-Za-z0-9_])`: a word ends here. These are cep's ASCII edges. Oniguruma's `\b` counts non-ASCII letters, which cep's identifiers exclude.
+- `WORDS` = the 115 words of `keywordList`, in `keywords.go` order, joined by `|`. This is the paste list below.
+- `NAME` = `(?!(?i:WORDS)R)[A-Za-z_][A-Za-z0-9_]*`: a plain name that is not a reserved word in any case. It is grammar.lark's own NAME exclusion.
+- `BT` = `` `[A-Za-z0-9_\-. ]*` ``: a backticked name, exactly as `lexer.go` defines it.
+
+**Skeleton.** The top-level `patterns` MUST be exactly this list, in this order. `check-keywords.mjs` enforces it (rule g).
+
 ```
+comments, strings, param-ref, backticked, declarations, annotation, number,
+keywords-declaration, keywords-type, keywords-modifier, keywords-clause, keywords-window, keywords-unit,
+keywords-logical, keywords-constant, keywords-builtin, keywords-text, keywords-reserved, keywords-wrong-case,
+function-call, identifier, operators, punctuation
+```
+
+Each entry is `{ "include": "#<key>" }`. There are 23 of them.
 
 **Ordering rules (MUST):**
 
-1. `comments` comes before everything, so `--x` is never two minus signs and `/*` is never division.
-2. Inside `strings`, the triple-quoted rules come before the single-quoted ones, so `'''` doesn't open an empty `''` string.
-3. `pragma`, `declarations` and `insert-target` come before the `keywords-*` rules, because they start on the same keyword and must win the tie.
-4. Every exact-case `keywords-*` rule comes before `keywords-wrong-case`, so `from` is a keyword and only `FROM`/`From` is an error.
-5. Every `keywords-*` rule comes before `function-call`. Otherwise `sort(`, `cron(`, `delay(`, `batch(`, `raw(` and `has_any_ci(` would be coloured as function calls.
-6. Inside `operators`, `->` and the two-character comparisons come before the single characters.
+1. `comments` comes first, so `--x` is never two minus signs and `/*` is never division. `a--b` and `-->` are comments, as in cep (`lexer.go:22`).
+2. Inside `strings`, each triple-quoted rule comes before its one-line rules, so `'''` never opens `''`. The unclosed one-line `match` and the closed one-line region exclude each other: the closed region's begin requires its closing quote on the line, by lookahead.
+3. `param-ref` and `backticked` come before `declarations` and every keyword rule, so `${min}` and `` `from` `` are never keywords.
+4. `declarations` comes before the keyword rules, because each region starts on its keyword and must win the tie.
+5. Every exact-case `keywords-*` rule comes before `keywords-wrong-case`, so only spellings that are not all-lowercase are errors.
+6. Every `keywords-*` rule comes before `function-call`. So `sort(`, `cron(`, `delay(`, `batch(`, `raw(`, `min(` and `has_any_ci(` keep their keyword class.
+7. `function-call` comes before `identifier`, which it ties with on the name.
+8. `identifier` comes after every keyword rule and consumes whole names, so no keyword, unit or number matches inside one (`ts_min`, `x1min`, `intake`, `select_`).
+9. Inside `operators`, `->` comes before `-`, and the two-character comparisons before `=`, `<` and `>`.
 
 **The rules.**
 
-The regexes below are written plain. When writing the JSON, escape every backslash, so `\b` becomes `"\\b"` and `\$\{` becomes `"\\$\\{"`. `NAME` below stands for this exact text: ``[A-Za-z_][A-Za-z0-9_]*|`[A-Za-z0-9_\-. ]*` `` (a plain name, or a backticked name as cep's lexer defines it).
-
 ```
 comments
-  line          match  (--).*$          name comment.line.double-dash.cep   cap 1 punctuation.definition.comment.cep
-  block         begin  /\*  end  \*/    name comment.block.cep              begin/end cap 0 punctuation.definition.comment.cep
-                no inner patterns: block comments do not nest; an unclosed one runs to end of file (E-CMT-001)
+  line            match  (--).*$          name comment.line.double-dash.cep   cap 1 punctuation.definition.comment.cep
+  block           begin  /\*  end  \*/    name comment.block.cep              begin/end cap 0 punctuation.definition.comment.cep
+                  no inner patterns: block comments do not nest; an unclosed one runs to end of file, as cep's BadComment
 
-strings         (rules in this order)
-  triple-single begin '''  end '''      name string.quoted.triple.single.cep   no inner patterns (raw: \n stays two characters)
-  triple-double begin """  end """      name string.quoted.triple.double.cep   no inner patterns
-  single        begin '    end (')|((?:[^\\\n])$)
-                name string.quoted.single.cep
-                begin cap 0 punctuation.definition.string.begin.cep
-                end cap 1 punctuation.definition.string.end.cep, end cap 2 invalid.illegal.newline.cep   (E-STR-001)
-                patterns: include #string-escapes
-  double        same as single with " in place of '   name string.quoted.double.cep
+strings           (rules in this order)
+  triple-single   begin '''  end '''      name string.quoted.triple.single.cep   no inner patterns (raw)
+  triple-double   begin """  end """      name string.quoted.triple.double.cep   no inner patterns (raw)
+  single-unclosed match ((')(?:[^'\\\n]|\\.)*\\?)$
+                  name string.quoted.single.cep
+                  cap 1 invalid.illegal.newline.cep (E-STR-001: the whole unclosed string, G1-2)
+                  cap 2 punctuation.definition.string.begin.cep
+  single          begin '(?=(?:[^'\\\n]|\\.)*')   end '
+                  name string.quoted.single.cep   begin cap 0 …string.begin.cep, end cap 0 …string.end.cep
+                  patterns: include #string-escapes
+  double-unclosed, double: as the two rules above, with " in place of '   name string.quoted.double.cep
 
-string-escapes  (rules in this order)
-  valid         match \\(?:[\\'"ntr]|u[0-9A-Fa-f]{4})   name constant.character.escape.cep
-  invalid       match \\.                               name invalid.illegal.escape.cep      (E-STR-002)
+string-escapes    (rules in this order)
+  valid           match \\(?:[\\'"ntr]|u[0-9A-Fa-f]{4})   name constant.character.escape.cep
+  invalid         match \\(?:u[0-9A-Fa-f]{0,3}|.)          name invalid.illegal.escape.cep   (E-STR-002;
+                  a \u with fewer than four hex digits is one invalid escape)
 
-pragma          match \b(language)\s+([a-z][a-z0-9_]*/[0-9]+\.[0-9]+)
-                cap 1 storage.type.declaration.cep, cap 2 constant.other.version.cep
+param-ref         match \$\{[A-Za-z_][A-Za-z0-9_]*\}   name variable.other.constant.param.cep
+backticked        match BT                             name variable.other.quoted.cep
 
-param-ref       match \$\{[A-Za-z_][A-Za-z0-9_]*\}      name variable.other.constant.param.cep
+declarations      bounded regions, each: begin L(<kw>)R, applyEndPatternLast true, patterns [include #comments]
+  language        begin cap 1 storage.type.declaration.cep
+                  end ([a-z][a-z0-9_]*/[0-9]+\.[0-9]+)|(?=\S)        end cap 1 constant.other.version.cep
+  stream          begin cap 1 storage.type.declaration.cep
+                  end (NAME)|(BT)|(?=\S)                             end cap 1 and 2 entity.name.type.stream.cep
+  table           as stream                                          end cap 1 and 2 entity.name.type.table.cep
+  rule            as stream                                          end cap 1 and 2 entity.name.function.rule.cep
+  param           as stream                                          end cap 1 and 2 variable.other.constant.param.cep
+  into            begin cap 1 keyword.control.clause.cep
+                  end (NAME)|(BT)|(?=\S)                             end cap 1 and 2 entity.name.type.stream.cep (the insert target)
+  given           begin cap 1 keyword.control.clause.cep   end (?=\S)
+                  patterns [include #comments, match L(table)R name storage.type.declaration.cep]
+                  so the name after "given table" is a plain reference, never a declaration
 
-backticked      match `[A-Za-z0-9_\-. ]*`               name variable.other.quoted.cep
+annotation        begin @ (cap 0 punctuation.definition.annotation.cep)
+                  end ([A-Za-z_][A-Za-z0-9_]*)|(?=\S)   end cap 1 storage.type.annotation.cep
+                  applyEndPatternLast true, patterns [include #comments]
 
-annotation      match (@)([A-Za-z_][A-Za-z0-9_]*)
-                cap 1 punctuation.definition.annotation.cep, cap 2 storage.type.annotation.cep
+number            match (?<![A-Za-z0-9_])[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?   name constant.numeric.cep
+                  (cep's Number pattern with a leading edge only, so 5min is a number and a unit, as cep lexes it)
 
-declarations    (four rules; cap 1 is always storage.type.declaration.cep)
-  stream        match \b(stream)\s+(NAME)   cap 2 entity.name.type.stream.cep
-  table         match \b(table)\s+(NAME)    cap 2 entity.name.type.table.cep
-  rule          match \b(rule)\s+(NAME)     cap 2 entity.name.function.rule.cep
-  param         match \b(param)\s+(NAME)    cap 2 variable.other.constant.param.cep
+function-call     (rules in this order)
+  namespaced      match (?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*)\s*(:)\s*([A-Za-z_][A-Za-z0-9_]*)\s*(?=\()
+                  cap 1 entity.name.namespace.cep, cap 2 punctuation.separator.namespace.cep, cap 3 support.function.cep
+  plain           match (?<![A-Za-z0-9_])([A-Za-z_][A-Za-z0-9_]*)\s*(?=\()         cap 1 support.function.cep
 
-insert-target   match \b(insert)\s+(into)\s+(NAME)
-                cap 1 and 2 keyword.control.clause.cep, cap 3 entity.name.type.stream.cep
+identifier        match [A-Za-z_][A-Za-z0-9_]*   (no name: a plain reference, field or capture)
 
-number          match \b[0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?\b    name constant.numeric.cep
-
-function-call   (rules in this order)
-  namespaced    match \b([A-Za-z_][A-Za-z0-9_]*)(:)([A-Za-z_][A-Za-z0-9_]*)\s*(?=\()
-                cap 1 entity.name.namespace.cep, cap 2 punctuation.separator.namespace.cep, cap 3 support.function.cep
-  plain         match \b([A-Za-z_][A-Za-z0-9_]*)\s*(?=\()           cap 1 support.function.cep
-
-operators       (rules in this order)
-  arrow         match ->                  name keyword.operator.arrow.cep
-  comparison    match ==|!=|>=|<=|>|<     name keyword.operator.comparison.cep
-  assignment    match =                   name keyword.operator.assignment.cep
-  arithmetic    match [+\-*/%]            name keyword.operator.arithmetic.cep
+operators         (rules in this order)
+  arrow           match ->                  name keyword.operator.arrow.cep
+  comparison      match ==|!=|>=|<=|>|<     name keyword.operator.comparison.cep
+  assignment      match =                   name keyword.operator.assignment.cep
+  arithmetic      match [+\-*/%]            name keyword.operator.arithmetic.cep
 
 punctuation
   match ;   name punctuation.terminator.statement.cep
@@ -286,9 +267,13 @@ punctuation
   match :   name punctuation.separator.key-value.cep
 ```
 
-**Keyword rules.** Each `keywords-<category>` entry is a single `{ "name": <scope>, "match": "\\b(?:w1|w2|…)\\b" }`. The match MUST be in exactly that form, with the words in the order listed below, because `check-keywords.mjs` parses it. Each of the 115 words of `keywordList` sits in exactly one category.
+**Keyword rules.**
+- Each `keywords-<category>` entry is a single `{ "name": <scope>, "match": "L(?:w1|w2|…)R" }`: exactly `(?<![A-Za-z_])(?:` + the words + `)(?![A-Za-z0-9_])`.
+- The words are in `keywords.go` order, and each of the 115 words of `keywordList` sits in exactly one category.
+- `check-keywords.mjs` parses these forms (§5.5.2).
+- The logical and text words also carry `keyword.operator.wordlike.cep` (owner, G1-3). The default themes colour that scope like keywords: `#569CD6` in Dark 2026 and Dark Modern, `#0000FF` in Light 2026 and Light Modern (measured with VS Code 1.145.2's own engine). Without it the word operators get the plain-text colour.
 
-| Repository key | Scope | Words |
+| Repository key | Scope (`name`) | Words |
 |---|---|---|
 | `keywords-declaration` | `storage.type.declaration.cep` | language param stream table rule |
 | `keywords-type` | `storage.type.primitive.cep` | string int float bool timestamp duration object |
@@ -296,27 +281,41 @@ punctuation
 | `keywords-clause` | `keyword.control.clause.cep` | intent partition by of ttl from every once within for after match skip past last late events drop allow select as output first insert into window emit on close change due end time arrival watermark bounded ascending idle expect given then todo asc desc |
 | `keywords-window` | `keyword.other.window.cep` | sort cron delay batch |
 | `keywords-unit` | `keyword.other.unit.cep` | ms sec min hour day week |
-| `keywords-logical` | `keyword.operator.logical.cep` | and or not in is |
+| `keywords-logical` | `keyword.operator.logical.cep keyword.operator.wordlike.cep` | and or not in is |
 | `keywords-constant` | `constant.language.cep` | true false null |
 | `keywords-builtin` | `support.function.builtin.cep` | raw |
-| `keywords-text` | `keyword.operator.text.cep` | has_ci has_cs contains_ci contains_cs starts_with_ci starts_with_cs ends_with_ci ends_with_cs has_any_ci has_any_cs has_all_ci has_all_cs contains_any_ci contains_any_cs contains_all_ci contains_all_cs matches_ci matches_cs contains_match_ci contains_match_cs |
+| `keywords-text` | `keyword.operator.text.cep keyword.operator.wordlike.cep` | has_ci has_cs contains_ci contains_cs starts_with_ci starts_with_cs ends_with_ci ends_with_cs has_any_ci has_any_cs has_all_ci has_all_cs contains_any_ci contains_any_cs contains_all_ci contains_all_cs matches_ci matches_cs contains_match_ci contains_match_cs |
 | `keywords-reserved` | `invalid.illegal.reserved.cep` | group having order limit offset join trigger aggregation sequence session tumbling hopping sliding processing route to punctuated |
 
-The counts are 5 + 7 + 3 + 44 + 4 + 6 + 5 + 3 + 1 + 20 + 17 = 115. `keywords-reserved` MUST equal `reservedFuture` exactly (E-RES-001).
+The counts are 5 + 7 + 3 + 44 + 4 + 6 + 5 + 3 + 1 + 20 + 17 = 115. `keywords-reserved` MUST equal `reservedFuture` exactly (E-RES-001). The breaker re-derived this table blind from grammar.lark and SPEC and reached the same 11 classes ([breaker review](reviews/s1-design-breaker.md)).
 
-`keywords-wrong-case` is `{ "name": "invalid.illegal.keyword-case.cep", "match": "(?i)\\b(?:<all 115 words, in keywords.go order>)\\b" }`. Rule 4 means it only ever matches spellings that are not all-lowercase. That covers E-KW-002 (`FROM`) and the wrong-case-identifier half of E-KW-001 (`Select` used as a name). The 115 words in keywords.go order, ready to paste:
+`keywords-wrong-case` is `{ "name": "invalid.illegal.keyword-case.cep", "match": "(?i)L(?:WORDS)R" }`. Ordering rule 5 means it only ever matches spellings that are not all-lowercase. That covers E-KW-002 (`FROM`) and the case half of E-KW-001 (`SeleCT` used as a name). `WORDS` appears six times in all: once here, and once in each of the five name exclusions (stream, table, rule, param, into). `check-keywords.mjs` checks every copy (rule h). The 115 words in `keywords.go` order, ready to paste:
 
 ```
 language|param|stream|table|rule|intent|partition|by|of|ttl|from|every|once|within|for|after|match|skip|past|last|late|events|drop|allow|route|to|select|as|output|first|insert|into|window|sort|cron|delay|batch|emit|on|close|change|due|end|time|arrival|watermark|bounded|ascending|punctuated|idle|primary|key|optional|expect|given|then|todo|and|or|not|in|is|null|true|false|raw|timestamp|string|int|float|bool|duration|object|asc|desc|ms|sec|min|hour|day|week|has_ci|has_cs|contains_ci|contains_cs|starts_with_ci|starts_with_cs|ends_with_ci|ends_with_cs|has_any_ci|has_any_cs|has_all_ci|has_all_cs|contains_any_ci|contains_any_cs|contains_all_ci|contains_all_cs|matches_ci|matches_cs|contains_match_ci|contains_match_cs|group|having|order|limit|offset|join|trigger|aggregation|sequence|session|tumbling|hopping|sliding|processing
 ```
 
-**Known limitations (accepted for v1; a TextMate grammar matches patterns, it does not parse):**
+**Choices settled in v2** (each follows cep, or keeps v1.1):
+- A backticked declared name takes the declared-name scope, as v1.1's verbatim test asserts (breaker D6).
+- An annotation name is any name; `@select` is input cep rejects (D12).
+- `null` is a constant (D1).
+- `batch` is a window keyword everywhere, `emit on batch end` included (D2).
+- `asc` and `desc` are clause words (D3).
+- `timestamp` is a type both in a schema and before a literal (D4).
+- `raw` keeps the builtin scope with or without `(` (D14).
 
-- References are plain identifiers: stream and table names after `from`, `of` and `in`; step aliases like `lead`; and `lead.agentId`. Only declarations and `insert into` targets get name scopes.
-- A keyword used as a declared name (`stream select (…)`, `stream SeleCT (…)`, both E-KW-001) shows as a name, not an error. The `declarations` rule captures it first.
-- Annotation keys (`type`, `url`) and record field names (`{agentId: …}`) are plain.
-- No other E-code is shown. That needs the language server (§9).
+**Known limitations (accepted for v2; a TextMate grammar matches patterns, it does not parse):**
 
+1. An unclosed `'''` or `"""` colours the rest of the file as a raw string, and `''''` opens one. cep sees two empty strings, or an unclosed `'`. A begin rule cannot look past its line.
+2. cep's lexer reads `risk/2.5` (no spaces) as a version-pragma token and refuses the rule (F1, forwarded to cep). The grammar shows a division. After `LANGUAGE` (not lowercase), `cep/0.1` gets no version scope.
+3. After a character cep refuses at the lexer, the grammar carries on with no mark on that character. Examples: a stray `#`, a `$` without `{`, a non-ASCII letter outside a string. A stray backtick pairs with the next one on its line.
+4. An unclosed `/*` shows as a comment to the end of the file, which is how cep lexes it. Nothing marks it as E-CMT-001.
+5. Parse and static errors get no mark. This covers E-KW-001 for a lowercase keyword in a slot that is not a declaration (a column named `key`), E-TXT-001 (`has`), E-SYN-*, and the rest. That needs the language server (§9).
+6. A call is recognised only with its `(` on the same line as its name. A namespaced call written with backticks (`` `math`:`round`( ``) is not shown as a call.
+7. Function names are not checked against cep's catalogue: any name before `(` that is not a keyword is `support.function.cep`.
+8. Escapes inside an unclosed one-line string are not coloured: the whole string is the error.
+9. References are plain identifiers: stream and table names after `from`, `of`, `in` and `given table`, step aliases, `lead.agentId`. Annotation keys and record field names are plain too.
+10. While typing, a `given table` with no name yet, a blank line, and then a `table K (` declaration gives `K` the function scope (architecture D-A20). It clears once the name is written.
 ### 5.4 Small files
 
 `.vscode/launch.json`:
@@ -343,7 +342,10 @@ language|param|stream|table|rule|intent|partition|by|of|ttl|from|every|once|with
 node_modules/
 *.vsix
 .claude/worktrees/
+.DS_Store
 ```
+
+(`.DS_Store` added in v2: a Finder file in a fixture folder would otherwise turn `check-fixtures` and `check-clean` red; architecture D-A11.)
 
 `.npmrc` (owner, 2026-11-08, Q2) keeps every install script from running and every optional package, including vsce-sign's native binary, off disk:
 
@@ -361,59 +363,69 @@ test/upstream/** -text
 
 `.nvmrc`: `26.13.0`
 
-### 5.5 Scripts
+### 5.5 Scripts (v2)
 
 All scripts are ES modules run with `node`, and they use only Node built-ins (`node:fs`, `node:path`, `node:child_process`, `node:process`, `node:zlib`, global `fetch`).
-- Subprocesses use `execFileSync` with an argument array, never a shell string.
-- The exit code is 0 for a pass and 1 for any failure. A missing or unparsable input is a failure, never a pass.
+- Subprocesses use `execFileSync` with an argument array, never a shell string. A `git` format such as `--format=%H %cs` is one array element.
+- The exit code is 0 for a pass and 1 for any failure. A missing or unparsable input is a failure, never a pass. So is a failed subprocess: a `git` exit code other than 0 is a failure even when its stdout is empty.
 - Every message starts with the script's name, for example `check-keywords: …`. A failure message also names the input or the item at fault.
 - Every default path resolves from the script's own location (`import.meta.dirname`), not the current directory, so a script behaves the same from any worktree.
-- Each script's tests (§6.3, §6.4) assert its message, not just its exit code, because Node itself exits 1 for a missing script. They also include a passing case.
+- Each script's tests (§6.3, §6.4) assert its message, not just its exit code, because Node itself exits 1 for a missing script. Each script also has a passing case.
 
-#### 5.5.1 `scripts/sync-upstream.mjs <path-to-cep-clone> [--ref <git-ref>] [--out <dir>]`
+#### 5.5.1 `scripts/sync-upstream.mjs <path-to-cep-clone> [--ref <git-ref>] [--out <dir>] [--check]`
 
-The script reads files from a git ref, `main` by default, through git's object store. It never reads or changes the cep working tree, so it works whatever branch the cep clone has checked out (the owner's clone is usually on a sprint branch). Run `git -C ../cep fetch origin` first and pass `--ref origin/main` to sync with the remote's `main`.
-
-- **`--out <dir>`** is the root that the paths below are written under. It defaults to the repo root. The tests pass a temporary directory and a throwaway git repo as the "cep clone", so they never need a real cep or touch this repo's tree.
-- **In S1** the sync runs pinned to the sprint's target: `node scripts/sync-upstream.mjs <absolute path of the cep clone> --ref 1fa3a5bb9d3bbabfe0c26ca3daa62086c8093c49`.
+The script reads files from a git ref, `main` by default, through git's object store. It never reads or changes the cep working tree, so it works whatever branch the cep clone has checked out (the owner's clone is usually on a sprint branch). Run `git -C <cep> fetch origin` first and pass `--ref origin/main` to sync with the remote's `main`.
 
 1. Fail if no path is given, or if `git -C <cep> rev-parse --verify <ref>^{commit}` fails.
-2. Read each file with `git -C <cep> cat-file blob <ref>:<path>` through `execFileSync(…, { encoding: 'buffer' })`. That gives raw bytes, with no line-ending conversion. Write the Buffer as-is, creating directories as needed:
-   - `internal/parser/keywords.go` → `test/upstream/keywords.go`
-   - every `*.cep` listed by `git -C <cep> ls-tree --name-only <ref> docs/language/examples/` → `test/fixtures/examples/`
-   - every `*.cep` listed by `git -C <cep> ls-tree --name-only <ref> docs/language/examples/torture/` → `test/fixtures/torture/`
-   - `ls-tree` prints full paths, for example `docs/language/examples/01-agent-kill-switch.cep`, and lists the `torture` folder as an entry of its own. Keep only names ending in `.cep`, and write each under its basename.
-   - these seven under `docs/language/invalid/` → `test/fixtures/invalid/`: `e-cmt-001-unterminated-comment.cep`, `e-kw-001-keyword-as-identifier.cep`, `e-kw-001-mixedcase-identifier.cep`, `e-kw-002-uppercase-keyword.cep`, `e-res-001-group-by.cep`, `e-str-001-newline-in-single-quoted.cep`, `e-txt-001-unsuffixed-text-operator.cep`. A missing one is a failure.
-3. Write `test/upstream/SOURCE` as one line, `VORSAR/cep <sha> <date>`, from `git -C <cep> log -1 --format=%H %cs <ref>`.
-4. Never delete anything, because the `.cep.snap` files live next to the fixtures. List every `test/fixtures/**/*.cep` that was not in this copy set and exit 1 if there are any, so a person removes the stale fixture and its snapshot.
-5. Print the files written that changed and the line `next: npm test, then review every snapshot diff`.
+2. Read each file with `git -C <cep> cat-file blob <ref>:<path>` through `execFileSync(…, { encoding: 'buffer' })`. That gives raw bytes, with no line-ending conversion. Write each Buffer as it is under `--out` (default: the repo root), creating directories as needed. The files:
+   - `internal/parser/keywords.go` → `test/upstream/keywords.go`;
+   - `internal/parser/lexer.go` → `test/upstream/lexer.go` (owner, G1-4);
+   - every `*.cep` that `git -C <cep> ls-tree --name-only <ref> docs/language/examples/` lists → `test/fixtures/examples/`;
+   - every `*.cep` that `ls-tree` lists for `docs/language/examples/torture/` → `test/fixtures/torture/`;
+   - these seven under `docs/language/invalid/` → `test/fixtures/invalid/`: `e-cmt-001-unterminated-comment.cep`, `e-kw-001-keyword-as-identifier.cep`, `e-kw-001-mixedcase-identifier.cep`, `e-kw-002-uppercase-keyword.cep`, `e-res-001-group-by.cep`, `e-str-001-newline-in-single-quoted.cep`, `e-txt-001-unsuffixed-text-operator.cep`. A missing one is a failure, naming it.
+
+   `ls-tree` prints full paths and lists the `torture` folder as an entry of its own. Keep only names ending in `.cep`, and write each under its basename.
+3. Write `test/upstream/SOURCE` as exactly `VORSAR/cep <sha> <date>` and one LF, from `git -C <cep> log -1 --format=%H %cs <ref>`.
+4. Never delete anything: the `.cep.snap` files live next to the fixtures. List every `.cep` under `<out>/test/fixtures/` that was not in this copy set, and exit 1 if there are any, so a person removes the stale fixture and its snapshot.
+5. Print each file written that changed, then the line `next: npm test, then review every snapshot diff`.
+6. **`--check`** writes nothing. It compares each of the 21 targets (19 fixtures, `keywords.go`, `lexer.go`), and `SOURCE`, with what step 2 would write. It exits 1, naming each file that differs or is missing; otherwise it prints `sync-upstream: ok (21 files match <sha>)`. This is the byte proof for the vendored files (plan check card line 4).
+
+In S1 the sync runs pinned to the sprint's target: `node scripts/sync-upstream.mjs <absolute path of the cep clone> --ref 1fa3a5bb9d3bbabfe0c26ca3daa62086c8093c49`.
 
 #### 5.5.2 `scripts/check-keywords.mjs [--grammar <path>] [--keywords <path>]`
 
 The defaults are `syntaxes/cep.tmLanguage.json` and `test/upstream/keywords.go`.
 
-1. Read the keyword file. Take `keywordList` as every `"…"` string between the line containing `keywordList = []string{` and the next line that is exactly `}`. Take `reservedFuture` as every `"…"` key between `reservedFuture = map[string]bool{` and the next line that is exactly `}`. Fail if either is empty.
-2. Read the grammar JSON. For every `repository` key starting with `keywords-`, other than `keywords-wrong-case`, parse its `match` against `^\\b\(\?:([a-z_|]+)\)\\b$` and split group 1 on `|`. For `keywords-wrong-case`, parse its `match` against `^\(\?i\)\\b\(\?:([a-z_|]+)\)\\b$`.
+1. Read the keyword file.
+   - Take `keywordList` as every `"…"` string between the line containing `keywordList = []string{` and the next line that is exactly `}`.
+   - Take `reservedFuture` as every `"…"` key between `reservedFuture = map[string]bool{` and the next line that is exactly `}`.
+   - If either block is missing or empty, print one line naming it and stop with exit 1.
+2. Read the grammar JSON, then parse three kinds of word list:
+   - **Category lists.** For every `repository` key starting with `keywords-` other than `keywords-wrong-case`, parse its `match` against `^\(\?<!\[A-Za-z_\]\)\(\?:([a-z_|]+)\)\(\?!\[A-Za-z0-9_\]\)$` and split group 1 on `|`.
+   - **The wrong-case list.** For `keywords-wrong-case`, parse its `match` against the same pattern, with `\(\?i\)` in front.
+   - **The name exclusions.** For every `end` in `repository.declarations.patterns` that contains `(?!(?i:`, take the list from `\(\?!\(\?i:([a-z_|]+)\)\(\?!\[A-Za-z0-9_\]\)\)`.
 3. Fail with one line per problem if:
    - (a) a `keywords-*` match is not in its canonical form;
    - (b) a word is in two categories;
    - (c) a `keywordList` word is in no category;
    - (d) a category word is not in `keywordList`;
    - (e) the set of `keywords-reserved` words differs from `reservedFuture`;
-   - (f) the set of `keywords-wrong-case` words differs from `keywordList`;
-   - (g) the top-level `patterns` list differs from the skeleton list in §5.3, which is held in the script as a constant.
-4. On pass, print `check-keywords: ok (<n> keywords, <m> reserved, <k> categories)`. At the pinned commit that is `115 keywords, 17 reserved, 11 categories`.
+   - (f) the `keywords-wrong-case` list differs from `keywordList`;
+   - (g) the top-level `patterns` list differs from §5.3's 23-entry skeleton, which the script holds as a constant;
+   - (h) there are not exactly 5 name exclusions, or one of them differs from `keywordList`;
+   - (i) any word list (a category, the wrong-case list or an exclusion) is not in `keywordList` order.
+4. On a pass, print `check-keywords: ok (<n> keywords, <m> reserved, <k> categories, <e> name exclusions)`. At the pinned commit that is `115 keywords, 17 reserved, 11 categories, 5 name exclusions`.
 
-#### 5.5.3 `scripts/check-upstream.mjs [--url <url>] [--local <path>]` (CI's scheduled job)
+#### 5.5.3 `scripts/check-upstream.mjs [--url-keywords <url>] [--url-lexer <url>] [--local <dir>]` (CI's scheduled job)
 
-1. Fetch `--url` with `fetch` and `AbortSignal.timeout(30000)`. The default is `https://raw.githubusercontent.com/VORSAR/cep/main/internal/parser/keywords.go`.
+1. Fetch both files with `fetch` and `AbortSignal.timeout(30000)`. The defaults are `https://raw.githubusercontent.com/VORSAR/cep/main/internal/parser/keywords.go` and the same path ending in `lexer.go` (owner, G1-4).
 2. A network error or a non-200 status is a failure: `check-upstream: could not fetch <url>: <reason or status>`.
-3. Compare the fetched bytes with `--local`, which defaults to `test/upstream/keywords.go`, read with `test/upstream/SOURCE` beside it.
-   - If they are equal, exit 0 with `check-upstream: ok (matches <SOURCE line>)`.
-   - Otherwise exit 1 with `check-upstream: cep main's keyword table differs from test/upstream (synced at <SOURCE line>); run sync-upstream, update the grammar, review the snapshots`.
+3. Compare each fetched file's bytes with the same file in `--local` (default `test/upstream/`), and read `SOURCE` there. A missing local file or a missing `SOURCE` is a failure, naming the path.
+   - If both are equal, exit 0 with `check-upstream: ok (keywords.go and lexer.go match <SOURCE line>)`.
+   - Otherwise exit 1 with one line per differing file: `check-upstream: cep main's <file> differs from test/upstream (synced at <SOURCE line>); run sync-upstream, update the grammar, review the snapshots`.
 
 The tests use three seams, since Node's `fetch` cannot read `file:` URLs:
-- a `data:` URL for the same bytes (exit 0) and for a changed copy (exit 1);
+- `data:` URLs for the same bytes, for a changed copy, and for the same bytes plus a final newline;
 - a port with nothing listening, for a refused connection;
 - a `node:http` server on `127.0.0.1` that answers 404.
 
@@ -423,20 +435,21 @@ This script is not part of `npm test`, so local runs stay offline and determinis
 
 This is the guard that `test:snap` lacks: the snapshot tool writes a missing snapshot and passes.
 
-1. `--root` defaults to the repo root. List the files under `<root>/test/fixtures/` on disk, and list the tracked ones with `git -C <root> ls-files -- test/fixtures`. Tracked means staged or committed.
-2. Fail, with one line per problem, if:
-   - (a) the `.cep` counts are not exactly 10 in `examples/`, 2 in `torture/` and 7 in `invalid/` (constants in the script);
-   - (b) a `.cep` has no tracked `<name>.cep.snap` beside it;
+1. `--root` defaults to the repo root. A `git` failure there (not a repository) is a failure.
+2. **Candidates.** List the candidate files with `git -C <root> ls-files --cached --others --exclude-standard -- test/fixtures`. Ignored files, such as a `.DS_Store`, are skipped. A candidate counts as present only if it also exists on disk, because `git ls-files` still lists a tracked file that was deleted.
+3. **Tracked** means listed by `git -C <root> ls-files --cached -- test/fixtures` (staged or committed).
+4. Fail, with one line per problem, if:
+   - (a) the present `.cep` files are not exactly 10 in `examples/`, 2 in `torture/` and 7 in `invalid/`. The counts are per folder and are constants in the script; a total of 19 is not enough.
+   - (b) a `.cep` has no `<name>.cep.snap` beside it that is both present and tracked;
    - (c) a `.cep.snap` has no `.cep` beside it;
-   - (d) any other file is there.
-3. On a pass, print `check-fixtures: ok (19 fixtures, 19 tracked snapshots)`.
+   - (d) any other present file is there.
+5. On a pass, print `check-fixtures: ok (19 fixtures, 19 tracked snapshots)`.
 
-Its tests build a throwaway git repo in a temporary directory.
+#### 5.5.5 `scripts/check-vsix.mjs [<file.vsix>] [--root <dir>]`
 
-#### 5.5.5 `scripts/check-vsix.mjs <file.vsix>`
-
-1. Read the file with `node:fs`. Find the zip's end-of-central-directory record, signature `0x06054b50`, searching back from the end over at most 65,557 bytes. Then read every central-directory entry, signature `0x02014b50`, and collect the file names. A missing file, or a file that is not a zip, is a failure.
-2. Compare the names, as a set, with the 8 of the S1 plan check's S4 (a constant):
+1. **Which file.** With no file, check `cep-<version>.vsix` in `--root` (default: the repo root), with `version` read from that root's `package.json`. A stale package from an older version is then never checked by mistake. `npm run test:vsix` runs it with no argument.
+2. **Read it.** Read the file with `node:fs`. Find the zip's end-of-central-directory record, signature `0x06054b50`, searching back from the end over at most 65,557 bytes; that also covers a zip with an archive comment. Then read every central-directory entry, signature `0x02014b50`, and collect the file names. A missing file, or a file that is not a zip, is a failure, naming the path.
+3. **Compare.** Compare the names, as a set, with the 8 of the S1 plan check's S4 (a constant):
 
    ```
    extension.vsixmanifest
@@ -450,17 +463,15 @@ Its tests build a throwaway git repo in a temporary directory.
    ```
 
    Fail with one line per missing name and one per extra name.
-3. On a pass, print `check-vsix: ok (8 files)`.
-
-Its tests write small zips with `node:zlib` (stored or deflated) into a temporary directory: the S4 set (exit 0), an empty zip, one with an extra `extension/test/x`, one without the grammar, and a non-zip file.
+4. On a pass, print `check-vsix: ok (8 files)`.
 
 #### 5.5.6 `scripts/check-clean.mjs [--root <dir>]`
 
-Run `git -C <root> status --porcelain --untracked-files=all`. Ignored files (`node_modules/`, `*.vsix`) are not listed. Any output is a failure, and the message lists each path. This is how `npm run gate` catches a snapshot or any other file written during the run. On a pass, print `check-clean: ok`. Its tests use a throwaway git repo: a clean one, one with an untracked file, and one with a changed file.
+Run `git -C <root> status --porcelain --untracked-files=all`. A `git` failure is a failure: outside a repository `git` exits 128 with an empty stdout, which must not read as "clean". Any output is a failure, and the message lists each path. Ignored files (`node_modules/`, `*.vsix`, `.DS_Store`) are not listed. This is how `npm run gate` catches a snapshot or any other file written during the run. On a pass, print `check-clean: ok`.
 
 #### 5.5.7 `scripts/check-toolchain.mjs [--nvmrc <path>] [--node <version>]`
 
-Built in the scaffold. It fails unless the running Node (or `--node`) equals the exact `x.y.z` in `.nvmrc`, accepting a leading `v` in either. A missing, unreadable or inexact `.nvmrc` is a failure. On a pass it prints `check-toolchain: ok (node <version>)`. Its tests are `test/toolchain.test.mjs`. Whether it should also check npm's version is open for the panel (plan check A17).
+Built in the scaffold. It fails unless the running Node (or `--node`) equals the exact `x.y.z` in `.nvmrc`, accepting a leading `v` in either. A missing, unreadable or inexact `.nvmrc` is a failure. On a pass it prints `check-toolchain: ok (node <version>)`. Its tests are `test/toolchain.test.mjs`. It does not check npm: the exact Node pin fixes npm's version through setup-node (architecture review, A17).
 
 ### 5.6 `.github/workflows/ci.yml`
 
@@ -642,67 +653,235 @@ lead.agentId, x                               "." → punctuation.accessor.cep; 
 {agentId: 'a1'}                               ":" → punctuation.separator.key-value.cep
 ```
 
-### 6.2 Snapshot tests: `test/fixtures/**/*.cep`
+**v2 additions (2026-11-09).** QA's design review ran 271 mutant grammars against the v1.1 tests. 31 survived every layer, and 37 more were caught only by a snapshot, which cannot show its own grammar wrong ([QA review](reviews/s1-design-qa.md)). v2 adds the lines below so that each grammar rule has a unit assertion that goes red when the rule is wrong.
 
-There are 19 fixtures (10 examples, 2 torture, 7 invalid), copied by `sync-upstream.mjs`. The first `npm run test:snap:update` writes a `.cep.snap` next to each. **Review every snapshot by hand** against §5.3 before committing it. Check at least:
+**Format notes added in v2.**
+- A token at column 1 cannot take `^` either, because `--` covers columns 0–1. Assert it with `<~-…`: each `~` skips one column from column 0, and each `-` covers one character. For example, `-- <~----- storage.type.annotation.cep` covers columns 1–5. Where a fragment allows it, prefix the source line with `x ` to move the key token off columns 0–1.
+- **Expected values come from cep, not from a grammar.** Derive each expected scope from cep's lexer tokens (`lexer.go`), the keyword table and the decisions in §5.3 v2. Never copy it from any grammar's output, including the breaker's `expected.md` (architecture D-A10).
+- **Check escape bytes.** After writing a file that holds a backslash-u escape, check its bytes with `grep`. Such escapes have arrived decoded through tool input in this sprint.
 
-- `torture/lexical.cep`: every string, escape, number, duration, param ref and backticked name has its §5.3 scope. `'''wire\s+transfer'''` has no escape scope.
-- `torture/comments.cep`: nothing after `--` or inside `/* */` carries a non-comment scope. The CRLF lines tokenize like the LF lines. Text that looks like a comment inside a string or the triple-quoted intent is string.
-- `invalid/e-kw-002-uppercase-keyword.cep`: `RULE`, `INTENT`, `FROM`, `SELECT`, `INSERT` and `INTO` carry `invalid.illegal.keyword-case.cep`.
-- `invalid/e-res-001-group-by.cep`: `group` carries `invalid.illegal.reserved.cep`; `sum` carries `support.function.cep`.
-- `invalid/e-str-001-newline-in-single-quoted.cep`: the last character of line 6 carries `invalid.illegal.newline.cep`.
-- `invalid/e-cmt-001-unterminated-comment.cep`: lines 4–5 are `comment.block.cep` to the end of the file.
-- `invalid/e-txt-001-unsuffixed-text-operator.cep`: `has` carries no keyword scope.
-- `invalid/e-kw-001-*.cep`: `select` and `SeleCT` show as `entity.name.type.stream.cep`. That is the accepted limitation in §5.3, not a bug.
+**Additions to the five files.** Each line is a source line, then its tokens and their scopes; `≠` means the scope must be absent.
+
+`test/unit/keywords.test.cep` (D-Q1, D-Q6, G1-3):
+- **Every word of every category,** each asserted with its category scope. Write the lines from the §5.3 table, by script or by hand, with these placements:
+  - the declaration words as `language; param; stream; table; rule;`, so no word is followed by a name that a declaration region would capture;
+  - the clause line broken after `insert`, so `insert` and `into window` are separate;
+  - `raw` as `x raw y`.
+
+  With this, no word can move to another category and keep every test green.
+- **The wordlike scope:** each logical and text word also asserts `keyword.operator.wordlike.cep`.
+- **Calls, not keywords:** `x int_value(a) intake(b) has_ci_flag(c) fromage(d)` → each name is `support.function.cep`. This is the positive form of the "no keyword inside a name" rule.
+- `2min 5 min 1hour` → `2`, `5` and `1` are `constant.numeric.cep`; `min`, `min` and `hour` are `keyword.other.unit.cep` (P2, as cep lexes it).
+- `x1min ab2sec` → each a single plain name: `≠ keyword.other.unit.cep` and `≠ constant.numeric.cep`.
+
+`test/unit/strings.test.cep` (D-Q2, D-Q4, G1-2):
+- `x '\n\t\r' "\n\t\r"` → each of the 6 escapes is `constant.character.escape.cep`.
+- `x '\0 \$ \a'` → `\0`, `\$` and `\a` are `invalid.illegal.escape.cep`.
+- `x """raw \n stays"""` → `\n` is `string.quoted.triple.double.cep ≠ constant.character.escape.cep`.
+- `x 'read'` → the column-2 quote is `punctuation.definition.string.begin.cep` and the column-7 quote is `punctuation.definition.string.end.cep`.
+- `  intent 'this intent` → the whole of `'this intent`, from the quote to the end of the line, is `invalid.illegal.newline.cep`, and the quote is also `punctuation.definition.string.begin.cep` (G1-2). The next source line, `y 'z'`, has a closed string.
+
+`test/unit/comments.test.cep` (D-Q4):
+- `x /* inline */ y` → `/*` and `*/` are `punctuation.definition.comment.cep`.
+
+`test/unit/names.test.cep` (D-Q3, D-Q4, D-Q11, D-Q17, architecture D-A1, D-A3, D-A4):
+- **Backticked names and declarations on one line:**
+  - `` x `agent events` `` → `variable.other.quoted.cep`;
+  - `` insert into `agent-events`; `` → `` `agent-events` `` is `entity.name.type.stream.cep`;
+  - `table Blocked (a string)` → `table` is `storage.type.declaration.cep`;
+  - `rule LexicalTorture` → `rule` is `storage.type.declaration.cep`;
+  - `stream  Foo (a string)` (two spaces) → `Foo` is `entity.name.type.stream.cep`;
+  - `select upstream as u` → `as` is `keyword.control.clause.cep`.
+- **Declarations split across lines or comments** (each valid cep):
+  - `stream`, then `U (a string)` on the next line → `U` is `entity.name.type.stream.cep`;
+  - `stream /* c */ U (a string)` → likewise;
+  - `rule`, then `R` → `entity.name.function.rule.cep`;
+  - `param`, then `grace duration = 1 min;` → `grace` is `variable.other.constant.param.cep`;
+  - `insert`, then `into T;` → `into` is a clause, and `T` is `entity.name.type.stream.cep`;
+  - `language`, then `cep/0.1;` → `cep/0.1` is `constant.other.version.cep`;
+  - `@ sink(type = 'log')` → `@` is `punctuation.definition.annotation.cep`, and `sink` is `storage.type.annotation.cep`.
+- **Names that are keywords** (E-KW-001):
+  - `stream events (a string)` → `events` is `keyword.control.clause.cep ≠ entity.name.type.stream.cep`;
+  - `stream SeleCT (a string)` → `SeleCT` is `invalid.illegal.keyword-case.cep`.
+- **`given table`:**
+  - `  expect given table T [ {a: 1} ]` → `given` is a clause, `table` is `storage.type.declaration.cep`, and `T` is `≠ entity.name.type.table.cep`;
+  - `given`, then `table T` on the next line → likewise.
+- **Calls and punctuation:**
+  - in `math:round(x)`, `:` is `punctuation.separator.namespace.cep`;
+  - `math : round (x)` → a namespaced call;
+  - `x {agentId:lead}` → `agentId` is `≠ entity.name.namespace.cep`, and `:` is `punctuation.separator.key-value.cep`;
+  - `  from S window cron('0 0 * * *', 'UTC')` → `cron` is `keyword.other.window.cep ≠ support.function.cep`;
+  - `  from S window batch()` → `batch` likewise;
+  - `  where text has_any_ci(${t})` → `has_any_ci` is `keyword.operator.text.cep ≠ support.function.cep`;
+  - `select count (x)` → `count` is `support.function.cep`.
+- **Input cep rejects:**
+  - `x ${ grace }` → `${` is `≠ variable.other.constant.param.cep`;
+  - `` x `a/b` `` → the backtick is `≠ variable.other.quoted.cep`.
+
+**A seventh file, `test/unit/counter.test.cep`,** holds the S1 plan check's §6 items 1–39, written as answered at G1:
+- **Item 5:** the mark covers the whole unclosed string.
+- **Item 15** (`2min`), **item 36** (a declaration split over two lines) and the split-pragma half of **item 39:** coloured as cep lexes them.
+- **Item 37** (`given table T`): `T` is plain.
+- **The `''''` half of item 39:** pinned as known limitation 1.
+- **Item 24**, an unclosed block comment, is the file's last source line.
+
+**Red first, for the unit layer.**
+1. Every unit file runs against the placeholder grammar and shows failures. Record each file's count of failing assertions.
+2. The assertions that require a scope to be absent cannot go red on the placeholder. So each one is also run once against the named mutant that breaks it, and the assertions that turned red are recorded:
+   - block comment `end` = `$` → `y`;
+   - one-line strings include `#comments` → `--` in a string;
+   - the block comment includes `#strings` → `'quote'`;
+   - the triple-quoted strings include `#string-escapes` → `\n`;
+   - the trailing edge `R` dropped from `keywords-unit` and `keywords-wrong-case`, with `identifier` removed → `ts_min`, `x1min`, `SELECTED`;
+   - `function-call` moved before the keyword rules → `key (`, `delay(`, `raw(`;
+   - `backticked` removed → `` `select` ``;
+   - `given`'s inner `table` rule removed → `T` in `given table T`.
+
+### 6.2 Snapshot tests: `test/fixtures/**/*.cep` (v2)
+
+There are 19 fixtures (10 examples, 2 torture, 7 invalid), copied by `sync-upstream.mjs`. The first `npm run test:snap:update` writes a `.cep.snap` next to each. `check-fixtures.mjs` (§5.5.4) then requires each snapshot to be present and tracked, so `test:snap` can never pass by writing one. **Review every snapshot by hand** against §5.3 v2 before committing it. Check at least:
+
+- **`torture/lexical.cep`:**
+  - every string, escape, number, duration, param ref and backticked name has its §5.3 scope;
+  - `'''wire\s+transfer'''` has no escape scope;
+  - `` `agent-events` `` where it is declared has the stream-name scope.
+- **`torture/comments.cep`:**
+  - nothing after `--` or inside `/* */` carries a non-comment scope;
+  - text that looks like a comment, inside a string or inside the triple-quoted intent, is string.
+  - (Its CRLF lines tokenize like LF lines by construction, because the test tool splits on `\r\n|\n`. That is not a test; plan check card line 4, the byte check, is the CRLF proof.)
+- **`examples/01-agent-kill-switch.cep` and `07-consent-gate.cep`:** `SensitiveResources` and `RegisteredApps` after `given table` carry no table-declaration scope (5 lines in all).
+- **`invalid/e-kw-002-uppercase-keyword.cep`:** `RULE`, `INTENT`, `FROM`, `SELECT`, `INSERT` and `INTO` carry `invalid.illegal.keyword-case.cep`.
+- **`invalid/e-res-001-group-by.cep`:** `group` carries `invalid.illegal.reserved.cep`, and `sum` carries `support.function.cep`.
+- **`invalid/e-str-001-newline-in-single-quoted.cep`:**
+  - on line 6, `'this intent` carries `invalid.illegal.newline.cep` from the quote to the end of the line;
+  - line 7's final `'` carries it too;
+  - on line 8, `from` is `keyword.control.clause.cep` and `'x'` is a closed string with begin and end punctuation.
+- **`invalid/e-cmt-001-unterminated-comment.cep`:** lines 4–5 are `comment.block.cep` to the end of the file.
+- **`invalid/e-txt-001-unsuffixed-text-operator.cep`:** `has` carries no keyword scope.
+- **`invalid/e-kw-001-*.cep`** (v2, architecture D-A4): `select` carries `keyword.control.clause.cep`, not a stream name, and `SeleCT` carries `invalid.illegal.keyword-case.cep`.
+
+**Red first, for the snapshot layer.** Rename `constant.numeric.cep` in the grammar. Expect `npm run test:snap` to exit 255 with all 19 fixtures failing, because every fixture has a number. Record it, then revert the rename. (Renaming a scope that no fixture uses, such as `invalid.illegal.escape.cep`, would exit 0.)
 
 After the review, a snapshot changes only with a diff that has been read and explained in the commit message.
 
-### 6.3 Checker tests: `test/checker.test.mjs` (`node:test`, no dependencies)
+### 6.3 Checker tests: `test/checker.test.mjs` (`node:test`, no dependencies) (v2)
 
-Each test copies the real grammar JSON into a temporary directory (`fs.mkdtempSync(path.join(os.tmpdir(), 'cep-'))`), makes one change in memory, writes it, and runs `node scripts/check-keywords.mjs --grammar <tmp> [--keywords <path>]` with `spawnSync`. It then asserts the exit status, and that the output names the word or rule involved. Test names, verbatim:
+Each test copies the real grammar JSON into a temporary directory (`fs.mkdtempSync(path.join(os.tmpdir(), 'cep-'))`), makes one change in memory, writes it, and runs `node scripts/check-keywords.mjs --grammar <tmp> [--keywords <path>]` with `spawnSync`. It then asserts the exit status, that the output has a line starting with `check-keywords:`, and that the output names the word, rule or path involved. Test names, verbatim:
 
-1. `passes on the real grammar and the vendored table`: status 0, output contains `115 keywords, 17 reserved, 11 categories`.
-2. `fails when a keyword is in no category`: remove `ms` from `keywords-unit`. Status 1, output contains `ms`.
-3. `fails when a keyword is in two categories`: add `ms` to `keywords-clause`. Status 1, output contains `ms`.
-4. `fails when the reserved category differs from reservedFuture`: move `join` from `keywords-reserved` to `keywords-clause`. Status 1, output contains `join`.
-5. `fails when the wrong-case list differs from keywordList`: remove `week` from `keywords-wrong-case`. Status 1, output contains `week`.
-6. `fails when a keywords match is not in canonical form`: set `keywords-unit.match` to `\\b(ms|sec)\\b`. Status 1, output contains `keywords-unit`.
-7. `fails when the top-level pattern order differs`: swap the first two `patterns` entries. Status 1, output contains `comments`.
-8. `fails when the keyword table is missing`: `--keywords <tmp>/absent.go`. Status 1.
-9. `fails when the grammar is missing`: `--grammar <tmp>/absent.json`. Status 1.
-10. `fails when a category word is not in keywordList`: add `month` to `keywords-unit`. Status 1, output contains `month`. This is rule (d); `month` is SPEC §2.4's calendar trap.
-11. `fails when the keyword table has no keywordList block`: a `--keywords` file without it. Status 1, output contains `keywordList`.
-12. `fails when the grammar is not JSON`: a `--grammar` file holding `{`. Status 1.
+1. `passes on the real grammar and the vendored table`: status 0; the output contains `115 keywords, 17 reserved, 11 categories, 5 name exclusions`.
+2. `fails when a keyword is in no category`: remove `ms` from `keywords-unit` → 1, naming `ms`.
+3. `fails when a keyword is in two categories`: add `ms` to `keywords-clause` → 1, naming `ms`.
+4. `fails when the reserved category differs from reservedFuture`: move `join` from `keywords-reserved` to `keywords-clause` → 1, naming `join`.
+5. `fails when the wrong-case list differs from keywordList`: remove `week` from `keywords-wrong-case` → 1, naming `week`.
+6. `fails when a keywords match uses the old word-boundary form`: set `keywords-unit.match` to `\b(?:ms|sec|min|hour|day|week)\b` → 1, naming `keywords-unit`.
+7. `fails when a keywords match has no word edges`: set `keywords-unit.match` to `(?:ms|sec|min|hour|day|week)` → 1, naming `keywords-unit`.
+8. `fails when the first two patterns are swapped` → 1, naming `comments`.
+9. `fails when function-call moves before the keyword rules`: move `#function-call` to just before `#keywords-window` → 1, naming `function-call`.
+10. `fails when a top-level entry is missing`: drop `#number` → 1, naming `number`.
+11. `fails when the keyword table is missing`: `--keywords <tmp>/absent.go` → 1, naming `absent.go`.
+12. `fails when the grammar is missing`: `--grammar <tmp>/absent.json` → 1, naming `absent.json`.
+13. `fails when a category word is not in keywordList`: add `month` to `keywords-unit` → 1, naming `month` (rule d; `month` is SPEC §2.4's calendar trap).
+14. `fails when the keyword table has no keywordList block` → 1, with exactly one `check-keywords:` line, naming `keywordList`.
+15. `fails when the keyword table has no reservedFuture block` → 1, naming `reservedFuture`.
+16. `fails when the grammar is not JSON`: a file holding `{` → 1, naming the grammar's path.
+17. `fails when a name exclusion misses a word`: remove `week` from the `stream` region's exclusion → 1, naming `week` and `declarations` (rule h).
+18. `fails when a name exclusion is missing`: remove the `rule` region's exclusion (its end becomes `([A-Za-z_][A-Za-z0-9_]*)|(BT)|(?=\S)`) → 1, saying 4 of 5 (rule h).
+19. `fails when a word list is out of keywordList order`: swap `ms` and `sec` in `keywords-unit` → 1, naming `keywords-unit` (rule i).
 
-Every test also asserts that the output has a line starting with `check-keywords:` (v1.1; plan check Q3). Red first: the tests run once against a stub `check-keywords.mjs` that always exits 0, and every failing test is recorded.
+**Red first.** This runs after the real grammar exists (PLAN §7 step 4); before that, the grammar-editing tests fail in setup.
+1. Run the tests once against a stub `check-keywords.mjs` that always exits 0. Every test except 1 must fail with an assertion, not a `TypeError`.
+2. Then remove each rule (a)–(i) and the empty-list stop, one at a time, and record which test goes red.
 
-### 6.4 Tooling tests: `test/tools.test.mjs` (`node:test`, no dependencies) (v1.1)
+### 6.4 Tooling tests: `test/tools.test.mjs` (`node:test`, no dependencies) (v2)
 
-Each test owns its world: a temporary directory and, where git is involved, a throwaway repo made with `git init` and an empty identity set with `-c user.name=t -c user.email=t@t`. No test reads `../cep` or writes into this repo. Each script gets a passing case and asserts its own message.
+**Each test owns its world.**
+- A temporary directory, and where git is involved, a throwaway repo made with `git init -b main`.
+- Every `git` call in a test runs with `GIT_CONFIG_GLOBAL` pointing at an empty file, `GIT_CONFIG_NOSYSTEM=1`, and `-c user.name=t -c user.email=t@t`, so the machine's own git settings (default branch, signing, hooks, autocrlf) never reach the tests.
+- No test reads `../cep`, uses the network beyond `127.0.0.1`, or writes into this repo.
+- Each test asserts the script's own message, as well as its exit status.
 
-- **`sync-upstream`** (§5.5.1), against a throwaway "cep" repo that has the cep paths with a few small files:
-  - a sync writes the files and `SOURCE` under `--out`;
-  - an unknown `--ref` → 1;
-  - a stale `.cep` already under `--out` → 1, naming it;
-  - a missing invalid fixture in the source → 1, naming it;
-  - a second run → the files are unchanged, byte for byte.
-- **`check-upstream`** (§5.5.3): the same bytes as a `data:` URL → 0; a changed copy → 1, saying it differs; a refused connection → 1; a 404 → 1, naming the status.
-- **`check-fixtures`** (§5.5.4):
-  - 10 + 2 + 7 tracked pairs → 0;
-  - a missing `.snap` → 1;
-  - an untracked `.snap` → 1;
-  - an orphan `.snap` → 1;
-  - 18 fixtures → 1;
-  - an extra file → 1.
-- **`check-vsix`** (§5.5.5): the S4 set → 0; an empty zip, an extra file, a missing file, or a non-zip → 1, each naming the problem.
-- **`check-clean`** (§5.5.6): a clean repo → 0; an untracked or a changed file → 1, naming the path.
-- **`ci.yml`**: the test job's `run:` steps are exactly `npm ci` then `npm run gate`, and the `upstream` job has the schedule-or-dispatch `if:` → passes. Red first against v1's §5.6 file.
+**`sync-upstream`** (§5.5.1), against a throwaway "cep" repo with the cep paths:
+- **A pass:**
+  - the source's `examples/` also holds a `README.md` and a `torture/` folder → exit 0; the `next:` line is printed;
+  - exactly the expected `.cep` files, `keywords.go`, `lexer.go` and `SOURCE` are written under `--out`;
+  - `SOURCE` is exactly `VORSAR/cep <sha> <date>` and one LF;
+  - only a run like this one counts as a first run for the second-run test.
+- **The ref, not the working tree** (QA D-Q5):
+  - commit on `main` a `keywords.go`, a `lexer.go`, one example with CRLF line endings and no final newline, and the 7 invalid names;
+  - then check out a branch `other` that changes those bytes, and leave one more uncommitted edit;
+  - run with `--ref main` → exit 0, and every written file is byte-equal to `git cat-file blob main:<path>`.
+- **The default ref:** one test on a `-b main` repo omits `--ref` and expects `main`'s bytes.
+- **A second run** after a passing first run → every file is unchanged, byte for byte.
+- **Failures:**
+  - no path → 1;
+  - an unknown `--ref` → 1, naming it;
+  - a missing invalid fixture in the source → 1, naming it.
+- **A stale fixture:** a stale `.cep` already under `--out` → 1, naming it. The stale `.cep`, and a `.cep.snap` beside a current fixture, are still on disk afterwards.
+- **`--check`:** after a sync → 0, with the `21 files match` line; after one byte is flipped in a written file → 1, naming it; nothing is written in either run.
+
+**`check-upstream`** (§5.5.3):
+- both files the same, as `data:` URLs → 0;
+- a changed `keywords.go` → 1, naming `keywords.go`;
+- a changed `lexer.go` → 1, naming `lexer.go`;
+- the same bytes plus a final newline → 1;
+- a refused connection → 1;
+- a 404 from a local `node:http` server → 1, naming the status;
+- a missing local file or `SOURCE` → 1, naming it.
+
+**`check-fixtures`** (§5.5.4):
+- 10 + 2 + 7 tracked pairs → 0;
+- a committed `.cep.snap` removed with a plain `rm` → 1, naming it;
+- an untracked `.snap` → 1;
+- an orphan `.snap` → 1;
+- 18 fixtures → 1;
+- 11 + 1 + 7 → 1, naming `examples`;
+- an extra file → 1;
+- an ignored `.DS_Store` in a fixture folder → 0;
+- a directory that is not a git repo → 1.
+
+**`check-vsix`** (§5.5.5):
+- the S4 set → 0;
+- the S4 set with an archive comment → 0;
+- an empty zip, an extra file, a missing file, or a non-zip → 1, each naming the problem;
+- a path that does not exist → 1, naming it;
+- the default path: a temp `--root` whose `package.json` says `9.9.9` checks `cep-9.9.9.vsix`.
+
+**`check-clean`** (§5.5.6): a clean repo → 0; an untracked or a changed file → 1, naming the path; a directory that is not a git repo → 1.
+
+**`ci.yml`.** A line-based reader with no dependency reads `on:`, each job's `if:`, and each job's `steps[].run`. It fails on any line it cannot place. The test requires all of these:
+- `on:` includes `push` (branches `[main]`), `pull_request`, `schedule` and `workflow_dispatch`;
+- the test job has no `if:`, and its `run:` steps are exactly `npm ci` then `npm run gate`;
+- the `upstream` job's `if:` is the schedule-or-dispatch condition, and its only `run:` step is `node scripts/check-upstream.mjs`.
+
+Red first: the test runs against PLAN v1's §5.6 file and against three mutations of the real one: `pull_request` dropped, an `if:` added to the test job, and the upstream step removed. Each must go red.
 
 `test/toolchain.test.mjs` (built) covers `check-toolchain` (§5.5.7).
+
+### 6.5 Grammar tests: `test/grammar.test.mjs` (`node:test`, no dependencies) (v2)
+
+The scope lint uses the test runner's own parser, `parseGrammarTestCase` from `vscode-tmgrammar-test/dist/unit/parsing.js` (already a dev dependency), so it reads required and excluded scopes exactly as the runner does. The grammar's emitted scopes are every space-separated name in `name`, `contentName`, `captures`, `beginCaptures` and `endCaptures`, at every depth.
+
+1. `every scope a unit test names is one the grammar emits`.
+2. `every scope the grammar emits is required by some unit test`.
+3. `the lint reads assertions that only exclude a scope`: a temporary test file whose only assertion is `-- <------ - keyword.other.units.cep` makes the lint fail, naming `keyword.other.units.cep`.
+4. `the language configuration loads`:
+   - `language-configuration.json` parses as JSON;
+   - `wordPattern` compiles as a JS `RegExp` and does not match `""`;
+   - `comments`, `brackets` and the auto-closing pairs equal §5.2.
+
+Red first: tests 1 and 2 fail on the placeholder grammar, and test 4 fails before the file exists.
 
 ## 7. Build steps, in order
 
 Commit after each step. Commit messages say what changed and why, with no AI attribution. The owner pushes; agents do not.
+
+*v2 note: S1 runs these steps inside cep's full loop. Steps 0–1 are done (G0, the scaffold). Steps 2 and 8 are lane A, steps 3–4 are lane B, and steps 5–7 are the coordinator's after combine (plan check §1, §4). Where a step below and §5–§6 v2 differ, §5–§6 v2 win:*
+- *step 2 also vendors `lexer.go`;*
+- *step 3 writes 7 unit files and runs them red against the placeholder and the named mutants (§6.1);*
+- *the checker's stub run comes after step 4 (§6.3);*
+- *step 5 adds the snapshot red run (§6.2);*
+- *step 6 is the owner's check, in Dark 2026, Light 2026, Dark Modern and Light Modern (G1-5), including typing `'''` and `"""` and recording what appears (G1-6);*
+- *step 7's `.vsix` proof is `npm run test:vsix`, and the install uses a scratch `--extensions-dir`.*
 
 0. **Decisions.** The owner answers D1–D6 (§2); annotate §2 with the answers and the date.
 1. **Scaffold.** Write `package.json` (§5.1) with `"devDependencies": {}`, `.nvmrc`, `.gitignore`, `.gitattributes`, `.vscodeignore` and `.vscode/launch.json` (§5.4). Then run `npm install --save-dev --save-exact @vscode/vsce@4.0.0 vscode-tmgrammar-test@0.1.3` (needs D2) and check that `package.json` now pins both exactly. Commit `package-lock.json`.
@@ -726,8 +905,8 @@ Commit after each step. Commit messages say what changed and why, with no AI att
 
 - [ ] `npm test` exits 0 on a clean checkout after `npm ci`; the exit code was read, not assumed.
 - [ ] All 19 snapshots were reviewed by hand per §6.2.
-- [ ] The step 6 manual check passed in both themes.
-- [ ] `cep-0.1.0.vsix` builds without warnings, contains only the extension files, and installs and colours `.cep` files.
+- [ ] The step 6 manual check (the owner's check) passed in all four themes: Dark 2026, Light 2026, Dark Modern and Light Modern.
+- [ ] `cep-0.1.0.vsix` builds with no `WARNING` line, `npm run test:vsix` passes, and the package installs and colours `.cep` files.
 - [ ] Both CI jobs are green on the PR.
 - [ ] No commit contains AI attribution.
 - [ ] The status line at the top of this file says what shipped.

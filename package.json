@@ -60,7 +60,7 @@
     "test:fixtures": "node scripts/check-fixtures.mjs",
     "test:snap": "vscode-tmgrammar-snap \"test/fixtures/**/*.cep\"",
     "test:snap:update": "vscode-tmgrammar-snap --updateSnapshot \"test/fixtures/**/*.cep\"",
-    "test:vsix": "node scripts/check-vsix.mjs cep-0.1.0.vsix",
+    "test:vsix": "node scripts/check-vsix.mjs",
     "test:clean": "node scripts/check-clean.mjs",
     "test:lane-a": "npm run test:toolchain && npm run test:tools",
     "test:lane-b": "npm run test:toolchain && npm run test:unit && npm run test:keywords && npm run test:checker && npm run test:grammar",

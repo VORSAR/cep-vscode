@@ -71,6 +71,8 @@ Their reports are [breaker](../reviews/s1-design-breaker.md), [QA](../reviews/s1
 7. **G1-7 — the breaker's three cep findings are forwarded** to cep's known issues, beside F1 (Findings: F2–F4).
 8. **G1-8 — the scheduled job's 60-day pause** becomes a known issue, with a monthly check in CLAUDE.md.
 
+**G1 passed 2026-11-09.** Design v2 (PLAN §5–§6) places every review finding (Findings table below) and applies G1-1 to G1-8. Two scaffold changes came with v2: `.DS_Store` in `.gitignore` (D-A11), and `test:vsix` with no argument (D-A13).
+
 ## How it runs
 
 At most two agents at once.
@@ -108,6 +110,59 @@ None.
 
 The plan check's 38 review findings and their dispositions are in [plan check §10](s1-plan-check.md#10-reviews-of-this-plan-check). Findings from later stages go here.
 
+**The design review (G1, 2026-11-09).** Design v2 (PLAN §5–§6) places every finding of the [QA](../reviews/s1-design-qa.md) and [architecture](../reviews/s1-design-architecture.md) reviews, and every breaker doubt. Each one is **fixed in v2** at the place named, unless marked otherwise.
+- The coordinator re-checked D-Q1 (moving `ttl` and `arrival` leaves every v1.1 unit test green) and D-A8 (VS Code 1.145.2's default themes are Dark 2026 and Light 2026).
+- The breaker's grammar claims and the architect's candidate were checked with the coordinator's diff.
+
+| Finding | Severity | Placed in v2 |
+|---|---|---|
+| D-Q1 keyword categories untested | blocker | §6.1 keywords: every word of every category |
+| D-Q2 escapes and raw `"""` untested | blocker | §6.1 strings |
+| D-Q3 name rules untested | blocker | §6.1 names |
+| D-Q4 punctuation and namespaced-call lookahead untested | blocker | §6.1 strings, comments and names; §6.5 test 2 |
+| D-Q5 sync could read the working tree | blocker | §6.4 sync: ref ≠ working tree, CRLF, no final newline |
+| D-Q6 one mutant cannot show absent-scope assertions red | should-fix | §6.1 red first (named mutants); card line 1 |
+| D-Q7 checker tests too weak | should-fix | §6.3 tests 9, 10, 14, 15; red first after the grammar |
+| D-Q8 counter-examples unplaced; column-1 tokens | should-fix | §6.1 `counter.test.cep`, the `<~-` note; §4 |
+| D-Q9 §6.2 e-str-001 and CRLF items | should-fix | §6.2 |
+| D-Q10 grammar tests unspecified | should-fix | §6.5 |
+| D-Q11 rule 5 calls untested | should-fix | §6.1 names |
+| D-Q12 git config leaks into tests | should-fix | §6.4 preamble |
+| D-Q13 deleted snapshot still tracked; total-only counts | should-fix | §5.5.4; §6.4 |
+| D-Q14 second sync run passes with no script | should-fix | §6.4 sync |
+| D-Q15 `ci.yml` assertion too weak | should-fix | §6.4 `ci.yml` |
+| D-Q16 missing-input failures untested | should-fix | §5.5 (a git failure is a failure); §5.5.6; §6.4 |
+| D-Q17 input cep rejects | later | §6.1 names |
+| D-Q18 checker tests 6, 8, 9, 12 | later | §6.3 tests 6, 7, 11, 12, 16 |
+| D-Q19 byte edges | later | §6.4 check-upstream, check-vsix |
+| D-Q20 no byte-proof command | later | §5.5.1 `--check`; card line 4 |
+| D-A1 `given table X` shown as a declaration | blocker | §5.3 `given` region; §6.1 names; §6.2 |
+| D-A2 v1.1 string end bleeds | blocker | §5.3 `single-unclosed` match (G1-2) |
+| D-A3 split or commented declarations | should-fix | §5.3 declaration regions; §6.1 names |
+| D-A4 declared names do not exclude keywords | should-fix | §5.3 `NAME`; §6.1 names; §6.2 e-kw-001 |
+| D-A5 `5min` uncoloured | should-fix | §5.3 ASCII edges and `identifier`; §6.1 keywords |
+| D-A6 checker tied to the v1 forms | should-fix | §5.5.2 v2 (forms, 23-entry g, h, i); §6.3 tests 6, 7, 17–19 |
+| D-A7 the breaker's grammar breaks "no build step" | should-fix | G1-1 (c); no generator |
+| D-A8 the default themes are now Dark and Light 2026 | should-fix | G1-5; §5.3 wordlike colours; card owner's check |
+| D-A9 `lexer.go` unwatched | should-fix | G1-4; §3; §5.5.1; §5.5.3 |
+| D-A10 test values copied from a grammar | should-fix | §6.1 note: expected values come from cep |
+| D-A11 `.DS_Store` turns the gate red | should-fix | §5.4 `.gitignore` (built); §5.5.4; §6.4 |
+| D-A12 the lockfile step has no proof | should-fix | card line 10 |
+| D-A13 `test:vsix` hard-codes the version | later | §5.5.5 default path; `package.json` (built) |
+| D-A14 global git config in tests | later | §6.4 preamble |
+| D-A15 YAML with no dependency | later | §6.4 `ci.yml` line reader |
+| D-A16 the format string must be one argv element | later | §5.5 preamble |
+| D-A17 test engine 7.0.4 against VS Code's 9.3.2 | later | known issue (below); the owner's check covers it |
+| D-A18 word order is a MUST nobody checks | later | §5.5.2 rule (i); §6.3 test 19 |
+| D-A19 the scope lint's reach | later | §6.5 |
+| D-A20 a `given` region while typing | later | §5.3 known limitation 10 |
+| Breaker D1–D4, D6, D12, D14 | — | §5.3 "Choices settled in v2" |
+| Breaker D5, D11 | — | §5.3 `given` region; ASCII edges |
+| Breaker D7, D10, D13, D15 | — | as v1.1, or §5.3 known limitations 2 and 5; VS Code strips CR |
+| Breaker D8 | — | G1-2 |
+| Breaker D9 | — | F2 (forwarded) |
+| P1–P8 | — | P1 G1-2 · P2, P3, P7 §5.3 · P4 closed by QA's probe · P5 G1-6 · P6 G1-3 · P8 split pragma fixed, `''''` known limitation 1 |
+
 | # | From | Severity | Finding | Disposition |
 |---|---|---|---|---|
 | F1 | plan check §0 finding 10 | later (cep) | cep lexes `risk/2.5` (no spaces) as one `Pragma` token: `Pragma` (`internal/parser/lexer.go:25`) is tried before `Ident` (`:31`). Probed with cep's rules on participle v2.1.4: `Pragma("risk/2.5")`, while `risk / 2.5` and `Risk/2.5` lex as arithmetic. Confirmed with cep's real parser (a copy equal to `1fa3a5b`, 2026-11-09): `from S[risk/2.5 > 1.0]` fails with `E-SYN-001: unexpected token "risk/2.5"`, and `risk / 2.5` parses. SPEC §2.5 does not say division needs spaces. | forwarded to cep's known issues (owner, Q7); this repo shows it as arithmetic |
@@ -118,6 +173,7 @@ The plan check's 38 review findings and their dispositions are in [plan check §
 ## Known issues
 
 - **GitHub pauses a public repo's scheduled workflows after 60 days with no commits** (from GitHub's documentation; not tested here). The weekly `upstream` drift job would then stop silently. *Mitigation (owner, G1-8):* the owner checks the job's last-run date monthly, as CLAUDE.md says, and re-enables it if paused.
+- **The tests and VS Code run different vscode-textmate versions.** `vscode-tmgrammar-test` 0.1.3 bundles 7.0.4, and VS Code 1.145.2 runs 9.3.2; both use the same `onig.wasm`. The architect found 0 differing characters over 164 inputs. *Forward:* the owner's check covers it in the real editor (architecture D-A17).
 - **`minimatch` 10.2.6, GHSA-g3hv-75wg-m249 (moderate).** It comes through `@vscode/vsce` 4.x, which requires `^10.2.6`, so there is no fix within vsce 4.x. The DoS needs hostile glob patterns, and this repo's only globs are its own. Forward: the next vsce major.
 
 ## Done-done
@@ -130,8 +186,10 @@ Entry (G0)   ☑ card complete and approved (plan check v2; §11 answered 2026-1
              ☑ dependencies merged, main green (none; main has no CI yet) ☑ fits the cap, lanes ≤ 8 days (inferred sizes)
              ☑ plan check reviewed (architect, QA) and answered by the owner
              ☑ test material exists, or making it is an item (vendoring is scope item 2)
-Design (G1)  ☐ architecture + the-fool findings resolved ☐ QA testability findings resolved
-             ☐ owner decisions recorded ☐ ADRs written for lasting decisions
+Design (G1)  ☑ architecture + the-fool findings resolved (placed in PLAN §5–§6 v2; Findings table)
+             ☑ QA testability findings resolved (placed in v2; Findings table)
+             ☑ owner decisions recorded (G1-1 to G1-8, 2026-11-09)
+             ☑ ADRs: n/a; the lasting decisions are recorded in PLAN §2 and this record (no ADR folder in this repo)
 Build (G2)   ☐ every lane at T2 ☐ T3 `npm ci && npm run gate` exit 0
              ☐ a test for every token class and error scope shipped
              ☐ tests on the real code ☐ every breaker's red test committed

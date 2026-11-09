@@ -23,16 +23,17 @@ SP as sized (all inferred): lane A 3, lane B 5. The coordinator's work (the scaf
 | **Not in scope** | Snippets (D1: backlog). Error squiggles, hover, go-to-definition, formatting: the language server, which is cep engine work (PLAN §9). Store publishing (D3: later). The tag and GitHub Release: the owner, after the merge. Fixing cep's `risk/2.5` lexing (§0 finding 10): cep's repo. |
 | **Entry criteria** | The standard ones, plus: D1–D6 answered (done, 2026-11-08); §11 answered. |
 | **Exit criteria** | The done-done block, plus these acceptance lines: |
-| | 1. Every token class has its scope (PLAN §5.3 v2), including every counter-example in §6. — **proof:** `npm run test:unit` exit 0. It ran red twice first: against the placeholder grammar, and against one named mutant grammar that drops `\b` from the number, unit and text rules and uses PLAN v1's string end. That second run makes the absent-scope assertions go red. Each run's failing-assertion count is recorded per file. A scope lint (every scope named in the unit files is one the grammar emits) exits 0, after running red first. |
+| | 1. Every token class has its scope (PLAN §5.3 v2), including every counter-example. — **proof:** `npm run test:unit` exits 0, after the red runs of PLAN §6.1 v2: first the placeholder grammar, then the named mutant for each assertion that requires a scope to be absent. Failing counts are recorded per file. The scope lint of §6.5 also exits 0, after running red first. *(Amended at G1, 2026-11-09: the named mutants replace the single mutant; QA D-Q6.)* |
 | | 2. The grammar's keywords are exactly cep's table. — **proof:** `npm run test:keywords` exit 0, printing `115 keywords, 17 reserved, 11 categories`. `npm run test:checker`: every test passes and asserts the script's own `check-keywords:` message, not just its exit status. Red first against a stub script that always exits 0. |
 | | 3. The 19 fixtures tokenize as reviewed. — **proof:** `npm run test:fixtures` exit 0, after running red first with one snapshot deleted. It requires exactly 10 + 2 + 7 fixtures, a git-tracked `.cep.snap` for each, and no orphans. Then `npm run test:snap` exit 0, after one recorded red run from a one-scope grammar change. `git status --porcelain` is empty after `npm run gate`. The record lists every PLAN §6.2 check (v2) and its result. |
-| | 4. The fixtures and the table are cep's bytes. — **proof:** for each of the 20 files (10 + 2 + 7 fixtures plus `keywords.go`), `git hash-object` equals the blob at the target in cep. Red first by flipping one byte. `test/upstream/SOURCE` is exactly the S3 line. `git ls-files --eol test/fixtures/torture/comments.cep` shows `i/mixed` and `attr/-text`. After a second sync run, `git status --porcelain test/` is empty. |
+| | 4. The fixtures and the tables are cep's bytes. — **proof:** `node scripts/sync-upstream.mjs <cep> --ref <target> --check` exits 0 for all 21 files (10 + 2 + 7 fixtures, `keywords.go`, `lexer.go`) and `SOURCE`. It runs red first, with one byte flipped. `git ls-files --eol test/fixtures/torture/comments.cep` shows `i/mixed` and `attr/-text`. *(Amended at G1, 2026-11-09: `lexer.go` added, G1-4; `--check` is the byte proof, QA D-Q20.)* |
 | | 5. The `.vsix` holds exactly the 8 files of S4. — **proof:** `npm run test:vsix` exit 0 on the real package. Its tests give exit 1, naming the problem, on an empty package and on one with an extra file. The local T3 `vsce package` output has no `WARNING` line. |
 | | 6. The `.vsix` installs. — **proof:** `code --extensions-dir <scratch> --install-extension cep-0.1.0.vsix` exit 0, then `code --extensions-dir <scratch> --list-extensions --show-versions` prints `vorsar.cep@0.1.0`. |
 | | 7. A keyword change in cep is caught. — **proof:** `check-upstream.mjs` exit 0 against cep `main` today. Its tests give exit 1, naming the cause, for a changed copy (a `data:` URL), a refused connection, and a 404. |
 | | 8. CI runs the same checks as T3. — **proof:** a tooling test requires `ci.yml`'s test job to run `npm ci` and then `npm run gate`; it is red first against PLAN §5.6's file. Both CI jobs are green on the draft PR, and each step's log has been read. |
 | | 9. The language configuration loads. — **proof:** a grammar test parses `language-configuration.json`, compiles `wordPattern` as a JS `RegExp`, and checks the comment tokens and bracket pairs; red first before the file exists. |
-| **Owner's check** | *By running:* F5, then open all 19 fixtures in Dark Modern and Light Modern. Run "Inspect Editor Tokens and Scopes" on a sample of tokens. Expect what each default theme maps the scopes to (§0 finding 16, as settled by P6). *By hand:* Ctrl+/, Shift+Alt+A, and auto-closing of `( [ { ' " \``. Install the `.vsix` in a normal window; the status bar should say "CEP". *By reading:* README, CHANGELOG, and the snapshot review in the record. |
+| | 10. The lockfile carries the advisory fix. — **proof:** after the lockfile is re-resolved on or after 2026-11-13, `npm ls @azure/identity` shows 4.14.1 or later, and the `npm audit` output is recorded in the record. *(Added at G1, 2026-11-09; architecture D-A12.)* |
+| **Owner's check** | *By running:* F5, then open all 19 fixtures in Dark 2026, Light 2026, Dark Modern and Light Modern (owner, G1-5). Run "Inspect Editor Tokens and Scopes" on a sample of tokens. Expect what each default theme maps the scopes to (§0 finding 16, as settled by P6). *By hand:* type `'''` and `"""`, and record what appears (G1-6); Ctrl+/, Shift+Alt+A, and auto-closing of `( [ { ' " \``. Install the `.vsix` in a normal window; the status bar should say "CEP". *By reading:* README, CHANGELOG, and the snapshot review in the record. |
 
 ## 0. What the code says that the plan does not (read first)
 
@@ -113,7 +114,7 @@ SP as sized (all inferred): lane A 3, lane B 5. The coordinator's work (the scaf
   "test:fixtures": "node scripts/check-fixtures.mjs",
   "test:snap": "vscode-tmgrammar-snap \"test/fixtures/**/*.cep\"",
   "test:snap:update": "vscode-tmgrammar-snap --updateSnapshot \"test/fixtures/**/*.cep\"",
-  "test:vsix": "node scripts/check-vsix.mjs cep-0.1.0.vsix",
+  "test:vsix": "node scripts/check-vsix.mjs",
   "test:clean": "node scripts/check-clean.mjs",
   "test:lane-a": "npm run test:toolchain && npm run test:tools",
   "test:lane-b": "npm run test:toolchain && npm run test:unit && npm run test:keywords && npm run test:checker && npm run test:grammar",
@@ -121,6 +122,8 @@ SP as sized (all inferred): lane A 3, lane B 5. The coordinator's work (the scaf
   "gate": "npm test && npm run package && npm run test:vsix && npm run test:clean"
 }
 ```
+
+*(Amended at G1, 2026-11-09: `test:vsix` takes no argument and reads the version from `package.json`; architecture D-A13.)*
 
 `package.json` also gets `"files": ["syntaxes/cep.tmLanguage.json", "language-configuration.json", "LICENSE", "CHANGELOG.md"]` in place of `.vscodeignore` (S4). vsce refuses to combine the two.
 
