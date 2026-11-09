@@ -159,6 +159,13 @@ At most two agents at once.
   - **The grammar change (F2), test-first:** five assertions were added to `names.test.cep`. The four rejections failed against the old rule (exit 255). All six copies of the backticked pattern then took cep's `[A-Za-z_]` first character, and `test:lane-b` exited 0.
   - **PLAN** now pins `75f541e`, and its known limitation 2 is rewritten.
   - **Not copied:** cep's new `invalid/e-syn-001-malformed-backticked-name.cep` is not one of the sync's 7 invalid fixtures (an open question for the owner).
+- **v0.1.1 released by CI (2026-11-09):**
+  - **CI:** PR #3 ran green on `d2e7f28` (run 42588610165: `npm ci` and the gate in 22 s).
+  - **The merge:** the owner merged PR #3 on GitHub as a rebase-merge, so `main` = `96f3f36`, whose tree is identical to the tested `d2e7f28`. CI on `main`, run 42588681471, succeeded.
+  - **The tag:** the owner asked "did we release a new version with this if not do now", so the coordinator tagged `96f3f36` as `v0.1.1` and pushed the tag. That is a third rule 7 exception, at the owner's word.
+  - **The release run**, 42588873069, exited 0 in 19 s: `npm ci`, the gate, `check-release` and `gh release create`.
+  - **The published asset:** `cep-0.1.1.vsix` holds 8 files, reports version 0.1.1, and its grammar is byte-equal to the tag's.
+  - <https://github.com/VORSAR/cep-vscode/releases/tag/v0.1.1>
 - **PLAN corrections from lane B (2026-11-09):** §5.3's table now lists type, modifier, constant and reserved in `keywords.go` order (rule i). §6.1 pairs `ts_min` with dropping the leading edge `L`.
 - **Lane A's open items, for later:**
     - `--check` compares only the 21 targets, so an extra stale `.cep` is caught by `check-fixtures`, not by `--check`;
