@@ -2,7 +2,7 @@
   "name": "cep",
   "displayName": "CEP Language",
   "description": "Syntax highlighting for the CEP rule language (CEPS, .cep files).",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "vorsar",
   "license": "Apache-2.0",
   "private": true,

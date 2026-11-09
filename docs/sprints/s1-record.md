@@ -166,6 +166,14 @@ At most two agents at once.
   - **The release run**, 42588873069, exited 0 in 19 s: `npm ci`, the gate, `check-release` and `gh release create`.
   - **The published asset:** `cep-0.1.1.vsix` holds 8 files, reports version 0.1.1, and its grammar is byte-equal to the tag's.
   - <https://github.com/VORSAR/cep-vscode/releases/tag/v0.1.1>
+- **Re-sync to cep `ebb8496` (2026-11-09):**
+  - **What changed in cep:** since `75f541e`, cep changed only `grammar.lark` (whole-word keywords, a BOM ignored only at the start) and added three invalid examples. `lexer.go`, `keywords.go` and every example are byte-identical.
+  - **The sync:** `git -C ../cep fetch origin` exited 0, then `node scripts/sync-upstream.mjs ../cep` exited 0 and wrote only `SOURCE`. `--check` reported 22 files matching.
+  - **Tests:** `npm test` exited 0 with no snapshot change, and the gate exited 0.
+  - **The grammar, verified on cep's new invalid files:** `languagecep/0.1` is a plain name, and `streamS` is not the keyword. A mid-file BOM is unmarked, which is known limitation 3.
+  - **A coverage gap found:** a grammar without the trailing word edge on its seven declaration regions passed every unit test and snapshot, reading `languagecep/0.1` as a valid pragma.
+  - **Closed by unit guards:** `names.test.cep` gained one glued line per keyword. They are green on the grammar, and each of the seven one-region mutants turned its line red (exit 255).
+  - **Fixtures:** the fixture list is unchanged, since the guards cover the gap more precisely than snapshots would. The BOM example would only pin today's unmarked behaviour.
 - **PLAN corrections from lane B (2026-11-09):** §5.3's table now lists type, modifier, constant and reserved in `keywords.go` order (rule i). §6.1 pairs `ts_min` with dropping the leading edge `L`.
 - **Lane A's open items, for later:**
     - `--check` compares only the 21 targets, so an extra stale `.cep` is caught by `check-fixtures`, not by `--check`;
@@ -190,6 +198,8 @@ PLAN §6.1's unit files and plan check §6's 47 counter-examples cover the rest.
 **2026-11-09, the owner: v0.1.1 is the re-sync.** After the owner asked to follow up on cep's fixes ("Sync cep-vscode"), the owner chose, as recommended:
 - **Ship the re-sync to cep `75f541e` now as v0.1.1.** The review and break-it move from v0.1.1 to v0.1.2.
 - **Vendor cep's new `invalid/e-syn-001-malformed-backticked-name.cep` as an 8th invalid fixture.** That puts the sync's copy set at 22 files and check-fixtures at 10 + 2 + 8, both changed test-first.
+
+**2026-11-09, the owner: v0.1.2 is the re-sync to cep `ebb8496`.** The owner's pasted brief asked to sync and re-verify without pushing. The coordinator found one change needed (below), and the owner then said "if there is a change required lets do it and ship a new release". The review and break-it move to v0.1.3.
 
 **2026-11-09, the owner: incremental delivery.** The owner asked for a working product as early as possible, then iteration, and said several released versions are fine. PLAN §7.0 now holds the release ladder. Decisions, in order:
 1. **The release ladder** (PLAN §7.0): v0.0.1 preview, then v0.1.0 (S1), then v0.1.1 (S1.1), then v0.1.x (lockfile), then later items.
