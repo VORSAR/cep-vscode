@@ -174,6 +174,13 @@ At most two agents at once.
   - **A coverage gap found:** a grammar without the trailing word edge on its seven declaration regions passed every unit test and snapshot, reading `languagecep/0.1` as a valid pragma.
   - **Closed by unit guards:** `names.test.cep` gained one glued line per keyword. They are green on the grammar, and each of the seven one-region mutants turned its line red (exit 255).
   - **Fixtures:** the fixture list is unchanged, since the guards cover the gap more precisely than snapshots would. The BOM example would only pin today's unmarked behaviour.
+- **v0.1.2 released by CI (2026-11-09):**
+  - **CI:** PR #4 ran green on `24a25ea`.
+  - **The merge:** the owner merged it on GitHub, so `main` = `a802bb2`, whose tree equals the tested one. CI on `main` succeeded.
+  - **The tag:** the owner said "cut the release", so the coordinator tagged `a802bb2` as `v0.1.2` and pushed the tag.
+  - **The release run**, 42616429488, exited 0 in 22 s: `npm ci`, the gate, `check-release` and `gh release create`.
+  - **The published asset:** `cep-0.1.2.vsix` holds 8 files, reports version 0.1.2, and its grammar is byte-equal to the tag's.
+  - <https://github.com/VORSAR/cep-vscode/releases/tag/v0.1.2>
 - **PLAN corrections from lane B (2026-11-09):** §5.3's table now lists type, modifier, constant and reserved in `keywords.go` order (rule i). §6.1 pairs `ts_min` with dropping the leading edge `L`.
 - **Lane A's open items, for later:**
     - `--check` compares only the 21 targets, so an extra stale `.cep` is caught by `check-fixtures`, not by `--check`;
