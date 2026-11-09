@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-09):** **v0.0.1 is released**, cut by CI from tag `v0.0.1` ([release](https://github.com/VORSAR/cep-vscode/releases/tag/v0.0.1)). It ships the design-reviewed reference grammar. Delivery is incremental, as a release ladder (§7.0). For v0.1.0 (S1), both lanes are combined onto v0.0.1 and the 19 snapshots are reviewed. T3 (`npm ci && npm run gate`) exits 0. Next: the v0.1.0 PR with CI, the owner's quick check, then merge and tag.
+**Status (2026-11-09):** **v0.1.0 is released** (S1), cut by CI from tag `v0.1.0` ([release](https://github.com/VORSAR/cep-vscode/releases/tag/v0.1.0)): the test-first grammar, the tooling, the 19 reviewed snapshots, and CI running the full gate. v0.0.1 came before it. Next on the ladder (§7.0): v0.1.1 (S1.1), the review and break-it of the combined build with one fix round and the four-theme check; then v0.1.x, the lockfile refresh on or after 2026-11-13.
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 
@@ -276,16 +276,16 @@ punctuation
 | Repository key | Scope (`name`) | Words |
 |---|---|---|
 | `keywords-declaration` | `storage.type.declaration.cep` | language param stream table rule |
-| `keywords-type` | `storage.type.primitive.cep` | string int float bool timestamp duration object |
-| `keywords-modifier` | `storage.modifier.cep` | optional primary key |
+| `keywords-type` | `storage.type.primitive.cep` | timestamp string int float bool duration object |
+| `keywords-modifier` | `storage.modifier.cep` | primary key optional |
 | `keywords-clause` | `keyword.control.clause.cep` | intent partition by of ttl from every once within for after match skip past last late events drop allow select as output first insert into window emit on close change due end time arrival watermark bounded ascending idle expect given then todo asc desc |
 | `keywords-window` | `keyword.other.window.cep` | sort cron delay batch |
 | `keywords-unit` | `keyword.other.unit.cep` | ms sec min hour day week |
 | `keywords-logical` | `keyword.operator.logical.cep keyword.operator.wordlike.cep` | and or not in is |
-| `keywords-constant` | `constant.language.cep` | true false null |
+| `keywords-constant` | `constant.language.cep` | null true false |
 | `keywords-builtin` | `support.function.builtin.cep` | raw |
 | `keywords-text` | `keyword.operator.text.cep keyword.operator.wordlike.cep` | has_ci has_cs contains_ci contains_cs starts_with_ci starts_with_cs ends_with_ci ends_with_cs has_any_ci has_any_cs has_all_ci has_all_cs contains_any_ci contains_any_cs contains_all_ci contains_all_cs matches_ci matches_cs contains_match_ci contains_match_cs |
-| `keywords-reserved` | `invalid.illegal.reserved.cep` | group having order limit offset join trigger aggregation sequence session tumbling hopping sliding processing route to punctuated |
+| `keywords-reserved` | `invalid.illegal.reserved.cep` | route to punctuated group having order limit offset join trigger aggregation sequence session tumbling hopping sliding processing |
 
 The counts are 5 + 7 + 3 + 44 + 4 + 6 + 5 + 3 + 1 + 20 + 17 = 115. `keywords-reserved` MUST equal `reservedFuture` exactly (E-RES-001). The breaker re-derived this table blind from grammar.lark and SPEC and reached the same 11 classes ([breaker review](reviews/s1-design-breaker.md)).
 
@@ -792,7 +792,8 @@ lead.agentId, x                               "." → punctuation.accessor.cep; 
    - one-line strings include `#comments` → `--` in a string;
    - the block comment includes `#strings` → `'quote'`;
    - the triple-quoted strings include `#string-escapes` → `\n`;
-   - the trailing edge `R` dropped from `keywords-unit` and `keywords-wrong-case`, with `identifier` removed → `ts_min`, `x1min`, `SELECTED`;
+   - the trailing edge `R` dropped from `keywords-unit` and `keywords-wrong-case`, with `identifier` removed → `x1min`, `ab2sec`, `SELECTED`;
+   - the leading edge `L` dropped from `keywords-unit`, with `identifier` removed → `ts_min` (corrected after lane B, 2026-11-09: the leading edge, not the trailing one, guards `ts_min`);
    - `function-call` moved before the keyword rules → `key (`, `delay(`, `raw(`;
    - `backticked` removed → `` `select` ``;
    - `given`'s inner `table` rule removed → `T` in `given table T`.

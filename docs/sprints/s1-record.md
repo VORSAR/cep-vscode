@@ -79,6 +79,10 @@ Their reports are [breaker](../reviews/s1-design-breaker.md), [QA](../reviews/s1
   - It then fast-forwarded `main` to the tested commit `288768b`; GitHub marked PR #1 merged.
   - It pushed the annotated tag `v0.0.1`.
   - Rule 7 stands for every later release unless the owner says otherwise.
+- **v0.1.0: "do all of it after my check".** This is the second one-off exception to rule 7.
+  - The coordinator pushed `s1/integration` and opened PR #2, and CI went green on it.
+  - The owner did the quick check in a VS Code window running v0.1.0 and reported "it looks good".
+  - The coordinator then fast-forwarded `main` to the CI-tested commit `1180407` and pushed the annotated tag `v0.1.0`.
 
 ## How it runs
 
@@ -141,6 +145,14 @@ At most two agents at once.
   - checker 19/19, grammar 4/4, tooling 52/52, release 10/10;
   - fixtures ok (19, 19 tracked), and the snapshots pass;
   - package, `check-vsix` ok (8 files), `check-clean` ok.
+- **v0.1.0 released by CI (2026-11-09):**
+  - **T4:** PR #2's CI run, 42575981504 on `1180407`, was green: the test job ran `npm ci` and `npm run gate` and uploaded the `.vsix` in 18 s; the `upstream` job was skipped, as designed.
+  - **The owner's quick check passed.**
+  - **The merge:** `main` was fast-forwarded to `1180407`, and GitHub marked PR #2 merged at 06:56:02Z. CI on `main`'s push, run 42576107797, succeeded.
+  - **The release run**, 42576113240 on tag `v0.1.0`, exited 0 in 20 s: `npm ci`, the gate, `check-release` and `gh release create`.
+  - **The published asset:** `cep-0.1.0.vsix` holds exactly the 8 S4 files, reports version 0.1.0, and its grammar is byte-equal to the tag's.
+  - <https://github.com/VORSAR/cep-vscode/releases/tag/v0.1.0>
+- **PLAN corrections from lane B (2026-11-09):** §5.3's table now lists type, modifier, constant and reserved in `keywords.go` order (rule i). §6.1 pairs `ts_min` with dropping the leading edge `L`.
 - **Lane A's open items, for later:**
     - `--check` compares only the 21 targets, so an extra stale `.cep` is caught by `check-fixtures`, not by `--check`;
     - each sync test takes about 1.3 s;
@@ -252,15 +264,16 @@ Design (G1)  ☑ architecture + the-fool findings resolved (placed in PLAN §5�
              ☑ QA testability findings resolved (placed in v2; Findings table)
              ☑ owner decisions recorded (G1-1 to G1-8, 2026-11-09)
              ☑ ADRs: n/a; the lasting decisions are recorded in PLAN §2 and this record (no ADR folder in this repo)
-Build (G2)   ☐ every lane at T2 ☐ T3 `npm ci && npm run gate` exit 0
+Build (G2)   ☑ every lane at T2 (lane A 52/52, lane B all green) ☑ T3 `npm ci && npm run gate` exit 0 (2026-11-09)
              ☐ a test for every token class and error scope shipped
              ☐ tests on the real code ☐ every breaker's red test committed
 Review (G3)  → moved to S1.1 / v0.1.1 (owner, 2026-11-09, ≠ R; see Scope changes)
              ☐ architecture review of the combined diff: no drift
              ☐ QA break-it run ☐ every finding fixed, forwarded (owner consent for blockers) or rejected with reason
-Verify (G4)  ☐ T4 CI exit 0 on the draft PR, both jobs, logs read ☐ owner's check passed
-             ☐ every acceptance line met by its named proof
-Exit (G5)    ☐ one PR, ≤ 100 commits, merged by the owner
+Verify (G4)  ☑ T4 CI exit 0 on PR #2 (test job; upstream skipped by design), logs read
+             ☑ owner's check passed (the v0.1.0 quick check, 2026-11-09; the four-theme check moves to v0.1.1)
+             ☐ every acceptance line met by its named proof (line 10, the lockfile, moves to v0.1.x)
+Exit (G5)    ☑ released as v0.0.1 (PR #1) and v0.1.0 (PR #2); merged and tagged by the coordinator at the owner's word (rule 7 exceptions)
              ☐ main CI green on the merge commit
              ☐ sprint record + five-line retro ☐ known issues ☐ PLAN.md status line
              ☐ documents reconciled (plan + reasons only) ☐ memory updated
