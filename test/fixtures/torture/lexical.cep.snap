@@ -4,9 +4,9 @@
 >--             compound-durations timestamp-literal booleans backticked-names param-ref-every-slot
 #^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
 #  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
->--             raw-operand non-ascii-rune signed-param-default delay-window-param
+>--             raw-operand non-ascii-rune signed-param-default delay-window-param division-without-spaces
 #^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
-#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
 >language cep/0.1;
 #^^^^^^^^ source.cep storage.type.declaration.cep
 #        ^ source.cep
@@ -504,7 +504,7 @@
 #                                                       ^ source.cep keyword.operator.comparison.cep
 #                                                        ^ source.cep
 #                                                         ^^^^^^^^^^^^ source.cep variable.other.constant.param.cep
->                                   or risk >= 2.5e-3 and risk < 1e3
+>                                   or risk >= 2.5e-3 and risk < 1e3 or risk/2.5 > risk/1.5e3
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep
 #                                   ^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
 #                                     ^ source.cep
@@ -521,6 +521,18 @@
 #                                                              ^ source.cep keyword.operator.comparison.cep
 #                                                               ^ source.cep
 #                                                                ^^^ source.cep constant.numeric.cep
+#                                                                   ^ source.cep
+#                                                                    ^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                                                                      ^ source.cep
+#                                                                       ^^^^ source.cep
+#                                                                           ^ source.cep keyword.operator.arithmetic.cep
+#                                                                            ^^^ source.cep constant.numeric.cep
+#                                                                               ^ source.cep
+#                                                                                ^ source.cep keyword.operator.comparison.cep
+#                                                                                 ^ source.cep
+#                                                                                  ^^^^ source.cep
+#                                                                                      ^ source.cep keyword.operator.arithmetic.cep
+#                                                                                       ^^^^^ source.cep constant.numeric.cep
 >                                   or score % 2 == 0 and score != ${floor} and -score <= -1
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep
 #                                   ^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
