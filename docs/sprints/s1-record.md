@@ -104,6 +104,18 @@ At most two agents at once.
   - The published asset was downloaded and checked: exactly the 8 S4 files, and its grammar is byte-equal to `v0.0.1`'s `syntaxes/cep.tmLanguage.json`.
   - <https://github.com/VORSAR/cep-vscode/releases/tag/v0.0.1>
   - The run printed one notice: the `ubuntu-latest` runner label moves to Ubuntu 26 from 2026-10-19 (informational).
+- **Lane A, tooling (2026-11-09):** 9 commits, cherry-picked cleanly onto `s1/integration` after v0.0.1. The coordinator re-ran the checks in lane A's worktree:
+  - **Ownership and attribution:** it touched only its owned files, and no commit carries attribution.
+  - **T2:** `npm run test:lane-a` exited 0, with 52/52 tests.
+  - **Red first:** before any script existed, 46 of 47 tooling tests failed (exit 1). The pass counts then rose 11 → 20 → 29 → 37 → 41 → 47 as each script landed.
+  - **`ci.yml`'s test:** it went red on PLAN v1's file and on each of the three mutations.
+  - **Card line 4:** `sync-upstream --check` gave `ok (21 files match 1fa3a5bb…)`, exit 0. It went red with one byte flipped. `comments.cep` is `i/mixed attr/-text`.
+  - **Card line 7:** the real `check-upstream` run printed `ok (keywords.go and lexer.go match VORSAR/cep 1fa3a5bb… 2026-11-08)`, exit 0.
+  - **On the combined branch:** the tooling, toolchain and release tests passed 62/62, exit 0.
+  - **Lane A's open items, for later:**
+    - `--check` compares only the 21 targets, so an extra stale `.cep` is caught by `check-fixtures`, not by `--check`;
+    - each sync test takes about 1.3 s;
+    - beyond §6.4, the tests also isolate `XDG_CONFIG_HOME` and set `GIT_CEILING_DIRECTORIES`.
 
 ## Test material
 
