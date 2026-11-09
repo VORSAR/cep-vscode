@@ -60,7 +60,7 @@ Not in v1: error squiggles, hover, go-to-definition, formatting (these need a la
 
 ## 3. Where the language is defined
 
-cep is the source of truth. The files used, pinned at **cep `main` = `1fa3a5bb9d3bbabfe0c26ca3daa62086c8093c49` (2026-11-08)**:
+cep is the source of truth. The files used, pinned at **cep `main` = `75f541e4b874bb69d8dedc332c22ec8c180328e3` (2026-11-09)**. They were first pinned at `1fa3a5b` (2026-11-08) and re-synced when cep fixed this repo's findings F1–F4:
 
 | cep path | What this repo takes from it |
 |---|---|
@@ -173,7 +173,7 @@ Folding is not configured. VS Code's default indentation folding already folds a
 - `R` = `(?![A-Za-z0-9_])`: a word ends here. These are cep's ASCII edges. Oniguruma's `\b` counts non-ASCII letters, which cep's identifiers exclude.
 - `WORDS` = the 115 words of `keywordList`, in `keywords.go` order, joined by `|`. This is the paste list below.
 - `NAME` = `(?!(?i:WORDS)R)[A-Za-z_][A-Za-z0-9_]*`: a plain name that is not a reserved word in any case. It is grammar.lark's own NAME exclusion.
-- `BT` = `` `[A-Za-z0-9_\-. ]*` ``: a backticked name, exactly as `lexer.go` defines it.
+- `BT` = `` `[A-Za-z_][A-Za-z0-9_\-. ]*` ``: a backticked name, exactly as `lexer.go` defines it at cep `75f541e` (grammar.lark's BACKTICKED, F2). Until `1fa3a5b` it also allowed a digit first, an empty name and an all-space name.
 
 **Skeleton.** The top-level `patterns` MUST be exactly this list, in this order. `check-keywords.mjs` enforces it (rule g).
 
@@ -307,7 +307,7 @@ language|param|stream|table|rule|intent|partition|by|of|ttl|from|every|once|with
 **Known limitations (accepted for v2; a TextMate grammar matches patterns, it does not parse):**
 
 1. An unclosed `'''` or `"""` colours the rest of the file as a raw string, and `''''` opens one. cep sees two empty strings, or an unclosed `'`. A begin rule cannot look past its line.
-2. cep's lexer reads `risk/2.5` (no spaces) as a version-pragma token and refuses the rule (F1, forwarded to cep). The grammar shows a division. After `LANGUAGE` (not lowercase), `cep/0.1` gets no version scope.
+2. After `LANGUAGE` (not lowercase), `cep/0.1` gets no version scope. cep `75f541e` joins the version there too and then reports the case error (E-KW-002). *(`risk/2.5` used to be one: until `1fa3a5b` cep lexed it as a version-pragma token. cep `75f541e` divides it, which is what this grammar already showed; F1 is fixed in cep.)*
 3. After a character cep refuses at the lexer, the grammar carries on with no mark on that character. Examples: a stray `#`, a `$` without `{`, a non-ASCII letter outside a string. A stray backtick pairs with the next one on its line.
 4. An unclosed `/*` shows as a comment to the end of the file, which is how cep lexes it. Nothing marks it as E-CMT-001.
 5. Parse and static errors get no mark. This covers E-KW-001 for a lowercase keyword in a slot that is not a declaration (a column named `key`), E-TXT-001 (`has`), E-SYN-*, and the rest. That needs the language server (§9).
