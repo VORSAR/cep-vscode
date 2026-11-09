@@ -116,3 +116,19 @@ x `_ok-name.v2 x`
 --^^^^^^^^^^^^^^^ variable.other.quoted.cep
 stream `1abc` (a string)
 --     ^^^^^^ - entity.name.type.stream.cep
+x languagecep/0.1;
+--^^^^^^^^^^^ - storage.type.declaration.cep
+--           ^ keyword.operator.arithmetic.cep
+--            ^^^ constant.numeric.cep
+x streamS (a string)
+--^^^^^^^ support.function.cep - storage.type.declaration.cep entity.name.type.stream.cep
+x tableT (a string)
+--^^^^^^ support.function.cep - storage.type.declaration.cep entity.name.type.table.cep
+x ruleR;
+--^^^^^ - storage.type.declaration.cep entity.name.function.rule.cep
+x paramp int = 1;
+--^^^^^^ - storage.type.declaration.cep variable.other.constant.param.cep
+insert intoT;
+--     ^^^^^ - keyword.control.clause.cep entity.name.type.stream.cep
+x givenT [ {a: 1} ]
+--^^^^^^ - keyword.control.clause.cep
