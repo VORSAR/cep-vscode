@@ -152,6 +152,13 @@ At most two agents at once.
   - **The release run**, 42576113240 on tag `v0.1.0`, exited 0 in 20 s: `npm ci`, the gate, `check-release` and `gh release create`.
   - **The published asset:** `cep-0.1.0.vsix` holds exactly the 8 S4 files, reports version 0.1.0, and its grammar is byte-equal to the tag's.
   - <https://github.com/VORSAR/cep-vscode/releases/tag/v0.1.0>
+- **Re-sync to cep `75f541e` (2026-11-09, at the owner's request).**
+  - **Why:** cep fixed F1–F4; `keywords.go` is unchanged.
+  - **The sync:** `node scripts/sync-upstream.mjs ../cep` wrote `lexer.go`, `torture/lexical.cep` and `SOURCE`. `--check` then reported 21 files matching `75f541e`, and cep's working tree was untouched.
+  - **The snapshot diff**, reviewed line by line: only `lexical.cep` changed, with its comment line and `or risk/2.5 > risk/1.5e3`, read as cep now reads it (name, `/`, number).
+  - **The grammar change (F2), test-first:** five assertions were added to `names.test.cep`. The four rejections failed against the old rule (exit 255). All six copies of the backticked pattern then took cep's `[A-Za-z_]` first character, and `test:lane-b` exited 0.
+  - **PLAN** now pins `75f541e`, and its known limitation 2 is rewritten.
+  - **Not copied:** cep's new `invalid/e-syn-001-malformed-backticked-name.cep` is not one of the sync's 7 invalid fixtures (an open question for the owner).
 - **PLAN corrections from lane B (2026-11-09):** §5.3's table now lists type, modifier, constant and reserved in `keywords.go` order (rule i). §6.1 pairs `ts_min` with dropping the leading edge `L`.
 - **Lane A's open items, for later:**
     - `--check` compares only the 21 targets, so an extra stale `.cep` is caught by `check-fixtures`, not by `--check`;
@@ -239,10 +246,10 @@ The plan check's 38 review findings and their dispositions are in [plan check §
 
 | # | From | Severity | Finding | Disposition |
 |---|---|---|---|---|
-| F1 | plan check §0 finding 10 | later (cep) | cep lexes `risk/2.5` (no spaces) as one `Pragma` token: `Pragma` (`internal/parser/lexer.go:25`) is tried before `Ident` (`:31`). Probed with cep's rules on participle v2.1.4: `Pragma("risk/2.5")`, while `risk / 2.5` and `Risk/2.5` lex as arithmetic. Confirmed with cep's real parser (a copy equal to `1fa3a5b`, 2026-11-09): `from S[risk/2.5 > 1.0]` fails with `E-SYN-001: unexpected token "risk/2.5"`, and `risk / 2.5` parses. SPEC §2.5 does not say division needs spaces. | forwarded to cep's known issues (owner, Q7); this repo shows it as arithmetic |
-| F2 | design breaker, cep finding 2 | later (cep) | The backticked-name rule differs across `lexer.go` (`` `[A-Za-z0-9_\-. ]*` ``), `grammar.lark` (a letter or `_` first) and `grammar.ebnf` ("any-but-backtick"). The engine accepts `` stream `1abc` ``, an empty name and an all-space name (the breaker's runs of cep's parser). | forwarded to cep's known issues (owner, G1-7); this repo follows `lexer.go` |
-| F3 | design breaker, cep finding 3 | later (cep) | E-LATE-001's fix text (`docs/language/errors.md` line 31 and `errors.go`) offers `late events allow <duration>`, which SPEC §6.3 rev 3 makes E-LATE-002. | forwarded to cep's known issues (owner, G1-7) |
-| F4 | design breaker, cep finding 4 | later (cep) | The E-STR-001 message, "a single-quoted string does not end on its line", is also given for an unclosed double-quoted string (`parse.go` `lexError`). | forwarded to cep's known issues (owner, G1-7) |
+| F1 | plan check §0 finding 10 | later (cep) | cep lexes `risk/2.5` (no spaces) as one `Pragma` token: `Pragma` (`internal/parser/lexer.go:25`) is tried before `Ident` (`:31`). Probed with cep's rules on participle v2.1.4: `Pragma("risk/2.5")`, while `risk / 2.5` and `Risk/2.5` lex as arithmetic. Confirmed with cep's real parser (a copy equal to `1fa3a5b`, 2026-11-09): `from S[risk/2.5 > 1.0]` fails with `E-SYN-001: unexpected token "risk/2.5"`, and `risk / 2.5` parses. SPEC §2.5 does not say division needs spaces. | forwarded to cep's known issues (owner, Q7); this repo shows it as arithmetic; **Fixed in cep `75f541e` (2026-11-09, its VSC-F1 to VSC-F4)**; this repo re-synced to it. |
+| F2 | design breaker, cep finding 2 | later (cep) | The backticked-name rule differs across `lexer.go` (`` `[A-Za-z0-9_\-. ]*` ``), `grammar.lark` (a letter or `_` first) and `grammar.ebnf` ("any-but-backtick"). The engine accepts `` stream `1abc` ``, an empty name and an all-space name (the breaker's runs of cep's parser). | forwarded to cep's known issues (owner, G1-7); this repo follows `lexer.go`; **Fixed in cep `75f541e` (2026-11-09, its VSC-F1 to VSC-F4)**; this repo re-synced to it. |
+| F3 | design breaker, cep finding 3 | later (cep) | E-LATE-001's fix text (`docs/language/errors.md` line 31 and `errors.go`) offers `late events allow <duration>`, which SPEC §6.3 rev 3 makes E-LATE-002. | forwarded to cep's known issues (owner, G1-7); **Fixed in cep `75f541e` (2026-11-09, its VSC-F1 to VSC-F4)**; this repo re-synced to it. |
+| F4 | design breaker, cep finding 4 | later (cep) | The E-STR-001 message, "a single-quoted string does not end on its line", is also given for an unclosed double-quoted string (`parse.go` `lexError`). | forwarded to cep's known issues (owner, G1-7); **Fixed in cep `75f541e` (2026-11-09, its VSC-F1 to VSC-F4)**; this repo re-synced to it. |
 
 ## Known issues
 
