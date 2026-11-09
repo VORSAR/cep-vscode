@@ -106,3 +106,13 @@ x ${ grace }
 x `a/b`
 --^ - variable.other.quoted.cep
 --    ^ - variable.other.quoted.cep
+x `1abc`
+--^^^^^^ - variable.other.quoted.cep
+x ``
+--^^ - variable.other.quoted.cep
+x ` `
+--^^^ - variable.other.quoted.cep
+x `_ok-name.v2 x`
+--^^^^^^^^^^^^^^^ variable.other.quoted.cep
+stream `1abc` (a string)
+--     ^^^^^^ - entity.name.type.stream.cep
