@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.1
+
+- Re-synced to cep `75f541e`, which fixed four issues this extension's review found in cep. `risk/2.5` now divides in cep too, which is how the extension already coloured it.
+- Backticked names follow cep's rule: a letter or `_` first. A digit-first, empty or all-space backticked name (`` `1abc` ``) is no longer shown as a name.
+- A new sample file, cep's malformed-backticked-name example, joins the snapshot tests (20 samples).
+
 ## 0.1.0
 
 - The grammar is now built test-first: 7 unit files with every keyword asserted in its class, the escape, name, punctuation and call cases, and the design review's counter-examples; a keyword check that ties the grammar to cep's keyword table (115 words, 17 reserved, 11 classes). Colours are unchanged from 0.0.1.
