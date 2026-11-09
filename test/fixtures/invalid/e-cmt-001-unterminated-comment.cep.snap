@@ -1,0 +1,40 @@
+>-- expect: E-CMT-001 (unterminated block comment swallows the rest of the file) @ 4:1
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>language cep/0.1;
+#^^^^^^^^ source.cep storage.type.declaration.cep
+#        ^ source.cep
+#         ^^^^^^^ source.cep constant.other.version.cep
+#                ^ source.cep punctuation.terminator.statement.cep
+>stream S (a string, ts timestamp) time ts watermark bounded 1 min;
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^ source.cep entity.name.type.stream.cep
+#        ^^ source.cep
+#          ^ source.cep
+#           ^ source.cep
+#            ^^^^^^ source.cep storage.type.primitive.cep
+#                  ^ source.cep punctuation.separator.comma.cep
+#                   ^ source.cep
+#                    ^^ source.cep
+#                      ^ source.cep
+#                       ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                ^^ source.cep
+#                                  ^^^^ source.cep keyword.control.clause.cep
+#                                      ^ source.cep
+#                                       ^^ source.cep
+#                                         ^ source.cep
+#                                          ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                                                   ^ source.cep
+#                                                    ^^^^^^^ source.cep keyword.control.clause.cep
+#                                                           ^ source.cep
+#                                                            ^ source.cep constant.numeric.cep
+#                                                             ^ source.cep
+#                                                              ^^^ source.cep keyword.other.unit.cep
+#                                                                 ^ source.cep punctuation.terminator.statement.cep
+>/* this comment never closes
+#^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+>stream T (a string, ts timestamp);
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+>

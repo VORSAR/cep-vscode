@@ -1,0 +1,233 @@
+>-- constructs: once-marker and-group arithmetic is-null whole-field-regex raw-regex-string
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>language cep/0.1;
+#^^^^^^^^ source.cep storage.type.declaration.cep
+#        ^ source.cep
+#         ^^^^^^^ source.cep constant.other.version.cep
+#                ^ source.cep punctuation.terminator.statement.cep
+>
+>stream Deploys (svc string, version string optional, ts timestamp)
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^ source.cep entity.name.type.stream.cep
+#              ^^ source.cep
+#                ^^^ source.cep
+#                   ^ source.cep
+#                    ^^^^^^ source.cep storage.type.primitive.cep
+#                          ^ source.cep punctuation.separator.comma.cep
+#                           ^ source.cep
+#                            ^^^^^^^ source.cep
+#                                   ^ source.cep
+#                                    ^^^^^^ source.cep storage.type.primitive.cep
+#                                          ^ source.cep
+#                                           ^^^^^^^^ source.cep storage.modifier.cep
+#                                                   ^ source.cep punctuation.separator.comma.cep
+#                                                    ^ source.cep
+#                                                     ^^ source.cep
+#                                                       ^ source.cep
+#                                                        ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                 ^^ source.cep
+>  time ts watermark bounded 1 min idle after 2 min;
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep
+#         ^ source.cep
+#          ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                   ^ source.cep
+#                    ^^^^^^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^ source.cep constant.numeric.cep
+#                             ^ source.cep
+#                              ^^^ source.cep keyword.other.unit.cep
+#                                 ^ source.cep
+#                                  ^^^^ source.cep keyword.control.clause.cep
+#                                      ^ source.cep
+#                                       ^^^^^ source.cep keyword.control.clause.cep
+#                                            ^ source.cep
+#                                             ^ source.cep constant.numeric.cep
+#                                              ^ source.cep
+#                                               ^^^ source.cep keyword.other.unit.cep
+#                                                  ^ source.cep punctuation.terminator.statement.cep
+>
+>stream Healthchecks (svc string, ok bool, ts timestamp)
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                   ^^ source.cep
+#                     ^^^ source.cep
+#                        ^ source.cep
+#                         ^^^^^^ source.cep storage.type.primitive.cep
+#                               ^ source.cep punctuation.separator.comma.cep
+#                                ^ source.cep
+#                                 ^^ source.cep
+#                                   ^ source.cep
+#                                    ^^^^ source.cep storage.type.primitive.cep
+#                                        ^ source.cep punctuation.separator.comma.cep
+#                                         ^ source.cep
+#                                          ^^ source.cep
+#                                            ^ source.cep
+#                                             ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                      ^^ source.cep
+>  time ts watermark bounded 1 min idle after 2 min;
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep
+#         ^ source.cep
+#          ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                   ^ source.cep
+#                    ^^^^^^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^ source.cep constant.numeric.cep
+#                             ^ source.cep
+#                              ^^^ source.cep keyword.other.unit.cep
+#                                 ^ source.cep
+#                                  ^^^^ source.cep keyword.control.clause.cep
+#                                      ^ source.cep
+#                                       ^^^^^ source.cep keyword.control.clause.cep
+#                                            ^ source.cep
+#                                             ^ source.cep constant.numeric.cep
+#                                              ^ source.cep
+#                                               ^^^ source.cep keyword.other.unit.cep
+#                                                  ^ source.cep punctuation.terminator.statement.cep
+>
+>stream RolloutAlerts (svc string, ts timestamp);
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                    ^^ source.cep
+#                      ^^^ source.cep
+#                         ^ source.cep
+#                          ^^^^^^ source.cep storage.type.primitive.cep
+#                                ^ source.cep punctuation.separator.comma.cep
+#                                 ^ source.cep
+#                                  ^^ source.cep
+#                                    ^ source.cep
+#                                     ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                              ^ source.cep
+#                                               ^ source.cep punctuation.terminator.statement.cep
+>
+>rule BadRollout
+#^^^^ source.cep storage.type.declaration.cep
+#    ^ source.cep
+#     ^^^^^^^^^^ source.cep entity.name.function.rule.cep
+>  intent 'A deploy and a failing healthcheck together, once per service instance.'
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                 ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+>  partition by svc of Deploys, svc of Healthchecks ttl 1 hour
+#^^ source.cep
+#  ^^^^^^^^^ source.cep keyword.control.clause.cep
+#           ^ source.cep
+#            ^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^ source.cep
+#                  ^ source.cep
+#                   ^^ source.cep keyword.control.clause.cep
+#                     ^ source.cep
+#                      ^^^^^^^ source.cep
+#                             ^ source.cep punctuation.separator.comma.cep
+#                              ^ source.cep
+#                               ^^^ source.cep
+#                                  ^ source.cep
+#                                   ^^ source.cep keyword.control.clause.cep
+#                                     ^ source.cep
+#                                      ^^^^^^^^^^^^ source.cep
+#                                                  ^ source.cep
+#                                                   ^^^ source.cep keyword.control.clause.cep
+#                                                      ^ source.cep
+#                                                       ^ source.cep constant.numeric.cep
+#                                                        ^ source.cep
+#                                                         ^^^^ source.cep keyword.other.unit.cep
+>  from once (d = Deploys[version is not null and version matches_cs '''v[0-9]+\.[0-9]+''']
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^ source.cep keyword.control.clause.cep
+#           ^^ source.cep
+#             ^ source.cep
+#              ^ source.cep
+#               ^ source.cep keyword.operator.assignment.cep
+#                ^ source.cep
+#                 ^^^^^^^ source.cep
+#                        ^ source.cep
+#                         ^^^^^^^ source.cep
+#                                ^ source.cep
+#                                 ^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                                   ^ source.cep
+#                                    ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                                       ^ source.cep
+#                                        ^^^^ source.cep constant.language.cep
+#                                            ^ source.cep
+#                                             ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                                                ^ source.cep
+#                                                 ^^^^^^^ source.cep
+#                                                        ^ source.cep
+#                                                         ^^^^^^^^^^ source.cep keyword.operator.text.cep keyword.operator.wordlike.cep
+#                                                                   ^ source.cep
+#                                                                    ^^^ source.cep string.quoted.triple.single.cep
+#                                                                       ^^^^^^^^^^^^^^^ source.cep string.quoted.triple.single.cep
+#                                                                                      ^^^ source.cep string.quoted.triple.single.cep
+#                                                                                         ^^ source.cep
+>             and h = Healthchecks[ok == false])
+#^^^^^^^^^^^^^ source.cep
+#             ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                ^ source.cep
+#                 ^ source.cep
+#                  ^ source.cep
+#                   ^ source.cep keyword.operator.assignment.cep
+#                    ^ source.cep
+#                     ^^^^^^^^^^^^ source.cep
+#                                 ^ source.cep
+#                                  ^^ source.cep
+#                                    ^ source.cep
+#                                     ^^ source.cep keyword.operator.comparison.cep
+#                                       ^ source.cep
+#                                        ^^^^^ source.cep constant.language.cep
+#                                             ^^^ source.cep
+>  within 15 min
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^ source.cep constant.numeric.cep
+#           ^ source.cep
+#            ^^^ source.cep keyword.other.unit.cep
+>  after match skip past last
+#^^ source.cep
+#  ^^^^^ source.cep keyword.control.clause.cep
+#       ^ source.cep
+#        ^^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^ source.cep keyword.control.clause.cep
+#                  ^ source.cep
+#                   ^^^^ source.cep keyword.control.clause.cep
+#                       ^ source.cep
+#                        ^^^^ source.cep keyword.control.clause.cep
+>  late events drop
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^ source.cep keyword.control.clause.cep
+>  select d.svc
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^ source.cep
+#          ^ source.cep punctuation.accessor.cep
+#           ^^^ source.cep
+>  insert into RolloutAlerts;
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                           ^ source.cep punctuation.terminator.statement.cep
+>

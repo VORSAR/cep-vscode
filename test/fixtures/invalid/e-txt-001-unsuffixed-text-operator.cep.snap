@@ -1,0 +1,88 @@
+>-- expect: E-TXT-001 (text operators carry their case mode: has_ci / has_cs) @ 7:12
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>language cep/0.1;
+#^^^^^^^^ source.cep storage.type.declaration.cep
+#        ^ source.cep
+#         ^^^^^^^ source.cep constant.other.version.cep
+#                ^ source.cep punctuation.terminator.statement.cep
+>stream S (a string, ts timestamp) time ts watermark bounded 1 min;
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^ source.cep entity.name.type.stream.cep
+#        ^^ source.cep
+#          ^ source.cep
+#           ^ source.cep
+#            ^^^^^^ source.cep storage.type.primitive.cep
+#                  ^ source.cep punctuation.separator.comma.cep
+#                   ^ source.cep
+#                    ^^ source.cep
+#                      ^ source.cep
+#                       ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                ^^ source.cep
+#                                  ^^^^ source.cep keyword.control.clause.cep
+#                                      ^ source.cep
+#                                       ^^ source.cep
+#                                         ^ source.cep
+#                                          ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                                                   ^ source.cep
+#                                                    ^^^^^^^ source.cep keyword.control.clause.cep
+#                                                           ^ source.cep
+#                                                            ^ source.cep constant.numeric.cep
+#                                                             ^ source.cep
+#                                                              ^^^ source.cep keyword.other.unit.cep
+#                                                                 ^ source.cep punctuation.terminator.statement.cep
+>stream T (a string, ts timestamp);
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^ source.cep entity.name.type.stream.cep
+#        ^^ source.cep
+#          ^ source.cep
+#           ^ source.cep
+#            ^^^^^^ source.cep storage.type.primitive.cep
+#                  ^ source.cep punctuation.separator.comma.cep
+#                   ^ source.cep
+#                    ^^ source.cep
+#                      ^ source.cep
+#                       ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                ^ source.cep
+#                                 ^ source.cep punctuation.terminator.statement.cep
+>rule UnsuffixedHas
+#^^^^ source.cep storage.type.declaration.cep
+#    ^ source.cep
+#     ^^^^^^^^^^^^^ source.cep entity.name.function.rule.cep
+>  intent 'x'
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#          ^ source.cep string.quoted.single.cep
+#           ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+>  from S[a has 'secret']
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^ source.cep
+#        ^ source.cep
+#         ^ source.cep
+#          ^ source.cep
+#           ^^^ source.cep
+#              ^ source.cep
+#               ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                ^^^^^^ source.cep string.quoted.single.cep
+#                      ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                       ^^ source.cep
+>  select a
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^ source.cep
+>  insert into T;
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^ source.cep entity.name.type.stream.cep
+#               ^ source.cep punctuation.terminator.statement.cep
+>

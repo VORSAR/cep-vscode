@@ -1,0 +1,282 @@
+>-- constructs: delay-window emit-on-due batch-window emit-on-batch-end two-rules
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>language cep/0.1;
+#^^^^^^^^ source.cep storage.type.declaration.cep
+#        ^ source.cep
+#         ^^^^^^^ source.cep constant.other.version.cep
+#                ^ source.cep punctuation.terminator.statement.cep
+>
+>stream Notifications (userId string, body string, ts timestamp)
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                    ^^ source.cep
+#                      ^^^^^^ source.cep
+#                            ^ source.cep
+#                             ^^^^^^ source.cep storage.type.primitive.cep
+#                                   ^ source.cep punctuation.separator.comma.cep
+#                                    ^ source.cep
+#                                     ^^^^ source.cep
+#                                         ^ source.cep
+#                                          ^^^^^^ source.cep storage.type.primitive.cep
+#                                                ^ source.cep punctuation.separator.comma.cep
+#                                                 ^ source.cep
+#                                                  ^^ source.cep
+#                                                    ^ source.cep
+#                                                     ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                              ^^ source.cep
+>  time ts watermark bounded 1 min idle after 2 min;
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep
+#         ^ source.cep
+#          ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                   ^ source.cep
+#                    ^^^^^^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^ source.cep constant.numeric.cep
+#                             ^ source.cep
+#                              ^^^ source.cep keyword.other.unit.cep
+#                                 ^ source.cep
+#                                  ^^^^ source.cep keyword.control.clause.cep
+#                                      ^ source.cep
+#                                       ^^^^^ source.cep keyword.control.clause.cep
+#                                            ^ source.cep
+#                                             ^ source.cep constant.numeric.cep
+#                                              ^ source.cep
+#                                               ^^^ source.cep keyword.other.unit.cep
+#                                                  ^ source.cep punctuation.terminator.statement.cep
+>
+>stream LoadedRecords (source string, recId string, ts timestamp)
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                    ^^ source.cep
+#                      ^^^^^^ source.cep
+#                            ^ source.cep
+#                             ^^^^^^ source.cep storage.type.primitive.cep
+#                                   ^ source.cep punctuation.separator.comma.cep
+#                                    ^ source.cep
+#                                     ^^^^^ source.cep
+#                                          ^ source.cep
+#                                           ^^^^^^ source.cep storage.type.primitive.cep
+#                                                 ^ source.cep punctuation.separator.comma.cep
+#                                                  ^ source.cep
+#                                                   ^^ source.cep
+#                                                     ^ source.cep
+#                                                      ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                               ^^ source.cep
+>  time ts watermark bounded 1 min idle after 2 min;
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep
+#         ^ source.cep
+#          ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                   ^ source.cep
+#                    ^^^^^^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^ source.cep constant.numeric.cep
+#                             ^ source.cep
+#                              ^^^ source.cep keyword.other.unit.cep
+#                                 ^ source.cep
+#                                  ^^^^ source.cep keyword.control.clause.cep
+#                                      ^ source.cep
+#                                       ^^^^^ source.cep keyword.control.clause.cep
+#                                            ^ source.cep
+#                                             ^ source.cep constant.numeric.cep
+#                                              ^ source.cep
+#                                               ^^^ source.cep keyword.other.unit.cep
+#                                                  ^ source.cep punctuation.terminator.statement.cep
+>
+>stream DelayedNotifications (userId string, body string, ts timestamp);
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                           ^^ source.cep
+#                             ^^^^^^ source.cep
+#                                   ^ source.cep
+#                                    ^^^^^^ source.cep storage.type.primitive.cep
+#                                          ^ source.cep punctuation.separator.comma.cep
+#                                           ^ source.cep
+#                                            ^^^^ source.cep
+#                                                ^ source.cep
+#                                                 ^^^^^^ source.cep storage.type.primitive.cep
+#                                                       ^ source.cep punctuation.separator.comma.cep
+#                                                        ^ source.cep
+#                                                         ^^ source.cep
+#                                                           ^ source.cep
+#                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                     ^ source.cep
+#                                                                      ^ source.cep punctuation.terminator.statement.cep
+>stream LoadSummaries (source string, n int, ts timestamp);
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                    ^^ source.cep
+#                      ^^^^^^ source.cep
+#                            ^ source.cep
+#                             ^^^^^^ source.cep storage.type.primitive.cep
+#                                   ^ source.cep punctuation.separator.comma.cep
+#                                    ^ source.cep
+#                                     ^ source.cep
+#                                      ^ source.cep
+#                                       ^^^ source.cep storage.type.primitive.cep
+#                                          ^ source.cep punctuation.separator.comma.cep
+#                                           ^ source.cep
+#                                            ^^ source.cep
+#                                              ^ source.cep
+#                                               ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                        ^ source.cep
+#                                                         ^ source.cep punctuation.terminator.statement.cep
+>
+>rule DebounceNotifications
+#^^^^ source.cep storage.type.declaration.cep
+#    ^ source.cep
+#     ^^^^^^^^^^^^^^^^^^^^^ source.cep entity.name.function.rule.cep
+>  intent 'Re-time every notification ten minutes later.'
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                       ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+>  partition by userId of Notifications ttl 1 hour
+#^^ source.cep
+#  ^^^^^^^^^ source.cep keyword.control.clause.cep
+#           ^ source.cep
+#            ^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^^ source.cep
+#                     ^ source.cep
+#                      ^^ source.cep keyword.control.clause.cep
+#                        ^ source.cep
+#                         ^^^^^^^^^^^^^ source.cep
+#                                      ^ source.cep
+#                                       ^^^ source.cep keyword.control.clause.cep
+#                                          ^ source.cep
+#                                           ^ source.cep constant.numeric.cep
+#                                            ^ source.cep
+#                                             ^^^^ source.cep keyword.other.unit.cep
+>  from Notifications window delay(10 min)
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^^ source.cep
+#                    ^ source.cep
+#                     ^^^^^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^^^^^ source.cep keyword.other.window.cep
+#                                 ^ source.cep
+#                                  ^^ source.cep constant.numeric.cep
+#                                    ^ source.cep
+#                                     ^^^ source.cep keyword.other.unit.cep
+#                                        ^^ source.cep
+>  emit on due
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep keyword.control.clause.cep
+#         ^ source.cep
+#          ^^^ source.cep keyword.control.clause.cep
+>  late events drop
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^ source.cep keyword.control.clause.cep
+>  select userId, body
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^^ source.cep
+#               ^ source.cep punctuation.separator.comma.cep
+#                ^ source.cep
+#                 ^^^^ source.cep
+>  insert into DelayedNotifications;
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                                  ^ source.cep punctuation.terminator.statement.cep
+>
+>rule SummarizeLoads
+#^^^^ source.cep storage.type.declaration.cep
+#    ^ source.cep
+#     ^^^^^^^^^^^^^^ source.cep entity.name.function.rule.cep
+>  intent 'One summary event per delivery batch, per ingest source.'
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                  ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+>  partition by source of LoadedRecords ttl 1 hour
+#^^ source.cep
+#  ^^^^^^^^^ source.cep keyword.control.clause.cep
+#           ^ source.cep
+#            ^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^^ source.cep
+#                     ^ source.cep
+#                      ^^ source.cep keyword.control.clause.cep
+#                        ^ source.cep
+#                         ^^^^^^^^^^^^^ source.cep
+#                                      ^ source.cep
+#                                       ^^^ source.cep keyword.control.clause.cep
+#                                          ^ source.cep
+#                                           ^ source.cep constant.numeric.cep
+#                                            ^ source.cep
+#                                             ^^^^ source.cep keyword.other.unit.cep
+>  from LoadedRecords window batch()
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^^ source.cep
+#                    ^ source.cep
+#                     ^^^^^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^^^^^ source.cep keyword.other.window.cep
+#                                 ^^^ source.cep
+>  emit on batch end
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep keyword.control.clause.cep
+#         ^ source.cep
+#          ^^^^^ source.cep keyword.other.window.cep
+#               ^ source.cep
+#                ^^^ source.cep keyword.control.clause.cep
+>  late events drop
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^ source.cep keyword.control.clause.cep
+>  select source, count() as n
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^^ source.cep
+#               ^ source.cep punctuation.separator.comma.cep
+#                ^ source.cep
+#                 ^^^^^ source.cep support.function.cep
+#                      ^^^ source.cep
+#                         ^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^ source.cep
+>  insert into LoadSummaries;
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                           ^ source.cep punctuation.terminator.statement.cep
+>

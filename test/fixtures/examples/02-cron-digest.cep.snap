@@ -1,0 +1,154 @@
+>-- constructs: cron-window emit-on-close late-drop count aggregate-call
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>language cep/0.1;
+#^^^^^^^^ source.cep storage.type.declaration.cep
+#        ^ source.cep
+#         ^^^^^^^ source.cep constant.other.version.cep
+#                ^ source.cep punctuation.terminator.statement.cep
+>
+>stream AgentActions (agentId string, action string, ts timestamp)
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                   ^^ source.cep
+#                     ^^^^^^^ source.cep
+#                            ^ source.cep
+#                             ^^^^^^ source.cep storage.type.primitive.cep
+#                                   ^ source.cep punctuation.separator.comma.cep
+#                                    ^ source.cep
+#                                     ^^^^^^ source.cep
+#                                           ^ source.cep
+#                                            ^^^^^^ source.cep storage.type.primitive.cep
+#                                                  ^ source.cep punctuation.separator.comma.cep
+#                                                   ^ source.cep
+#                                                    ^^ source.cep
+#                                                      ^ source.cep
+#                                                       ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                ^^ source.cep
+>  time ts watermark bounded 2 min idle after 1 min;
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep
+#         ^ source.cep
+#          ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                   ^ source.cep
+#                    ^^^^^^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^ source.cep constant.numeric.cep
+#                             ^ source.cep
+#                              ^^^ source.cep keyword.other.unit.cep
+#                                 ^ source.cep
+#                                  ^^^^ source.cep keyword.control.clause.cep
+#                                      ^ source.cep
+#                                       ^^^^^ source.cep keyword.control.clause.cep
+#                                            ^ source.cep
+#                                             ^ source.cep constant.numeric.cep
+#                                              ^ source.cep
+#                                               ^^^ source.cep keyword.other.unit.cep
+#                                                  ^ source.cep punctuation.terminator.statement.cep
+>
+>stream DailyAgentDigest (agentId string, actions int, ts timestamp);
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                       ^^ source.cep
+#                         ^^^^^^^ source.cep
+#                                ^ source.cep
+#                                 ^^^^^^ source.cep storage.type.primitive.cep
+#                                       ^ source.cep punctuation.separator.comma.cep
+#                                        ^ source.cep
+#                                         ^^^^^^^ source.cep
+#                                                ^ source.cep
+#                                                 ^^^ source.cep storage.type.primitive.cep
+#                                                    ^ source.cep punctuation.separator.comma.cep
+#                                                     ^ source.cep
+#                                                      ^^ source.cep
+#                                                        ^ source.cep
+#                                                         ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                  ^ source.cep
+#                                                                   ^ source.cep punctuation.terminator.statement.cep
+>
+>rule DailyDigest
+#^^^^ source.cep storage.type.declaration.cep
+#    ^ source.cep
+#     ^^^^^^^^^^^ source.cep entity.name.function.rule.cep
+>  intent 'One digest event per agent per New-York day.'
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+>  partition by agentId of AgentActions ttl 36 hour
+#^^ source.cep
+#  ^^^^^^^^^ source.cep keyword.control.clause.cep
+#           ^ source.cep
+#            ^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^^^ source.cep
+#                      ^ source.cep
+#                       ^^ source.cep keyword.control.clause.cep
+#                         ^ source.cep
+#                          ^^^^^^^^^^^^ source.cep
+#                                      ^ source.cep
+#                                       ^^^ source.cep keyword.control.clause.cep
+#                                          ^ source.cep
+#                                           ^^ source.cep constant.numeric.cep
+#                                             ^ source.cep
+#                                              ^^^^ source.cep keyword.other.unit.cep
+>  from AgentActions window cron('0 0 * * *', 'America/New_York')
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^ source.cep
+#                   ^ source.cep
+#                    ^^^^^^ source.cep keyword.control.clause.cep
+#                          ^ source.cep
+#                           ^^^^ source.cep keyword.other.window.cep
+#                               ^ source.cep
+#                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                 ^^^^^^^^^ source.cep string.quoted.single.cep
+#                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                           ^ source.cep punctuation.separator.comma.cep
+#                                            ^ source.cep
+#                                             ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                              ^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                              ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                               ^^ source.cep
+>  emit on close
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep keyword.control.clause.cep
+#         ^ source.cep
+#          ^^^^^ source.cep keyword.control.clause.cep
+>  late events drop
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^ source.cep keyword.control.clause.cep
+>  select agentId, count() as actions
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^^^ source.cep
+#                ^ source.cep punctuation.separator.comma.cep
+#                 ^ source.cep
+#                  ^^^^^ source.cep support.function.cep
+#                       ^^^ source.cep
+#                          ^^ source.cep keyword.control.clause.cep
+#                            ^ source.cep
+#                             ^^^^^^^ source.cep
+>  insert into DailyAgentDigest;
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                              ^ source.cep punctuation.terminator.statement.cep
+>

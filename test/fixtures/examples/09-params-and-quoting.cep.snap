@@ -1,0 +1,643 @@
+>-- constructs: params-every-type backticked-identifier expect ns-call arithmetic
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>--             rate-limit-unpartitioned defeat-path-expect
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>language cep/0.1;
+#^^^^^^^^ source.cep storage.type.declaration.cep
+#        ^ source.cep
+#         ^^^^^^^ source.cep constant.other.version.cep
+#                ^ source.cep punctuation.terminator.statement.cep
+>
+>param threshold float = 0.75;
+#^^^^^ source.cep storage.type.declaration.cep
+#     ^ source.cep
+#      ^^^^^^^^^ source.cep variable.other.constant.param.cep
+#               ^ source.cep
+#                ^^^^^ source.cep storage.type.primitive.cep
+#                     ^ source.cep
+#                      ^ source.cep keyword.operator.assignment.cep
+#                       ^ source.cep
+#                        ^^^^ source.cep constant.numeric.cep
+#                            ^ source.cep punctuation.terminator.statement.cep
+>param lookback duration = 1 hour 30 min;
+#^^^^^ source.cep storage.type.declaration.cep
+#     ^ source.cep
+#      ^^^^^^^^ source.cep variable.other.constant.param.cep
+#              ^ source.cep
+#               ^^^^^^^^ source.cep storage.type.primitive.cep
+#                       ^ source.cep
+#                        ^ source.cep keyword.operator.assignment.cep
+#                         ^ source.cep
+#                          ^ source.cep constant.numeric.cep
+#                           ^ source.cep
+#                            ^^^^ source.cep keyword.other.unit.cep
+#                                ^ source.cep
+#                                 ^^ source.cep constant.numeric.cep
+#                                   ^ source.cep
+#                                    ^^^ source.cep keyword.other.unit.cep
+#                                       ^ source.cep punctuation.terminator.statement.cep
+>param label string = 'prod';
+#^^^^^ source.cep storage.type.declaration.cep
+#     ^ source.cep
+#      ^^^^^ source.cep variable.other.constant.param.cep
+#           ^ source.cep
+#            ^^^^^^ source.cep storage.type.primitive.cep
+#                  ^ source.cep
+#                   ^ source.cep keyword.operator.assignment.cep
+#                    ^ source.cep
+#                     ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                      ^^^^ source.cep string.quoted.single.cep
+#                          ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                           ^ source.cep punctuation.terminator.statement.cep
+>param strict bool = true;
+#^^^^^ source.cep storage.type.declaration.cep
+#     ^ source.cep
+#      ^^^^^^ source.cep variable.other.constant.param.cep
+#            ^ source.cep
+#             ^^^^ source.cep storage.type.primitive.cep
+#                 ^ source.cep
+#                  ^ source.cep keyword.operator.assignment.cep
+#                   ^ source.cep
+#                    ^^^^ source.cep constant.language.cep
+#                        ^ source.cep punctuation.terminator.statement.cep
+>
+>stream `agent-events` (agentId string, risk float, env string, ts timestamp)
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                     ^^ source.cep
+#                       ^^^^^^^ source.cep
+#                              ^ source.cep
+#                               ^^^^^^ source.cep storage.type.primitive.cep
+#                                     ^ source.cep punctuation.separator.comma.cep
+#                                      ^ source.cep
+#                                       ^^^^ source.cep
+#                                           ^ source.cep
+#                                            ^^^^^ source.cep storage.type.primitive.cep
+#                                                 ^ source.cep punctuation.separator.comma.cep
+#                                                  ^ source.cep
+#                                                   ^^^ source.cep
+#                                                      ^ source.cep
+#                                                       ^^^^^^ source.cep storage.type.primitive.cep
+#                                                             ^ source.cep punctuation.separator.comma.cep
+#                                                              ^ source.cep
+#                                                               ^^ source.cep
+#                                                                 ^ source.cep
+#                                                                  ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                           ^^ source.cep
+>  time ts watermark bounded 2 min;
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep
+#         ^ source.cep
+#          ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                   ^ source.cep
+#                    ^^^^^^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^ source.cep constant.numeric.cep
+#                             ^ source.cep
+#                              ^^^ source.cep keyword.other.unit.cep
+#                                 ^ source.cep punctuation.terminator.statement.cep
+>
+>stream RiskAlerts (agentId string, scaled float, ts timestamp);
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                 ^^ source.cep
+#                   ^^^^^^^ source.cep
+#                          ^ source.cep
+#                           ^^^^^^ source.cep storage.type.primitive.cep
+#                                 ^ source.cep punctuation.separator.comma.cep
+#                                  ^ source.cep
+#                                   ^^^^^^ source.cep
+#                                         ^ source.cep
+#                                          ^^^^^ source.cep storage.type.primitive.cep
+#                                               ^ source.cep punctuation.separator.comma.cep
+#                                                ^ source.cep
+#                                                 ^^ source.cep
+#                                                   ^ source.cep
+#                                                    ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                             ^ source.cep
+#                                                              ^ source.cep punctuation.terminator.statement.cep
+>
+>rule HighRisk
+#^^^^ source.cep storage.type.declaration.cep
+#    ^ source.cep
+#     ^^^^^^^^ source.cep entity.name.function.rule.cep
+>  intent 'Alert when a scaled risk score crosses the configured threshold.'
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+>  from `agent-events`[risk * 100 / 100 > ${threshold} and env == ${label}]
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^^^^ source.cep variable.other.quoted.cep
+#                     ^ source.cep
+#                      ^^^^ source.cep
+#                          ^ source.cep
+#                           ^ source.cep keyword.operator.arithmetic.cep
+#                            ^ source.cep
+#                             ^^^ source.cep constant.numeric.cep
+#                                ^ source.cep
+#                                 ^ source.cep keyword.operator.arithmetic.cep
+#                                  ^ source.cep
+#                                   ^^^ source.cep constant.numeric.cep
+#                                      ^ source.cep
+#                                       ^ source.cep keyword.operator.comparison.cep
+#                                        ^ source.cep
+#                                         ^^^^^^^^^^^^ source.cep variable.other.constant.param.cep
+#                                                     ^ source.cep
+#                                                      ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                                                         ^ source.cep
+#                                                          ^^^ source.cep
+#                                                             ^ source.cep
+#                                                              ^^ source.cep keyword.operator.comparison.cep
+#                                                                ^ source.cep
+#                                                                 ^^^^^^^^ source.cep variable.other.constant.param.cep
+#                                                                         ^^ source.cep
+>  expect given `agent-events` [ {agentId: 'a1', risk: 0.9, env: 'prod', ts: timestamp '2026-01-01T00:00:01Z'} ]
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^^^^^^^^^^ source.cep variable.other.quoted.cep
+#                             ^^^^ source.cep
+#                                 ^^^^^^^ source.cep
+#                                        ^ source.cep punctuation.separator.key-value.cep
+#                                         ^ source.cep
+#                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                           ^^ source.cep string.quoted.single.cep
+#                                             ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                              ^ source.cep punctuation.separator.comma.cep
+#                                               ^ source.cep
+#                                                ^^^^ source.cep
+#                                                    ^ source.cep punctuation.separator.key-value.cep
+#                                                     ^ source.cep
+#                                                      ^^^ source.cep constant.numeric.cep
+#                                                         ^ source.cep punctuation.separator.comma.cep
+#                                                          ^ source.cep
+#                                                           ^^^ source.cep
+#                                                              ^ source.cep punctuation.separator.key-value.cep
+#                                                               ^ source.cep
+#                                                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                 ^^^^ source.cep string.quoted.single.cep
+#                                                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                                       ^ source.cep
+#                                                                        ^^ source.cep
+#                                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                                           ^ source.cep
+#                                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                     ^ source.cep
+#                                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                       ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                           ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                            ^^^^ source.cep
+>         then RiskAlerts [ {agentId: 'a1', scaled: 1.0, ts: timestamp '2026-01-01T00:00:01Z'} ]
+#^^^^^^^^^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^ source.cep
+#                        ^^^^ source.cep
+#                            ^^^^^^^ source.cep
+#                                   ^ source.cep punctuation.separator.key-value.cep
+#                                    ^ source.cep
+#                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                      ^^ source.cep string.quoted.single.cep
+#                                        ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                         ^ source.cep punctuation.separator.comma.cep
+#                                          ^ source.cep
+#                                           ^^^^^^ source.cep
+#                                                 ^ source.cep punctuation.separator.key-value.cep
+#                                                  ^ source.cep
+#                                                   ^^^ source.cep constant.numeric.cep
+#                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                       ^ source.cep
+#                                                        ^^ source.cep
+#                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                           ^ source.cep
+#                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                     ^ source.cep
+#                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                       ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                           ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                            ^^^^ source.cep
+>  expect given `agent-events` [ {agentId: 'a1', risk: 0.9, env: 'prod', ts: timestamp '2026-01-01T00:00:01Z'},
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^^^^^^^^^^ source.cep variable.other.quoted.cep
+#                             ^^^^ source.cep
+#                                 ^^^^^^^ source.cep
+#                                        ^ source.cep punctuation.separator.key-value.cep
+#                                         ^ source.cep
+#                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                           ^^ source.cep string.quoted.single.cep
+#                                             ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                              ^ source.cep punctuation.separator.comma.cep
+#                                               ^ source.cep
+#                                                ^^^^ source.cep
+#                                                    ^ source.cep punctuation.separator.key-value.cep
+#                                                     ^ source.cep
+#                                                      ^^^ source.cep constant.numeric.cep
+#                                                         ^ source.cep punctuation.separator.comma.cep
+#                                                          ^ source.cep
+#                                                           ^^^ source.cep
+#                                                              ^ source.cep punctuation.separator.key-value.cep
+#                                                               ^ source.cep
+#                                                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                 ^^^^ source.cep string.quoted.single.cep
+#                                                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                                       ^ source.cep
+#                                                                        ^^ source.cep
+#                                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                                           ^ source.cep
+#                                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                     ^ source.cep
+#                                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                       ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                           ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                            ^ source.cep
+#                                                                                                             ^ source.cep punctuation.separator.comma.cep
+>                                {agentId: 'a2', risk: 0.8, env: 'prod', ts: timestamp '2026-01-01T00:30:00Z'},
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep
+#                                 ^^^^^^^ source.cep
+#                                        ^ source.cep punctuation.separator.key-value.cep
+#                                         ^ source.cep
+#                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                           ^^ source.cep string.quoted.single.cep
+#                                             ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                              ^ source.cep punctuation.separator.comma.cep
+#                                               ^ source.cep
+#                                                ^^^^ source.cep
+#                                                    ^ source.cep punctuation.separator.key-value.cep
+#                                                     ^ source.cep
+#                                                      ^^^ source.cep constant.numeric.cep
+#                                                         ^ source.cep punctuation.separator.comma.cep
+#                                                          ^ source.cep
+#                                                           ^^^ source.cep
+#                                                              ^ source.cep punctuation.separator.key-value.cep
+#                                                               ^ source.cep
+#                                                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                 ^^^^ source.cep string.quoted.single.cep
+#                                                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                                       ^ source.cep
+#                                                                        ^^ source.cep
+#                                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                                           ^ source.cep
+#                                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                     ^ source.cep
+#                                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                       ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                           ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                            ^ source.cep
+#                                                                                                             ^ source.cep punctuation.separator.comma.cep
+>                                {agentId: 'a1', risk: 0.9, env: 'prod', ts: timestamp '2026-01-01T01:30:01Z'},
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep
+#                                 ^^^^^^^ source.cep
+#                                        ^ source.cep punctuation.separator.key-value.cep
+#                                         ^ source.cep
+#                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                           ^^ source.cep string.quoted.single.cep
+#                                             ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                              ^ source.cep punctuation.separator.comma.cep
+#                                               ^ source.cep
+#                                                ^^^^ source.cep
+#                                                    ^ source.cep punctuation.separator.key-value.cep
+#                                                     ^ source.cep
+#                                                      ^^^ source.cep constant.numeric.cep
+#                                                         ^ source.cep punctuation.separator.comma.cep
+#                                                          ^ source.cep
+#                                                           ^^^ source.cep
+#                                                              ^ source.cep punctuation.separator.key-value.cep
+#                                                               ^ source.cep
+#                                                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                 ^^^^ source.cep string.quoted.single.cep
+#                                                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                                       ^ source.cep
+#                                                                        ^^ source.cep
+#                                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                                           ^ source.cep
+#                                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                     ^ source.cep
+#                                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                       ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                           ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                            ^ source.cep
+#                                                                                                             ^ source.cep punctuation.separator.comma.cep
+>                                {agentId: 'a2', risk: 0.8, env: 'prod', ts: timestamp '2026-01-01T01:30:01.001Z'} ]
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep
+#                                 ^^^^^^^ source.cep
+#                                        ^ source.cep punctuation.separator.key-value.cep
+#                                         ^ source.cep
+#                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                           ^^ source.cep string.quoted.single.cep
+#                                             ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                              ^ source.cep punctuation.separator.comma.cep
+#                                               ^ source.cep
+#                                                ^^^^ source.cep
+#                                                    ^ source.cep punctuation.separator.key-value.cep
+#                                                     ^ source.cep
+#                                                      ^^^ source.cep constant.numeric.cep
+#                                                         ^ source.cep punctuation.separator.comma.cep
+#                                                          ^ source.cep
+#                                                           ^^^ source.cep
+#                                                              ^ source.cep punctuation.separator.key-value.cep
+#                                                               ^ source.cep
+#                                                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                 ^^^^ source.cep string.quoted.single.cep
+#                                                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                                       ^ source.cep
+#                                                                        ^^ source.cep
+#                                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                                           ^ source.cep
+#                                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                     ^ source.cep
+#                                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                               ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                                ^^^^ source.cep
+>         then RiskAlerts [ {agentId: 'a1', scaled: 1.0, ts: timestamp '2026-01-01T00:00:01Z'},
+#^^^^^^^^^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^ source.cep
+#                        ^^^^ source.cep
+#                            ^^^^^^^ source.cep
+#                                   ^ source.cep punctuation.separator.key-value.cep
+#                                    ^ source.cep
+#                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                      ^^ source.cep string.quoted.single.cep
+#                                        ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                         ^ source.cep punctuation.separator.comma.cep
+#                                          ^ source.cep
+#                                           ^^^^^^ source.cep
+#                                                 ^ source.cep punctuation.separator.key-value.cep
+#                                                  ^ source.cep
+#                                                   ^^^ source.cep constant.numeric.cep
+#                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                       ^ source.cep
+#                                                        ^^ source.cep
+#                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                           ^ source.cep
+#                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                     ^ source.cep
+#                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                       ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                           ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                            ^ source.cep
+#                                                                                             ^ source.cep punctuation.separator.comma.cep
+>                           {agentId: 'a2', scaled: 1.0, ts: timestamp '2026-01-01T01:30:01.001Z'} ]
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep
+#                            ^^^^^^^ source.cep
+#                                   ^ source.cep punctuation.separator.key-value.cep
+#                                    ^ source.cep
+#                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                      ^^ source.cep string.quoted.single.cep
+#                                        ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                         ^ source.cep punctuation.separator.comma.cep
+#                                          ^ source.cep
+#                                           ^^^^^^ source.cep
+#                                                 ^ source.cep punctuation.separator.key-value.cep
+#                                                  ^ source.cep
+#                                                   ^^^ source.cep constant.numeric.cep
+#                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                       ^ source.cep
+#                                                        ^^ source.cep
+#                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                           ^ source.cep
+#                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                     ^ source.cep
+#                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                       ^^^^^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                               ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                ^^^^ source.cep
+>  expect given `agent-events` [ {agentId: 'a1', risk: 0.75, env: 'prod', ts: timestamp '2026-01-01T00:00:01Z'},
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^^^^^^^^^^ source.cep variable.other.quoted.cep
+#                             ^^^^ source.cep
+#                                 ^^^^^^^ source.cep
+#                                        ^ source.cep punctuation.separator.key-value.cep
+#                                         ^ source.cep
+#                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                           ^^ source.cep string.quoted.single.cep
+#                                             ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                              ^ source.cep punctuation.separator.comma.cep
+#                                               ^ source.cep
+#                                                ^^^^ source.cep
+#                                                    ^ source.cep punctuation.separator.key-value.cep
+#                                                     ^ source.cep
+#                                                      ^^^^ source.cep constant.numeric.cep
+#                                                          ^ source.cep punctuation.separator.comma.cep
+#                                                           ^ source.cep
+#                                                            ^^^ source.cep
+#                                                               ^ source.cep punctuation.separator.key-value.cep
+#                                                                ^ source.cep
+#                                                                 ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                  ^^^^ source.cep string.quoted.single.cep
+#                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                       ^ source.cep punctuation.separator.comma.cep
+#                                                                        ^ source.cep
+#                                                                         ^^ source.cep
+#                                                                           ^ source.cep punctuation.separator.key-value.cep
+#                                                                            ^ source.cep
+#                                                                             ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                      ^ source.cep
+#                                                                                       ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                        ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                            ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                             ^ source.cep
+#                                                                                                              ^ source.cep punctuation.separator.comma.cep
+>                                {agentId: 'a2', risk: 0.5, env: 'prod', ts: timestamp '2026-01-01T00:01:00Z'} ]
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep
+#                                 ^^^^^^^ source.cep
+#                                        ^ source.cep punctuation.separator.key-value.cep
+#                                         ^ source.cep
+#                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                           ^^ source.cep string.quoted.single.cep
+#                                             ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                              ^ source.cep punctuation.separator.comma.cep
+#                                               ^ source.cep
+#                                                ^^^^ source.cep
+#                                                    ^ source.cep punctuation.separator.key-value.cep
+#                                                     ^ source.cep
+#                                                      ^^^ source.cep constant.numeric.cep
+#                                                         ^ source.cep punctuation.separator.comma.cep
+#                                                          ^ source.cep
+#                                                           ^^^ source.cep
+#                                                              ^ source.cep punctuation.separator.key-value.cep
+#                                                               ^ source.cep
+#                                                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                 ^^^^ source.cep string.quoted.single.cep
+#                                                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                                       ^ source.cep
+#                                                                        ^^ source.cep
+#                                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                                           ^ source.cep
+#                                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                     ^ source.cep
+#                                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                       ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                           ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                            ^^^^ source.cep
+>         then RiskAlerts [ ]
+#^^^^^^^^^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^ source.cep
+#                        ^^^^^ source.cep
+>  expect given `agent-events` [ {agentId: 'a1', risk: 0.9, env: 'staging', ts: timestamp '2026-01-01T00:00:01Z'},
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^^^^^^^^^^ source.cep variable.other.quoted.cep
+#                             ^^^^ source.cep
+#                                 ^^^^^^^ source.cep
+#                                        ^ source.cep punctuation.separator.key-value.cep
+#                                         ^ source.cep
+#                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                           ^^ source.cep string.quoted.single.cep
+#                                             ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                              ^ source.cep punctuation.separator.comma.cep
+#                                               ^ source.cep
+#                                                ^^^^ source.cep
+#                                                    ^ source.cep punctuation.separator.key-value.cep
+#                                                     ^ source.cep
+#                                                      ^^^ source.cep constant.numeric.cep
+#                                                         ^ source.cep punctuation.separator.comma.cep
+#                                                          ^ source.cep
+#                                                           ^^^ source.cep
+#                                                              ^ source.cep punctuation.separator.key-value.cep
+#                                                               ^ source.cep
+#                                                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                 ^^^^^^^ source.cep string.quoted.single.cep
+#                                                                        ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                         ^ source.cep punctuation.separator.comma.cep
+#                                                                          ^ source.cep
+#                                                                           ^^ source.cep
+#                                                                             ^ source.cep punctuation.separator.key-value.cep
+#                                                                              ^ source.cep
+#                                                                               ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                        ^ source.cep
+#                                                                                         ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                          ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                              ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                               ^ source.cep
+#                                                                                                                ^ source.cep punctuation.separator.comma.cep
+>                                {agentId: 'a1', risk: 0.9, env: 'prod', ts: timestamp '2026-01-01T00:10:00Z'} ]
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep
+#                                 ^^^^^^^ source.cep
+#                                        ^ source.cep punctuation.separator.key-value.cep
+#                                         ^ source.cep
+#                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                           ^^ source.cep string.quoted.single.cep
+#                                             ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                              ^ source.cep punctuation.separator.comma.cep
+#                                               ^ source.cep
+#                                                ^^^^ source.cep
+#                                                    ^ source.cep punctuation.separator.key-value.cep
+#                                                     ^ source.cep
+#                                                      ^^^ source.cep constant.numeric.cep
+#                                                         ^ source.cep punctuation.separator.comma.cep
+#                                                          ^ source.cep
+#                                                           ^^^ source.cep
+#                                                              ^ source.cep punctuation.separator.key-value.cep
+#                                                               ^ source.cep
+#                                                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                 ^^^^ source.cep string.quoted.single.cep
+#                                                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                                       ^ source.cep
+#                                                                        ^^ source.cep
+#                                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                                           ^ source.cep
+#                                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                     ^ source.cep
+#                                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                       ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                           ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                            ^^^^ source.cep
+>         then RiskAlerts [ {agentId: 'a1', scaled: 1.0, ts: timestamp '2026-01-01T00:10:00Z'} ]
+#^^^^^^^^^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^ source.cep
+#                        ^^^^ source.cep
+#                            ^^^^^^^ source.cep
+#                                   ^ source.cep punctuation.separator.key-value.cep
+#                                    ^ source.cep
+#                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                      ^^ source.cep string.quoted.single.cep
+#                                        ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                         ^ source.cep punctuation.separator.comma.cep
+#                                          ^ source.cep
+#                                           ^^^^^^ source.cep
+#                                                 ^ source.cep punctuation.separator.key-value.cep
+#                                                  ^ source.cep
+#                                                   ^^^ source.cep constant.numeric.cep
+#                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                       ^ source.cep
+#                                                        ^^ source.cep
+#                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                           ^ source.cep
+#                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                     ^ source.cep
+#                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                       ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                           ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                            ^^^^ source.cep
+>  select agentId, math:round(risk) as scaled
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^^^ source.cep
+#                ^ source.cep punctuation.separator.comma.cep
+#                 ^ source.cep
+#                  ^^^^ source.cep entity.name.namespace.cep
+#                      ^ source.cep punctuation.separator.namespace.cep
+#                       ^^^^^ source.cep support.function.cep
+#                            ^ source.cep
+#                             ^^^^ source.cep
+#                                 ^^ source.cep
+#                                   ^^ source.cep keyword.control.clause.cep
+#                                     ^ source.cep
+#                                      ^^^^^^ source.cep
+>  output first every ${lookback}
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^ source.cep keyword.control.clause.cep
+#                    ^ source.cep
+#                     ^^^^^^^^^^^ source.cep variable.other.constant.param.cep
+>  insert into RiskAlerts;
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                        ^ source.cep punctuation.terminator.statement.cep
+>

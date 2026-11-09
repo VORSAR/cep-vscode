@@ -1,0 +1,269 @@
+>-- constructs: three-step-chain followed-by cross-step-references gallery-shape
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>language cep/0.1;
+#^^^^^^^^ source.cep storage.type.declaration.cep
+#        ^ source.cep
+#         ^^^^^^^ source.cep constant.other.version.cep
+#                ^ source.cep punctuation.terminator.statement.cep
+>
+>stream ToolCalls (sessionId string, tool string, visibility string, ts timestamp)
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                ^^ source.cep
+#                  ^^^^^^^^^ source.cep
+#                           ^ source.cep
+#                            ^^^^^^ source.cep storage.type.primitive.cep
+#                                  ^ source.cep punctuation.separator.comma.cep
+#                                   ^ source.cep
+#                                    ^^^^ source.cep
+#                                        ^ source.cep
+#                                         ^^^^^^ source.cep storage.type.primitive.cep
+#                                               ^ source.cep punctuation.separator.comma.cep
+#                                                ^ source.cep
+#                                                 ^^^^^^^^^^ source.cep
+#                                                           ^ source.cep
+#                                                            ^^^^^^ source.cep storage.type.primitive.cep
+#                                                                  ^ source.cep punctuation.separator.comma.cep
+#                                                                   ^ source.cep
+#                                                                    ^^ source.cep
+#                                                                      ^ source.cep
+#                                                                       ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                ^^ source.cep
+>  time ts watermark bounded 1 min idle after 2 min;
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep
+#         ^ source.cep
+#          ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                   ^ source.cep
+#                    ^^^^^^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^ source.cep constant.numeric.cep
+#                             ^ source.cep
+#                              ^^^ source.cep keyword.other.unit.cep
+#                                 ^ source.cep
+#                                  ^^^^ source.cep keyword.control.clause.cep
+#                                      ^ source.cep
+#                                       ^^^^^ source.cep keyword.control.clause.cep
+#                                            ^ source.cep
+#                                             ^ source.cep constant.numeric.cep
+#                                              ^ source.cep
+#                                               ^^^ source.cep keyword.other.unit.cep
+#                                                  ^ source.cep punctuation.terminator.statement.cep
+>
+>stream FlowAlerts (sessionId string, ts timestamp, evidence object);
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                 ^^ source.cep
+#                   ^^^^^^^^^ source.cep
+#                            ^ source.cep
+#                             ^^^^^^ source.cep storage.type.primitive.cep
+#                                   ^ source.cep punctuation.separator.comma.cep
+#                                    ^ source.cep
+#                                     ^^ source.cep
+#                                       ^ source.cep
+#                                        ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                 ^ source.cep punctuation.separator.comma.cep
+#                                                  ^ source.cep
+#                                                   ^^^^^^^^ source.cep
+#                                                           ^ source.cep
+#                                                            ^^^^^^ source.cep storage.type.primitive.cep
+#                                                                  ^ source.cep
+#                                                                   ^ source.cep punctuation.terminator.statement.cep
+>
+>rule CrossVisibilityFlow
+#^^^^ source.cep storage.type.declaration.cep
+#    ^ source.cep
+#     ^^^^^^^^^^^^^^^^^^^ source.cep entity.name.function.rule.cep
+>  intent 'Within one session: a public read, then a private read, then a public write.'
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+>  partition by sessionId of ToolCalls ttl 1 hour
+#^^ source.cep
+#  ^^^^^^^^^ source.cep keyword.control.clause.cep
+#           ^ source.cep
+#            ^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^^^^^ source.cep
+#                        ^ source.cep
+#                         ^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^^^^^^^^^ source.cep
+#                                     ^ source.cep
+#                                      ^^^ source.cep keyword.control.clause.cep
+#                                         ^ source.cep
+#                                          ^ source.cep constant.numeric.cep
+#                                           ^ source.cep
+#                                            ^^^^ source.cep keyword.other.unit.cep
+>  from every a = ToolCalls[tool == 'get_issue' and visibility == 'public']
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^ source.cep keyword.control.clause.cep
+#            ^ source.cep
+#             ^ source.cep
+#              ^ source.cep
+#               ^ source.cep keyword.operator.assignment.cep
+#                ^ source.cep
+#                 ^^^^^^^^^ source.cep
+#                          ^ source.cep
+#                           ^^^^ source.cep
+#                               ^ source.cep
+#                                ^^ source.cep keyword.operator.comparison.cep
+#                                  ^ source.cep
+#                                   ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                    ^^^^^^^^^ source.cep string.quoted.single.cep
+#                                             ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                              ^ source.cep
+#                                               ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                                                  ^ source.cep
+#                                                   ^^^^^^^^^^ source.cep
+#                                                             ^ source.cep
+#                                                              ^^ source.cep keyword.operator.comparison.cep
+#                                                                ^ source.cep
+#                                                                 ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                  ^^^^^^ source.cep string.quoted.single.cep
+#                                                                        ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                         ^^ source.cep
+>    -> b = ToolCalls[tool == 'file_read' and visibility == 'private'
+#^^^^ source.cep
+#    ^^ source.cep keyword.operator.arrow.cep
+#      ^ source.cep
+#       ^ source.cep
+#        ^ source.cep
+#         ^ source.cep keyword.operator.assignment.cep
+#          ^ source.cep
+#           ^^^^^^^^^ source.cep
+#                    ^ source.cep
+#                     ^^^^ source.cep
+#                         ^ source.cep
+#                          ^^ source.cep keyword.operator.comparison.cep
+#                            ^ source.cep
+#                             ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                              ^^^^^^^^^ source.cep string.quoted.single.cep
+#                                       ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                        ^ source.cep
+#                                         ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                                            ^ source.cep
+#                                             ^^^^^^^^^^ source.cep
+#                                                       ^ source.cep
+#                                                        ^^ source.cep keyword.operator.comparison.cep
+#                                                          ^ source.cep
+#                                                           ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                            ^^^^^^^ source.cep string.quoted.single.cep
+#                                                                   ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+>                     and sessionId == a.sessionId]
+#^^^^^^^^^^^^^^^^^^^^^ source.cep
+#                     ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                        ^ source.cep
+#                         ^^^^^^^^^ source.cep
+#                                  ^ source.cep
+#                                   ^^ source.cep keyword.operator.comparison.cep
+#                                     ^ source.cep
+#                                      ^ source.cep
+#                                       ^ source.cep punctuation.accessor.cep
+#                                        ^^^^^^^^^ source.cep
+#                                                 ^^ source.cep
+>    -> c = ToolCalls[tool == 'create_pull_request' and visibility == 'public'
+#^^^^ source.cep
+#    ^^ source.cep keyword.operator.arrow.cep
+#      ^ source.cep
+#       ^ source.cep
+#        ^ source.cep
+#         ^ source.cep keyword.operator.assignment.cep
+#          ^ source.cep
+#           ^^^^^^^^^ source.cep
+#                    ^ source.cep
+#                     ^^^^ source.cep
+#                         ^ source.cep
+#                          ^^ source.cep keyword.operator.comparison.cep
+#                            ^ source.cep
+#                             ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                              ^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                 ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                  ^ source.cep
+#                                                   ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                                                      ^ source.cep
+#                                                       ^^^^^^^^^^ source.cep
+#                                                                 ^ source.cep
+#                                                                  ^^ source.cep keyword.operator.comparison.cep
+#                                                                    ^ source.cep
+#                                                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                      ^^^^^^ source.cep string.quoted.single.cep
+#                                                                            ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+>                     and sessionId == a.sessionId]
+#^^^^^^^^^^^^^^^^^^^^^ source.cep
+#                     ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                        ^ source.cep
+#                         ^^^^^^^^^ source.cep
+#                                  ^ source.cep
+#                                   ^^ source.cep keyword.operator.comparison.cep
+#                                     ^ source.cep
+#                                      ^ source.cep
+#                                       ^ source.cep punctuation.accessor.cep
+#                                        ^^^^^^^^^ source.cep
+#                                                 ^^ source.cep
+>  within 10 min
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^ source.cep constant.numeric.cep
+#           ^ source.cep
+#            ^^^ source.cep keyword.other.unit.cep
+>  after match skip past last
+#^^ source.cep
+#  ^^^^^ source.cep keyword.control.clause.cep
+#       ^ source.cep
+#        ^^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^ source.cep keyword.control.clause.cep
+#                  ^ source.cep
+#                   ^^^^ source.cep keyword.control.clause.cep
+#                       ^ source.cep
+#                        ^^^^ source.cep keyword.control.clause.cep
+>  late events drop
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^ source.cep keyword.control.clause.cep
+>  select a.sessionId, chain(a, b, c) as evidence
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^ source.cep
+#          ^ source.cep punctuation.accessor.cep
+#           ^^^^^^^^^ source.cep
+#                    ^ source.cep punctuation.separator.comma.cep
+#                     ^ source.cep
+#                      ^^^^^ source.cep support.function.cep
+#                           ^ source.cep
+#                            ^ source.cep
+#                             ^ source.cep punctuation.separator.comma.cep
+#                              ^ source.cep
+#                               ^ source.cep
+#                                ^ source.cep punctuation.separator.comma.cep
+#                                 ^ source.cep
+#                                  ^ source.cep
+#                                   ^^ source.cep
+#                                     ^^ source.cep keyword.control.clause.cep
+#                                       ^ source.cep
+#                                        ^^^^^^^^ source.cep
+>  insert into FlowAlerts;
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                        ^ source.cep punctuation.terminator.statement.cep
+>

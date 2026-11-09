@@ -1,0 +1,490 @@
+>-- constructs: comment-torture line-comments block-comments comment-before-pragma comment-after-last-statement
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>--             comment-inside-expression crlf tabs raw-string-with-comment-text no-trailing-newline
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>/* a block comment before the pragma */
+#^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+#                                     ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+>language cep/0.1; -- a line comment at the end of the pragma line
+#^^^^^^^^ source.cep storage.type.declaration.cep
+#        ^ source.cep
+#         ^^^^^^^ source.cep constant.other.version.cep
+#                ^ source.cep punctuation.terminator.statement.cep
+#                 ^ source.cep
+#                  ^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>
+>-- a line comment whose text contains /* and */ and -- again
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>/* a block comment whose text contains -- and a 'quote' and a "double quote" */
+#^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+#                                                                             ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+>param	grace	duration = 2 min;	-- tabs between the tokens and before this comment
+#^^^^^ source.cep storage.type.declaration.cep
+#     ^ source.cep
+#      ^^^^^ source.cep variable.other.constant.param.cep
+#           ^ source.cep
+#            ^^^^^^^^ source.cep storage.type.primitive.cep
+#                    ^ source.cep
+#                     ^ source.cep keyword.operator.assignment.cep
+#                      ^ source.cep
+#                       ^ source.cep constant.numeric.cep
+#                        ^ source.cep
+#                         ^^^ source.cep keyword.other.unit.cep
+#                            ^ source.cep punctuation.terminator.statement.cep
+#                             ^ source.cep
+#                              ^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>
+>stream Actions (agentId string, action string, -- a line comment inside the attribute list, ending in CRLF
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^ source.cep entity.name.type.stream.cep
+#              ^^ source.cep
+#                ^^^^^^^ source.cep
+#                       ^ source.cep
+#                        ^^^^^^ source.cep storage.type.primitive.cep
+#                              ^ source.cep punctuation.separator.comma.cep
+#                               ^ source.cep
+#                                ^^^^^^ source.cep
+#                                      ^ source.cep
+#                                       ^^^^^^ source.cep storage.type.primitive.cep
+#                                             ^ source.cep punctuation.separator.comma.cep
+#                                              ^ source.cep
+#                                               ^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>		resource string, ts timestamp)
+#^^ source.cep
+#  ^^^^^^^^ source.cep
+#          ^ source.cep
+#           ^^^^^^ source.cep storage.type.primitive.cep
+#                 ^ source.cep punctuation.separator.comma.cep
+#                  ^ source.cep
+#                   ^^ source.cep
+#                     ^ source.cep
+#                      ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                               ^^ source.cep
+>  time ts watermark bounded 2 min idle after 1 min;
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep
+#         ^ source.cep
+#          ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                   ^ source.cep
+#                    ^^^^^^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^ source.cep constant.numeric.cep
+#                             ^ source.cep
+#                              ^^^ source.cep keyword.other.unit.cep
+#                                 ^ source.cep
+#                                  ^^^^ source.cep keyword.control.clause.cep
+#                                      ^ source.cep
+#                                       ^^^^^ source.cep keyword.control.clause.cep
+#                                            ^ source.cep
+#                                             ^ source.cep constant.numeric.cep
+#                                              ^ source.cep
+#                                               ^^^ source.cep keyword.other.unit.cep
+#                                                  ^ source.cep punctuation.terminator.statement.cep
+>
+>stream Approvals (agentId string, action string, ts timestamp)
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                ^^ source.cep
+#                  ^^^^^^^ source.cep
+#                         ^ source.cep
+#                          ^^^^^^ source.cep storage.type.primitive.cep
+#                                ^ source.cep punctuation.separator.comma.cep
+#                                 ^ source.cep
+#                                  ^^^^^^ source.cep
+#                                        ^ source.cep
+#                                         ^^^^^^ source.cep storage.type.primitive.cep
+#                                               ^ source.cep punctuation.separator.comma.cep
+#                                                ^ source.cep
+#                                                 ^^ source.cep
+#                                                   ^ source.cep
+#                                                    ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                             ^^ source.cep
+>  time ts watermark bounded 2 min idle after 1 min;
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^ source.cep
+#         ^ source.cep
+#          ^^^^^^^^^ source.cep keyword.control.clause.cep
+#                   ^ source.cep
+#                    ^^^^^^^ source.cep keyword.control.clause.cep
+#                           ^ source.cep
+#                            ^ source.cep constant.numeric.cep
+#                             ^ source.cep
+#                              ^^^ source.cep keyword.other.unit.cep
+#                                 ^ source.cep
+#                                  ^^^^ source.cep keyword.control.clause.cep
+#                                      ^ source.cep
+#                                       ^^^^^ source.cep keyword.control.clause.cep
+#                                            ^ source.cep
+#                                             ^ source.cep constant.numeric.cep
+#                                              ^ source.cep
+#                                               ^^^ source.cep keyword.other.unit.cep
+#                                                  ^ source.cep punctuation.terminator.statement.cep
+>
+>/* a block comment
+#^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+>   spanning three lines,
+#^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+>   the middle one ending in CRLF */
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+#                                 ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+>@sink(type = 'log' /* a block comment inside an annotation */)
+#^ source.cep punctuation.definition.annotation.cep
+# ^^^^ source.cep storage.type.annotation.cep
+#     ^ source.cep
+#      ^^^^ source.cep
+#          ^ source.cep
+#           ^ source.cep keyword.operator.assignment.cep
+#            ^ source.cep
+#             ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#              ^^^ source.cep string.quoted.single.cep
+#                 ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                  ^ source.cep
+#                   ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+#                                                           ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#                                                             ^^ source.cep
+>stream Escalations (agentId string, reason string, ts timestamp);
+#^^^^^^ source.cep storage.type.declaration.cep
+#      ^ source.cep
+#       ^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                  ^^ source.cep
+#                    ^^^^^^^ source.cep
+#                           ^ source.cep
+#                            ^^^^^^ source.cep storage.type.primitive.cep
+#                                  ^ source.cep punctuation.separator.comma.cep
+#                                   ^ source.cep
+#                                    ^^^^^^ source.cep
+#                                          ^ source.cep
+#                                           ^^^^^^ source.cep storage.type.primitive.cep
+#                                                 ^ source.cep punctuation.separator.comma.cep
+#                                                  ^ source.cep
+#                                                   ^^ source.cep
+#                                                     ^ source.cep
+#                                                      ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                               ^ source.cep
+#                                                                ^ source.cep punctuation.terminator.statement.cep
+>
+>rule CommentTorture
+#^^^^ source.cep storage.type.declaration.cep
+#    ^ source.cep
+#     ^^^^^^^^^^^^^^ source.cep entity.name.function.rule.cep
+>  intent '''A multi-line raw intent string.
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^ source.cep string.quoted.triple.single.cep
+#            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.triple.single.cep
+>-- not a comment
+#^^^^^^^^^^^^^^^^^ source.cep string.quoted.triple.single.cep
+>/* not a comment */
+#^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.triple.single.cep
+>It ends here.'''
+#^^^^^^^^^^^^^ source.cep string.quoted.triple.single.cep
+#             ^^^ source.cep string.quoted.triple.single.cep
+>  partition by agentId of Actions, agentId of Approvals ttl 15 min
+#^^ source.cep
+#  ^^^^^^^^^ source.cep keyword.control.clause.cep
+#           ^ source.cep
+#            ^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^^^ source.cep
+#                      ^ source.cep
+#                       ^^ source.cep keyword.control.clause.cep
+#                         ^ source.cep
+#                          ^^^^^^^ source.cep
+#                                 ^ source.cep punctuation.separator.comma.cep
+#                                  ^ source.cep
+#                                   ^^^^^^^ source.cep
+#                                          ^ source.cep
+#                                           ^^ source.cep keyword.control.clause.cep
+#                                             ^ source.cep
+#                                              ^^^^^^^^^ source.cep
+#                                                       ^ source.cep
+#                                                        ^^^ source.cep keyword.control.clause.cep
+#                                                           ^ source.cep
+#                                                            ^^ source.cep constant.numeric.cep
+#                                                              ^ source.cep
+#                                                               ^^^ source.cep keyword.other.unit.cep
+>  from every read = Actions[action == /* a block comment between tokens inside an expression */ 'read'
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^ source.cep keyword.control.clause.cep
+#            ^ source.cep
+#             ^^^^ source.cep
+#                 ^ source.cep
+#                  ^ source.cep keyword.operator.assignment.cep
+#                   ^ source.cep
+#                    ^^^^^^^ source.cep
+#                           ^ source.cep
+#                            ^^^^^^ source.cep
+#                                  ^ source.cep
+#                                   ^^ source.cep keyword.operator.comparison.cep
+#                                     ^ source.cep
+#                                      ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+#                                                                                             ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#                                                                                               ^ source.cep
+#                                                                                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                                 ^^^^ source.cep string.quoted.single.cep
+#                                                                                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+>                            and resource == 'vault -- not a comment either' -- but this one is
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep
+#                            ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#                               ^ source.cep
+#                                ^^^^^^^^ source.cep
+#                                        ^ source.cep
+#                                         ^^ source.cep keyword.operator.comparison.cep
+#                                           ^ source.cep
+#                                            ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                          ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                           ^ source.cep
+#                                                                            ^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#                                                                              ^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>                            ]
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep
+>    -> send = Actions[action == 'send' /* a block comment
+#^^^^ source.cep
+#    ^^ source.cep keyword.operator.arrow.cep
+#      ^ source.cep
+#       ^^^^ source.cep
+#           ^ source.cep
+#            ^ source.cep keyword.operator.assignment.cep
+#             ^ source.cep
+#              ^^^^^^^ source.cep
+#                     ^ source.cep
+#                      ^^^^^^ source.cep
+#                            ^ source.cep
+#                             ^^ source.cep keyword.operator.comparison.cep
+#                               ^ source.cep
+#                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                 ^^^^ source.cep string.quoted.single.cep
+#                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                      ^ source.cep
+#                                       ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#                                         ^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+>                      spanning two lines inside the filter */ ]
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+#                                                           ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#                                                             ^^^ source.cep
+>    and not Approvals[action == 'send'] for ${grace}
+#^^^^ source.cep
+#    ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#       ^ source.cep
+#        ^^^ source.cep keyword.operator.logical.cep keyword.operator.wordlike.cep
+#           ^ source.cep
+#            ^^^^^^^^^ source.cep
+#                     ^ source.cep
+#                      ^^^^^^ source.cep
+#                            ^ source.cep
+#                             ^^ source.cep keyword.operator.comparison.cep
+#                               ^ source.cep
+#                                ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                 ^^^^ source.cep string.quoted.single.cep
+#                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                      ^^ source.cep
+#                                        ^^^ source.cep keyword.control.clause.cep
+#                                           ^ source.cep
+#                                            ^^^^^^^^ source.cep variable.other.constant.param.cep
+>  within ${grace} -- a line comment after the within clause
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^^^^ source.cep variable.other.constant.param.cep
+#                 ^ source.cep
+#                  ^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>  after /* a block comment between two keywords of one clause */ match skip past last
+#^^ source.cep
+#  ^^^^^ source.cep keyword.control.clause.cep
+#       ^ source.cep
+#        ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+#                                                              ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#                                                                ^ source.cep
+#                                                                 ^^^^^ source.cep keyword.control.clause.cep
+#                                                                      ^ source.cep
+#                                                                       ^^^^ source.cep keyword.control.clause.cep
+#                                                                           ^ source.cep
+#                                                                            ^^^^ source.cep keyword.control.clause.cep
+#                                                                                ^ source.cep
+#                                                                                 ^^^^ source.cep keyword.control.clause.cep
+>  late events drop
+#^^ source.cep
+#  ^^^^ source.cep keyword.control.clause.cep
+#      ^ source.cep
+#       ^^^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^ source.cep keyword.control.clause.cep
+>  expect given Actions [ {agentId: 'a1', action: 'read', resource: 'vault -- not a comment either', ts: timestamp '2026-01-01T10:00:00Z'}, -- a record
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^^^ source.cep
+#                      ^^^^ source.cep
+#                          ^^^^^^^ source.cep
+#                                 ^ source.cep punctuation.separator.key-value.cep
+#                                  ^ source.cep
+#                                   ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                    ^^ source.cep string.quoted.single.cep
+#                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                       ^ source.cep punctuation.separator.comma.cep
+#                                        ^ source.cep
+#                                         ^^^^^^ source.cep
+#                                               ^ source.cep punctuation.separator.key-value.cep
+#                                                ^ source.cep
+#                                                 ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                  ^^^^ source.cep string.quoted.single.cep
+#                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                       ^ source.cep punctuation.separator.comma.cep
+#                                                        ^ source.cep
+#                                                         ^^^^^^^^ source.cep
+#                                                                 ^ source.cep punctuation.separator.key-value.cep
+#                                                                  ^ source.cep
+#                                                                   ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                 ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                  ^ source.cep punctuation.separator.comma.cep
+#                                                                                                   ^ source.cep
+#                                                                                                    ^^ source.cep
+#                                                                                                      ^ source.cep punctuation.separator.key-value.cep
+#                                                                                                       ^ source.cep
+#                                                                                                        ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                                                 ^ source.cep
+#                                                                                                                  ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                                                   ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                                                       ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                                                        ^ source.cep
+#                                                                                                                                         ^ source.cep punctuation.separator.comma.cep
+#                                                                                                                                          ^ source.cep
+#                                                                                                                                           ^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#                                                                                                                                             ^^^^^^^^^ source.cep comment.line.double-dash.cep
+>                         {agentId: 'a1', action: 'send', resource: 'x', ts: timestamp '2026-01-01T10:01:00Z'} ]
+#^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep
+#                          ^^^^^^^ source.cep
+#                                 ^ source.cep punctuation.separator.key-value.cep
+#                                  ^ source.cep
+#                                   ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                    ^^ source.cep string.quoted.single.cep
+#                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                       ^ source.cep punctuation.separator.comma.cep
+#                                        ^ source.cep
+#                                         ^^^^^^ source.cep
+#                                               ^ source.cep punctuation.separator.key-value.cep
+#                                                ^ source.cep
+#                                                 ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                  ^^^^ source.cep string.quoted.single.cep
+#                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                       ^ source.cep punctuation.separator.comma.cep
+#                                                        ^ source.cep
+#                                                         ^^^^^^^^ source.cep
+#                                                                 ^ source.cep punctuation.separator.key-value.cep
+#                                                                  ^ source.cep
+#                                                                   ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                    ^ source.cep string.quoted.single.cep
+#                                                                     ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                      ^ source.cep punctuation.separator.comma.cep
+#                                                                       ^ source.cep
+#                                                                        ^^ source.cep
+#                                                                          ^ source.cep punctuation.separator.key-value.cep
+#                                                                           ^ source.cep
+#                                                                            ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                     ^ source.cep
+#                                                                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                       ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                           ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                            ^^^^ source.cep
+>         then Escalations [ {agentId: 'a1', reason: 'read-then-send', ts: timestamp '2026-01-01T10:03:00Z'} ]
+#^^^^^^^^^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^^ source.cep
+#                         ^^^^ source.cep
+#                             ^^^^^^^ source.cep
+#                                    ^ source.cep punctuation.separator.key-value.cep
+#                                     ^ source.cep
+#                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                       ^^ source.cep string.quoted.single.cep
+#                                         ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                          ^ source.cep punctuation.separator.comma.cep
+#                                           ^ source.cep
+#                                            ^^^^^^ source.cep
+#                                                  ^ source.cep punctuation.separator.key-value.cep
+#                                                   ^ source.cep
+#                                                    ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                     ^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                   ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                    ^ source.cep punctuation.separator.comma.cep
+#                                                                     ^ source.cep
+#                                                                      ^^ source.cep
+#                                                                        ^ source.cep punctuation.separator.key-value.cep
+#                                                                         ^ source.cep
+#                                                                          ^^^^^^^^^ source.cep storage.type.primitive.cep
+#                                                                                   ^ source.cep
+#                                                                                    ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                                                                                     ^^^^^^^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                                                                                         ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                                                                                          ^^^^ source.cep
+>  select read.agentId, 'read-then-send' as reason
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^ source.cep
+#             ^ source.cep punctuation.accessor.cep
+#              ^^^^^^^ source.cep
+#                     ^ source.cep punctuation.separator.comma.cep
+#                      ^ source.cep
+#                       ^ source.cep string.quoted.single.cep punctuation.definition.string.begin.cep
+#                        ^^^^^^^^^^^^^^ source.cep string.quoted.single.cep
+#                                      ^ source.cep string.quoted.single.cep punctuation.definition.string.end.cep
+#                                       ^ source.cep
+#                                        ^^ source.cep keyword.control.clause.cep
+#                                          ^ source.cep
+#                                           ^^^^^^ source.cep
+>  output first every 10 min
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^^ source.cep keyword.control.clause.cep
+#              ^ source.cep
+#               ^^^^^ source.cep keyword.control.clause.cep
+#                    ^ source.cep
+#                     ^^ source.cep constant.numeric.cep
+#                       ^ source.cep
+#                        ^^^ source.cep keyword.other.unit.cep
+>  insert into Escalations; -- a line comment after the last semicolon
+#^^ source.cep
+#  ^^^^^^ source.cep keyword.control.clause.cep
+#        ^ source.cep
+#         ^^^^ source.cep keyword.control.clause.cep
+#             ^ source.cep
+#              ^^^^^^^^^^^ source.cep entity.name.type.stream.cep
+#                         ^ source.cep punctuation.terminator.statement.cep
+#                          ^ source.cep
+#                           ^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
+>/* a block comment after the last semicolon */
+#^^ source.cep comment.block.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.block.cep
+#                                            ^^ source.cep comment.block.cep punctuation.definition.comment.cep
+>-- the last line: a line comment with no trailing newline
+#^^ source.cep comment.line.double-dash.cep punctuation.definition.comment.cep
+#  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ source.cep comment.line.double-dash.cep
