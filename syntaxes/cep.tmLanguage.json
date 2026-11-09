@@ -118,8 +118,8 @@
           "end": "\"\"\""
         },
         {
-          "match": "((')(?:[^'\\\\\\n]|\\\\.)*\\\\?)$",
           "name": "string.quoted.single.cep",
+          "match": "((')(?:[^'\\\\\\n]|\\\\.)*\\\\?)$",
           "captures": {
             "1": {
               "name": "invalid.illegal.newline.cep"
@@ -130,9 +130,9 @@
           }
         },
         {
+          "name": "string.quoted.single.cep",
           "begin": "'(?=(?:[^'\\\\\\n]|\\\\.)*')",
           "end": "'",
-          "name": "string.quoted.single.cep",
           "beginCaptures": {
             "0": {
               "name": "punctuation.definition.string.begin.cep"
@@ -150,8 +150,8 @@
           ]
         },
         {
-          "match": "((\")(?:[^\"\\\\\\n]|\\\\.)*\\\\?)$",
           "name": "string.quoted.double.cep",
+          "match": "((\")(?:[^\"\\\\\\n]|\\\\.)*\\\\?)$",
           "captures": {
             "1": {
               "name": "invalid.illegal.newline.cep"
@@ -162,9 +162,9 @@
           }
         },
         {
+          "name": "string.quoted.double.cep",
           "begin": "\"(?=(?:[^\"\\\\\\n]|\\\\.)*\")",
           "end": "\"",
-          "name": "string.quoted.double.cep",
           "beginCaptures": {
             "0": {
               "name": "punctuation.definition.string.begin.cep"
@@ -354,8 +354,8 @@
               "include": "#comments"
             },
             {
-              "match": "(?<![A-Za-z_])table(?![A-Za-z0-9_])",
-              "name": "storage.type.declaration.cep"
+              "name": "storage.type.declaration.cep",
+              "match": "(?<![A-Za-z_])table(?![A-Za-z0-9_])"
             }
           ]
         }
@@ -391,11 +391,11 @@
     },
     "keywords-type": {
       "name": "storage.type.primitive.cep",
-      "match": "(?<![A-Za-z_])(?:string|int|float|bool|timestamp|duration|object)(?![A-Za-z0-9_])"
+      "match": "(?<![A-Za-z_])(?:timestamp|string|int|float|bool|duration|object)(?![A-Za-z0-9_])"
     },
     "keywords-modifier": {
       "name": "storage.modifier.cep",
-      "match": "(?<![A-Za-z_])(?:optional|primary|key)(?![A-Za-z0-9_])"
+      "match": "(?<![A-Za-z_])(?:primary|key|optional)(?![A-Za-z0-9_])"
     },
     "keywords-clause": {
       "name": "keyword.control.clause.cep",
@@ -415,7 +415,7 @@
     },
     "keywords-constant": {
       "name": "constant.language.cep",
-      "match": "(?<![A-Za-z_])(?:true|false|null)(?![A-Za-z0-9_])"
+      "match": "(?<![A-Za-z_])(?:null|true|false)(?![A-Za-z0-9_])"
     },
     "keywords-builtin": {
       "name": "support.function.builtin.cep",
@@ -427,7 +427,7 @@
     },
     "keywords-reserved": {
       "name": "invalid.illegal.reserved.cep",
-      "match": "(?<![A-Za-z_])(?:group|having|order|limit|offset|join|trigger|aggregation|sequence|session|tumbling|hopping|sliding|processing|route|to|punctuated)(?![A-Za-z0-9_])"
+      "match": "(?<![A-Za-z_])(?:route|to|punctuated|group|having|order|limit|offset|join|trigger|aggregation|sequence|session|tumbling|hopping|sliding|processing)(?![A-Za-z0-9_])"
     },
     "keywords-wrong-case": {
       "name": "invalid.illegal.keyword-case.cep",
