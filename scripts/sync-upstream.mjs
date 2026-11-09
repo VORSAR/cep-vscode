@@ -62,6 +62,7 @@ const INVALID = [
   'e-kw-001-mixedcase-identifier.cep',
   'e-kw-002-uppercase-keyword.cep',
   'e-res-001-group-by.cep',
+  'e-syn-001-malformed-backticked-name.cep',
   'e-str-001-newline-in-single-quoted.cep',
   'e-txt-001-unsuffixed-text-operator.cep',
 ];
