@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-09):** **v0.1.0 is released** (S1), cut by CI from tag `v0.1.0` ([release](https://github.com/VORSAR/cep-vscode/releases/tag/v0.1.0)): the test-first grammar, the tooling, the 19 reviewed snapshots, and CI running the full gate. v0.0.1 came before it. Next on the ladder (§7.0): v0.1.1 (S1.1), the review and break-it of the combined build with one fix round and the four-theme check; then v0.1.x, the lockfile refresh on or after 2026-11-13.
+**Status (2026-11-09):** v0.0.1 and v0.1.0 are released ([releases](https://github.com/VORSAR/cep-vscode/releases)). **v0.1.1 is being prepared:** the re-sync to cep `75f541e` (F1–F4 fixed in cep), cep's backticked-name rule, and an 8th invalid fixture. Next on the ladder (§7.0): v0.1.2 (S1.1), the review and break-it with one fix round and the four-theme check; then v0.1.x, the lockfile refresh on or after 2026-11-13.
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 
@@ -69,7 +69,7 @@ cep is the source of truth. The files used, pinned at **cep `main` = `75f541e4b8
 | `docs/language/SPEC.md` §2 | Lexical rules: keywords lowercase-only (§2.1); identifiers and backticked names (§2.3); string escapes, exhaustively `\\ \' \" \n \t \r \uXXXX`, anything else is E-STR-002 (§2.4 table) |
 | `docs/language/grammar.lark` | Where each keyword can appear; used for the categories in §5.3 |
 | `docs/language/examples/*.cep` (10 files) and `examples/torture/*.cep` (2 files) | Snapshot fixtures. `torture/lexical.cep` uses every literal form; `torture/comments.cep` covers every comment case and has CRLF line endings and no final newline |
-| `docs/language/invalid/` (7 files, §6.2) | Snapshot fixtures for the error scopes |
+| `docs/language/invalid/` (8 files, §6.2; the 8th, `e-syn-001-malformed-backticked-name.cep`, since cep `75f541e`) | Snapshot fixtures for the error scopes |
 
 The language is `language cep/0.1;` (frozen). The grammar targets exactly that version.
 
@@ -103,7 +103,7 @@ cep-vscode/
 │   ├── fixtures/
 │   │   ├── examples/*.cep (+ .cep.snap)   # 10 files
 │   │   ├── torture/*.cep  (+ .cep.snap)   # 2 files
-│   │   └── invalid/*.cep  (+ .cep.snap)   # 7 files
+│   │   └── invalid/*.cep  (+ .cep.snap)   # 8 files
 │   ├── checker.test.mjs             # §6.3
 │   ├── grammar.test.mjs             # scope lint + language configuration (plan check card lines 1, 9)
 │   ├── tools.test.mjs               # §6.4
@@ -382,13 +382,13 @@ The script reads files from a git ref, `main` by default, through git's object s
    - `internal/parser/lexer.go` → `test/upstream/lexer.go` (owner, G1-4);
    - every `*.cep` that `git -C <cep> ls-tree --name-only <ref> docs/language/examples/` lists → `test/fixtures/examples/`;
    - every `*.cep` that `ls-tree` lists for `docs/language/examples/torture/` → `test/fixtures/torture/`;
-   - these seven under `docs/language/invalid/` → `test/fixtures/invalid/`: `e-cmt-001-unterminated-comment.cep`, `e-kw-001-keyword-as-identifier.cep`, `e-kw-001-mixedcase-identifier.cep`, `e-kw-002-uppercase-keyword.cep`, `e-res-001-group-by.cep`, `e-str-001-newline-in-single-quoted.cep`, `e-txt-001-unsuffixed-text-operator.cep`. A missing one is a failure, naming it.
+   - these eight under `docs/language/invalid/` → `test/fixtures/invalid/` (the 8th added 2026-11-09, owner): `e-cmt-001-unterminated-comment.cep`, `e-kw-001-keyword-as-identifier.cep`, `e-kw-001-mixedcase-identifier.cep`, `e-kw-002-uppercase-keyword.cep`, `e-res-001-group-by.cep`, `e-syn-001-malformed-backticked-name.cep`, `e-str-001-newline-in-single-quoted.cep`, `e-txt-001-unsuffixed-text-operator.cep`. A missing one is a failure, naming it.
 
    `ls-tree` prints full paths and lists the `torture` folder as an entry of its own. Keep only names ending in `.cep`, and write each under its basename.
 3. Write `test/upstream/SOURCE` as exactly `VORSAR/cep <sha> <date>` and one LF, from `git -C <cep> log -1 --format=%H %cs <ref>`.
 4. Never delete anything: the `.cep.snap` files live next to the fixtures. List every `.cep` under `<out>/test/fixtures/` that was not in this copy set, and exit 1 if there are any, so a person removes the stale fixture and its snapshot.
 5. Print each file written that changed, then the line `next: npm test, then review every snapshot diff`.
-6. **`--check`** writes nothing. It compares each of the 21 targets (19 fixtures, `keywords.go`, `lexer.go`), and `SOURCE`, with what step 2 would write. It exits 1, naming each file that differs or is missing; otherwise it prints `sync-upstream: ok (21 files match <sha>)`. This is the byte proof for the vendored files (plan check card line 4).
+6. **`--check`** writes nothing. It compares each of the 22 targets (20 fixtures, `keywords.go`, `lexer.go`), and `SOURCE`, with what step 2 would write. It exits 1, naming each file that differs or is missing; otherwise it prints `sync-upstream: ok (22 files match <sha>)`. This is the byte proof for the vendored files (plan check card line 4).
 
 In S1 the sync runs pinned to the sprint's target: `node scripts/sync-upstream.mjs <absolute path of the cep clone> --ref 1fa3a5bb9d3bbabfe0c26ca3daa62086c8093c49`.
 
@@ -439,11 +439,11 @@ This is the guard that `test:snap` lacks: the snapshot tool writes a missing sna
 2. **Candidates.** List the candidate files with `git -C <root> ls-files --cached --others --exclude-standard -- test/fixtures`. Ignored files, such as a `.DS_Store`, are skipped. A candidate counts as present only if it also exists on disk, because `git ls-files` still lists a tracked file that was deleted.
 3. **Tracked** means listed by `git -C <root> ls-files --cached -- test/fixtures` (staged or committed).
 4. Fail, with one line per problem, if:
-   - (a) the present `.cep` files are not exactly 10 in `examples/`, 2 in `torture/` and 7 in `invalid/`. The counts are per folder and are constants in the script; a total of 19 is not enough.
+   - (a) the present `.cep` files are not exactly 10 in `examples/`, 2 in `torture/` and 8 in `invalid/`. The counts are per folder and are constants in the script; a total of 20 is not enough.
    - (b) a `.cep` has no `<name>.cep.snap` beside it that is both present and tracked;
    - (c) a `.cep.snap` has no `.cep` beside it;
    - (d) any other present file is there.
-5. On a pass, print `check-fixtures: ok (19 fixtures, 19 tracked snapshots)`.
+5. On a pass, print `check-fixtures: ok (20 fixtures, 20 tracked snapshots)`.
 
 #### 5.5.5 `scripts/check-vsix.mjs [<file.vsix>] [--root <dir>]`
 
@@ -800,7 +800,7 @@ lead.agentId, x                               "." → punctuation.accessor.cep; 
 
 ### 6.2 Snapshot tests: `test/fixtures/**/*.cep` (v2)
 
-There are 19 fixtures (10 examples, 2 torture, 7 invalid), copied by `sync-upstream.mjs`. The first `npm run test:snap:update` writes a `.cep.snap` next to each. `check-fixtures.mjs` (§5.5.4) then requires each snapshot to be present and tracked, so `test:snap` can never pass by writing one. **Review every snapshot by hand** against §5.3 v2 before committing it. Check at least:
+There are 20 fixtures (10 examples, 2 torture, 8 invalid), copied by `sync-upstream.mjs`. The first `npm run test:snap:update` writes a `.cep.snap` next to each. `check-fixtures.mjs` (§5.5.4) then requires each snapshot to be present and tracked, so `test:snap` can never pass by writing one. **Review every snapshot by hand** against §5.3 v2 before committing it. Check at least:
 
 - **`torture/lexical.cep`:**
   - every string, escape, number, duration, param ref and backticked name has its §5.3 scope;
@@ -819,9 +819,10 @@ There are 19 fixtures (10 examples, 2 torture, 7 invalid), copied by `sync-upstr
   - on line 8, `from` is `keyword.control.clause.cep` and `'x'` is a closed string with begin and end punctuation.
 - **`invalid/e-cmt-001-unterminated-comment.cep`:** lines 4–5 are `comment.block.cep` to the end of the file.
 - **`invalid/e-txt-001-unsuffixed-text-operator.cep`:** `has` carries no keyword scope.
+- **`invalid/e-syn-001-malformed-backticked-name.cep`** (2026-11-09): the digit-first `` `1abc` `` after `stream` carries no quoted-name and no stream-name scope, as cep's backticked rule is `` `[A-Za-z_][A-Za-z0-9_\-. ]*` ``.
 - **`invalid/e-kw-001-*.cep`** (v2, architecture D-A4): `select` carries `keyword.control.clause.cep`, not a stream name, and `SeleCT` carries `invalid.illegal.keyword-case.cep`.
 
-**Red first, for the snapshot layer.** Rename `constant.numeric.cep` in the grammar. Expect `npm run test:snap` to exit 255 with all 19 fixtures failing, because every fixture has a number. Record it, then revert the rename. (Renaming a scope that no fixture uses, such as `invalid.illegal.escape.cep`, would exit 0.)
+**Red first, for the snapshot layer.** Rename `constant.numeric.cep` in the grammar. Expect `npm run test:snap` to exit 255 with all 20 fixtures failing, because every fixture has a number. Record it, then revert the rename. (Renaming a scope that no fixture uses, such as `invalid.illegal.escape.cep`, would exit 0.)
 
 After the review, a snapshot changes only with a diff that has been read and explained in the commit message.
 
@@ -868,7 +869,7 @@ Each test copies the real grammar JSON into a temporary directory (`fs.mkdtempSy
   - `SOURCE` is exactly `VORSAR/cep <sha> <date>` and one LF;
   - only a run like this one counts as a first run for the second-run test.
 - **The ref, not the working tree** (QA D-Q5):
-  - commit on `main` a `keywords.go`, a `lexer.go`, one example with CRLF line endings and no final newline, and the 7 invalid names;
+  - commit on `main` a `keywords.go`, a `lexer.go`, one example with CRLF line endings and no final newline, and the 8 invalid names;
   - then check out a branch `other` that changes those bytes, and leave one more uncommitted edit;
   - run with `--ref main` → exit 0, and every written file is byte-equal to `git cat-file blob main:<path>`.
 - **The default ref:** one test on a `-b main` repo omits `--ref` and expects `main`'s bytes.
@@ -878,7 +879,7 @@ Each test copies the real grammar JSON into a temporary directory (`fs.mkdtempSy
   - an unknown `--ref` → 1, naming it;
   - a missing invalid fixture in the source → 1, naming it.
 - **A stale fixture:** a stale `.cep` already under `--out` → 1, naming it. The stale `.cep`, and a `.cep.snap` beside a current fixture, are still on disk afterwards.
-- **`--check`:** after a sync → 0, with the `21 files match` line; after one byte is flipped in a written file → 1, naming it; nothing is written in either run.
+- **`--check`:** after a sync → 0, with the `22 files match` line; after one byte is flipped in a written file → 1, naming it; nothing is written in either run.
 
 **`check-upstream`** (§5.5.3):
 - both files the same, as `data:` URLs → 0;
@@ -890,12 +891,12 @@ Each test copies the real grammar JSON into a temporary directory (`fs.mkdtempSy
 - a missing local file or `SOURCE` → 1, naming it.
 
 **`check-fixtures`** (§5.5.4):
-- 10 + 2 + 7 tracked pairs → 0;
+- 10 + 2 + 8 tracked pairs → 0;
 - a committed `.cep.snap` removed with a plain `rm` → 1, naming it;
 - an untracked `.snap` → 1;
 - an orphan `.snap` → 1;
-- 18 fixtures → 1;
-- 11 + 1 + 7 → 1, naming `examples`;
+- 19 fixtures → 1;
+- 11 + 1 + 8 → 1, naming `examples`;
 - an extra file → 1;
 - an ignored `.DS_Store` in a fixture folder → 0;
 - a directory that is not a git repo → 1.
@@ -942,8 +943,9 @@ The owner wants a working product as early as possible, then iteration towards t
 |---|---|---|
 | **v0.0.1** (preview) | The design-reviewed reference grammar (the architect's candidate for §5.3 v2), PLAN §5.2's editor configuration, §6.1's verbatim `literals.test.cep` (run red first), and the release job (§5.6.1), released by CI from the owner's tag (owner, 2026-11-09: "an immediate release from CI"). **Its gate is what exists at that rung**: the toolchain check, the literals test, the release tests and packaging. `.vsix` content was checked by hand (8 files). The full gate comes with v0.1.0. | 2026-11-09 |
 | **v0.1.0** (sprint S1) | The repo-built extension: lane B's test-first grammar and configuration, and lane A's tooling and CI. Then the 19 snapshots generated and reviewed, T3 (`npm ci && npm run gate`), CI green on the owner's PR, the owner's quick check (Dark 2026 and Light 2026, the editor basics, typing `'''`), merge and tag. | target 2026-11-09 |
-| **v0.1.1** (S1.1) | The review and break-it of the combined build (architect, QA, the-fool), moved here from S1 by the owner (≠ R). Then one fix round, the owner's feedback from the preview and v0.1.0, and the full owner's check in four themes. | after v0.1.0 |
-| **v0.1.x** | The lockfile re-resolved with `--before` (today − 14 days), so the `@azure/identity` 4.14.1 fix is in; `npm audit` recorded (plan check card line 10). Moved here from before T3 by the owner, amending G0 Q3. It folds into v0.1.1 if that ships on or after the 13th. | on or after 2026-11-13 |
+| **v0.1.1** | Re-sync to cep `75f541e`, which fixed this repo's findings F1–F4 (owner, 2026-11-09). `risk/2.5` divides in cep now, as the grammar already showed. Backticked names take cep's rule, a letter or `_` first, tested first. cep's new `e-syn-001-malformed-backticked-name.cep` is an 8th invalid fixture. | 2026-11-09 |
+| **v0.1.2** (S1.1) | The review and break-it of the combined build (architect, QA, the-fool), moved here from S1 by the owner (≠ R). Then one fix round, the owner's feedback from the preview and v0.1.0, and the full owner's check in four themes. | after v0.1.1 |
+| **v0.1.x** | The lockfile re-resolved with `--before` (today − 14 days), so the `@azure/identity` 4.14.1 fix is in; `npm audit` recorded (plan check card line 10). Moved here from before T3 by the owner, amending G0 Q3. It folds into v0.1.2 if that ships on or after the 13th. | on or after 2026-11-13 |
 | **later** | §9's items (snippets, store publishing, the language server) as the owner picks them, one release each. | — |
 
 Every release still runs the gate (`npm ci && npm run gate`) and CI before its merge, and every snapshot change is reviewed.

@@ -180,6 +180,10 @@ PLAN §6.1's unit files and plan check §6's 47 counter-examples cover the rest.
 
 ## Scope changes
 
+**2026-11-09, the owner: v0.1.1 is the re-sync.** After the owner asked to follow up on cep's fixes ("Sync cep-vscode"), the owner chose, as recommended:
+- **Ship the re-sync to cep `75f541e` now as v0.1.1.** The review and break-it move from v0.1.1 to v0.1.2.
+- **Vendor cep's new `invalid/e-syn-001-malformed-backticked-name.cep` as an 8th invalid fixture.** That puts the sync's copy set at 22 files and check-fixtures at 10 + 2 + 8, both changed test-first.
+
 **2026-11-09, the owner: incremental delivery.** The owner asked for a working product as early as possible, then iteration, and said several released versions are fine. PLAN §7.0 now holds the release ladder. Decisions, in order:
 1. **The release ladder** (PLAN §7.0): v0.0.1 preview, then v0.1.0 (S1), then v0.1.1 (S1.1), then v0.1.x (lockfile), then later items.
 2. **v0.1.0 ships before the review and break-it of the combined build**, which move to v0.1.1 (S1.1) with the one fix round (≠ R: the recommendation was to review before v0.1.0). S1's G3 row moves with them. v0.1.0's owner's check is the quick check (Dark 2026 and Light 2026, the editor basics, typing `'''`); the four-theme check comes in v0.1.1.
