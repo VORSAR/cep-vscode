@@ -102,6 +102,7 @@ const INVALID = [
   'e-kw-001-mixedcase-identifier.cep',
   'e-kw-002-uppercase-keyword.cep',
   'e-res-001-group-by.cep',
+  'e-syn-001-malformed-backticked-name.cep',
   'e-str-001-newline-in-single-quoted.cep',
   'e-txt-001-unsuffixed-text-operator.cep',
 ];
@@ -282,7 +283,7 @@ describe('sync-upstream', () => {
     const clean = snapshot(out);
     const ok = run('sync-upstream', [cep, '--ref', 'main', '--out', out, '--check']);
     assert.equal(ok.status, 0, ok.out);
-    assert.match(ok.out, new RegExp(`^sync-upstream: ok \\(21 files match ${sha}\\)$`, 'm'));
+    assert.match(ok.out, new RegExp(`^sync-upstream: ok \\(22 files match ${sha}\\)$`, 'm'));
     assert.deepEqual(snapshot(out), clean);
 
     const flipped = read(out, 'test/fixtures/torture/comments.cep');
@@ -419,9 +420,9 @@ describe('check-fixtures', () => {
     return dir;
   }
   const check = (root) => run('check-fixtures', ['--root', root]);
-  const OK = /^check-fixtures: ok \(19 fixtures, 19 tracked snapshots\)$/m;
+  const OK = /^check-fixtures: ok \(20 fixtures, 20 tracked snapshots\)$/m;
 
-  test('passes on 10 + 2 + 7 tracked pairs', () => {
+  test('passes on 10 + 2 + 8 tracked pairs', () => {
     const r = check(fixturesRepo());
     assert.equal(r.status, 0, r.out);
     assert.match(r.out, OK);
@@ -453,16 +454,16 @@ describe('check-fixtures', () => {
     assert.match(r.out, /^check-fixtures: .*test\/fixtures\/invalid\/zz-orphan\.cep\.snap/m);
   });
 
-  test('fails on 18 fixtures, naming the short folder', () => {
+  test('fails on 19 fixtures, naming the short folder', () => {
     const dir = fixturesRepo();
     git(dir, 'rm', '-q', 'test/fixtures/invalid/e-res-001-group-by.cep', 'test/fixtures/invalid/e-res-001-group-by.cep.snap');
     commitAll(dir, 'drop one');
     const r = check(dir);
     assert.equal(r.status, 1, r.out);
-    assert.match(r.out, /^check-fixtures: .*test\/fixtures\/invalid has 6 \.cep files, expected 7/m);
+    assert.match(r.out, /^check-fixtures: .*test\/fixtures\/invalid has 7 \.cep files, expected 8/m);
   });
 
-  test('fails on 11 + 1 + 7, naming examples', () => {
+  test('fails on 11 + 1 + 8, naming examples', () => {
     const dir = fixturesRepo();
     git(dir, 'mv', 'test/fixtures/torture/lexical.cep', 'test/fixtures/examples/lexical.cep');
     git(dir, 'mv', 'test/fixtures/torture/lexical.cep.snap', 'test/fixtures/examples/lexical.cep.snap');
