@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-09):** v0.0.1, v0.1.0, v0.1.1 and **v0.1.2** are released ([releases](https://github.com/VORSAR/cep-vscode/releases)); the vendored cep files are at `ebb8496`. Next on the ladder (§7.0): v0.1.3 (S1.1), the review and break-it of the combined build with one fix round and the four-theme check; then v0.1.x, the lockfile refresh on or after 2026-11-13.
+**Status (2026-11-13):** v0.0.1, v0.1.0, v0.1.1 and **v0.1.2** are released ([releases](https://github.com/VORSAR/cep-vscode/releases)); the vendored cep files are at `7c65dbf` (after cep S1.1c-3; unreleased, and only `SOURCE` changed since v0.1.2's `ebb8496`). Next on the ladder (§7.0): v0.1.3 (S1.1), the review and break-it of the combined build with one fix round and the four-theme check; then v0.1.x, the lockfile refresh on or after 2026-11-13.
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 
@@ -60,7 +60,7 @@ Not in v1: error squiggles, hover, go-to-definition, formatting (these need a la
 
 ## 3. Where the language is defined
 
-cep is the source of truth. The files used, pinned at **cep `main` = `ebb8496636564086400f27f3c0d06ad49e5dcd22` (2026-11-09)**. They were first pinned at `1fa3a5b` (2026-11-08), re-synced to `75f541e` when cep fixed this repo's findings F1–F4, and to `ebb8496`, which changed none of the vendored files except `SOURCE`:
+cep is the source of truth. The files used, pinned at **cep `main` = `7c65dbfcc9ad8010756128424f033af9cb00acc2` (2026-11-13)**. They were first pinned at `1fa3a5b` (2026-11-08), re-synced to `75f541e` when cep fixed this repo's findings F1–F4, then to `ebb8496` and to `7c65dbf` (cep S1.1c-3), neither of which changed any vendored file except `SOURCE`:
 
 | cep path | What this repo takes from it |
 |---|---|
