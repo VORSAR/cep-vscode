@@ -181,6 +181,11 @@ At most two agents at once.
   - **The release run**, 42616429488, exited 0 in 22 s: `npm ci`, the gate, `check-release` and `gh release create`.
   - **The published asset:** `cep-0.1.2.vsix` holds 8 files, reports version 0.1.2, and its grammar is byte-equal to the tag's.
   - <https://github.com/VORSAR/cep-vscode/releases/tag/v0.1.2>
+- **Re-sync to cep `7c65dbf` (2026-11-13, after cep's S1.1c-3):**
+  - **What changed in cep:** since `ebb8496`, 296 commits (PRs #27–#39), ending with S1.1c-3 (PR #38, `1fec29a`) and its close-out. Under the paths the sync reads, the only change is a new grammar-level invalid file, `e-pat-005-arrow-before-absence.cep`, which is not vendored. `lexer.go`, `keywords.go`, `grammar.lark` and every example are byte-identical; S1.1c-3 changed cep's diagnostics and documents.
+  - **The sync:** after the owner merged cep's PRs #38 and #39, cep's `main` = `origin/main` = `7c65dbf`. `node scripts/sync-upstream.mjs ../cep` exited 0 and wrote only `SOURCE`, and `--check` reported 22 files matching.
+  - **Tests:** `npm test` exited 0 with no snapshot change, and the gate exited 0 at `7d65c55`.
+  - **The release:** the owner said "do a release with changes upto now", so v0.1.3 is this re-sync alone, and the review and break-it move to v0.1.4.
 - **PLAN corrections from lane B (2026-11-09):** §5.3's table now lists type, modifier, constant and reserved in `keywords.go` order (rule i). §6.1 pairs `ts_min` with dropping the leading edge `L`.
 - **Lane A's open items, for later:**
     - `--check` compares only the 21 targets, so an extra stale `.cep` is caught by `check-fixtures`, not by `--check`;
@@ -207,6 +212,8 @@ PLAN §6.1's unit files and plan check §6's 47 counter-examples cover the rest.
 - **Vendor cep's new `invalid/e-syn-001-malformed-backticked-name.cep` as an 8th invalid fixture.** That puts the sync's copy set at 22 files and check-fixtures at 10 + 2 + 8, both changed test-first.
 
 **2026-11-09, the owner: v0.1.2 is the re-sync to cep `ebb8496`.** The owner's pasted brief asked to sync and re-verify without pushing. The coordinator found one change needed (below), and the owner then said "if there is a change required lets do it and ship a new release". The review and break-it move to v0.1.3.
+
+**2026-11-13, the owner: v0.1.3 is the re-sync to cep `7c65dbf`.** After the owner merged cep's S1.1c-3 (PR #38) and its close-out (PR #39), the coordinator re-synced; only `SOURCE` changed. The owner then said "do a release with changes upto now". The review and break-it move to v0.1.4, and the lockfile refresh folds into v0.1.4 if that ships on or after the 13th.
 
 **2026-11-09, the owner: incremental delivery.** The owner asked for a working product as early as possible, then iteration, and said several released versions are fine. PLAN §7.0 now holds the release ladder. Decisions, in order:
 1. **The release ladder** (PLAN §7.0): v0.0.1 preview, then v0.1.0 (S1), then v0.1.1 (S1.1), then v0.1.x (lockfile), then later items.

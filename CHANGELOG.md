@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- Re-synced to cep `7c65dbf`; no sample file or lexer rule changed, so colours are the same as 0.1.2. cep's changes since 0.1.2 are to its error messages and documents, which this extension does not show.
+
 ## 0.1.2
 
 - Re-synced to cep `ebb8496`; no sample file or lexer rule changed, so colours are the same as 0.1.1.
