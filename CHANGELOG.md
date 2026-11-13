@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4
+
+- No change to colours: the grammar and the language configuration are the same as 0.1.3.
+- This extension now notices more of cep's changes. A weekly check compares every sample file it copies from cep, not just the keyword table and the lexer, and each new example of an error that cep adds must be reviewed before the next copy.
+
 ## 0.1.3
 
 - Re-synced to cep `7c65dbf`; no sample file or lexer rule changed, so colours are the same as 0.1.2. cep's changes since 0.1.2 are to its error messages and documents, which this extension does not show.
