@@ -66,6 +66,34 @@ const INVALID = [
   'e-str-001-newline-in-single-quoted.cep',
   'e-txt-001-unsuffixed-text-operator.cep',
 ];
+// cep's other invalid files, each reviewed and not vendored (PLAN §5.5.1, 2026-11-13). A file in
+// cep's invalid/ that is on neither list is a failure, so a new one gets a decision.
+const NOT_VENDORED = [
+  // Parse and static errors: no highlighting scope (PLAN §5.3, known limitation 5).
+  'e-dur-001-bare-integer-duration.cep',
+  'e-emit-001-missing-emit.cep',
+  'e-int-001-missing-intent.cep',
+  'e-late-001-missing-late-clause.cep',
+  'e-ord-001-reordered-clauses.cep',
+  'e-pat-001-missing-within.cep',
+  'e-pat-002-missing-after-match.cep',
+  'e-pat-003-missing-restart-marker.cep',
+  'e-pat-004-absence-without-for.cep',
+  'e-pat-005-absence-only-pattern.cep',
+  'e-pat-005-arrow-before-absence.cep',
+  'e-prag-001-missing-pragma.cep',
+  'e-syn-001-synonym-keyword.cep',
+  'e-syn-002-sql-equality.cep',
+  'e-syn-003-in-list.cep',
+  'e-syn-004-select-star.cep',
+  'e-ttl-001-partition-missing-ttl.cep',
+  'e-win-001-cron-missing-timezone.cep',
+  // A keyword glued to a name: covered by the glued lines in test/unit/names.test.cep.
+  'e-prag-001-keyword-glued-to-pragma-id.cep',
+  'e-syn-001-keyword-glued-to-name.cep',
+  // A BOM after the start: unmarked (PLAN §5.3, known limitation 3).
+  'e-syn-001-bom-after-start.cep',
+];
 const listCep = (dir) =>
   git(['ls-tree', '-z', '--name-only', sha, dir], `cannot list ${dir} at ${ref}`)
     .split('\0')
@@ -80,6 +108,11 @@ const targets = [
 const invalidUpstream = new Set(listCep('docs/language/invalid/'));
 const missing = INVALID.map((n) => `docs/language/invalid/${n}`).filter((src) => !invalidUpstream.has(src));
 if (missing.length > 0) fail(...missing.map((src) => `${at} has no ${src}`));
+const reviewed = new Set([...INVALID, ...NOT_VENDORED].map((n) => `docs/language/invalid/${n}`));
+const unreviewed = [...invalidUpstream].filter((src) => !reviewed.has(src)).sort();
+if (unreviewed.length > 0) {
+  fail(...unreviewed.map((src) => `${at} has ${src}, which is neither vendored nor reviewed; add it to INVALID or NOT_VENDORED (PLAN §5.5.1)`));
+}
 for (const n of INVALID) targets.push({ src: `docs/language/invalid/${n}`, dest: `test/fixtures/invalid/${n}` });
 
 // Read every blob first, as raw bytes with no line-ending conversion, so a failure writes nothing.

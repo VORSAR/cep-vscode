@@ -383,6 +383,7 @@ The script reads files from a git ref, `main` by default, through git's object s
    - every `*.cep` that `git -C <cep> ls-tree --name-only <ref> docs/language/examples/` lists → `test/fixtures/examples/`;
    - every `*.cep` that `ls-tree` lists for `docs/language/examples/torture/` → `test/fixtures/torture/`;
    - these eight under `docs/language/invalid/` → `test/fixtures/invalid/` (the 8th added 2026-11-09, owner): `e-cmt-001-unterminated-comment.cep`, `e-kw-001-keyword-as-identifier.cep`, `e-kw-001-mixedcase-identifier.cep`, `e-kw-002-uppercase-keyword.cep`, `e-res-001-group-by.cep`, `e-syn-001-malformed-backticked-name.cep`, `e-str-001-newline-in-single-quoted.cep`, `e-txt-001-unsuffixed-text-operator.cep`. A missing one is a failure, naming it.
+   - every other `.cep` under `docs/language/invalid/` must be on the script's reviewed list, `NOT_VENDORED` (2026-11-13, at the owner's go-ahead): 18 parse and static errors (§5.3 known limitation 5), the two keyword-glued files (`names.test.cep` covers them) and `e-syn-001-bom-after-start.cep` (known limitation 3). An unlisted one is a failure, naming it, before anything is written or compared, so each new cep invalid file gets a decision: vendor it or list it.
 
    `ls-tree` prints full paths and lists the `torture` folder as an entry of its own. Keep only names ending in `.cep`, and write each under its basename.
 3. Write `test/upstream/SOURCE` as exactly `VORSAR/cep <sha> <date>` and one LF, from `git -C <cep> log -1 --format=%H %cs <ref>`.
@@ -882,7 +883,8 @@ Each test copies the real grammar JSON into a temporary directory (`fs.mkdtempSy
 - **Failures:**
   - no path → 1;
   - an unknown `--ref` → 1, naming it;
-  - a missing invalid fixture in the source → 1, naming it.
+  - a missing invalid fixture in the source → 1, naming it;
+  - an invalid file in the source that is neither vendored nor reviewed → 1, naming only it, with nothing written; the same file landing after a sync → `--check` 1, naming it.
 - **A stale fixture:** a stale `.cep` already under `--out` → 1, naming it. The stale `.cep`, and a `.cep.snap` beside a current fixture, are still on disk afterwards.
 - **`--check`:** after a sync → 0, with the `22 files match` line; after one byte is flipped in a written file → 1, naming it; nothing is written in either run.
 
