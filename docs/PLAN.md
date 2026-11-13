@@ -372,7 +372,7 @@ All scripts are ES modules run with `node`, and they use only Node built-ins (`n
 - Every default path resolves from the script's own location (`import.meta.dirname`), not the current directory, so a script behaves the same from any worktree.
 - Each script's tests (§6.3, §6.4) assert its message, not just its exit code, because Node itself exits 1 for a missing script. Each script also has a passing case.
 
-#### 5.5.1 `scripts/sync-upstream.mjs <path-to-cep-clone> [--ref <git-ref>] [--out <dir>] [--check]`
+#### 5.5.1 `scripts/sync-upstream.mjs <path-to-cep-clone> [--ref <git-ref>] [--out <dir>] [--check [--ignore-source]]`
 
 The script reads files from a git ref, `main` by default, through git's object store. It never reads or changes the cep working tree, so it works whatever branch the cep clone has checked out (the owner's clone is usually on a sprint branch). Run `git -C <cep> fetch origin` first and pass `--ref origin/main` to sync with the remote's `main`.
 
@@ -390,6 +390,7 @@ The script reads files from a git ref, `main` by default, through git's object s
 4. Never delete anything: the `.cep.snap` files live next to the fixtures. List every `.cep` under `<out>/test/fixtures/` that was not in this copy set, and exit 1 if there are any, so a person removes the stale fixture and its snapshot.
 5. Print each file written that changed, then the line `next: npm test, then review every snapshot diff`.
 6. **`--check`** writes nothing. It compares each of the 22 targets (20 fixtures, `keywords.go`, `lexer.go`), and `SOURCE`, with what step 2 would write. It exits 1, naming each file that differs or is missing; otherwise it prints `sync-upstream: ok (22 files match <sha>)`. This is the byte proof for the vendored files (plan check card line 4).
+7. **`--ignore-source`**, only with `--check` (alone it is a failure, writing nothing), leaves `SOURCE` out of the comparison. A cep commit that changes no vendored file then still passes, while any changed, missing or new vendored file, or a new unreviewed invalid file, fails. This is CI's weekly full check (§5.6; owner's go-ahead, 2026-11-13).
 
 In S1 the sync runs pinned to the sprint's target: `node scripts/sync-upstream.mjs <absolute path of the cep clone> --ref 1fa3a5bb9d3bbabfe0c26ca3daa62086c8093c49`.
 
@@ -512,7 +513,15 @@ jobs:
         with:
           node-version-file: .nvmrc
       - run: node scripts/check-upstream.mjs
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          repository: VORSAR/cep
+          path: cep
+          persist-credentials: false
+      - run: node scripts/sync-upstream.mjs cep --ref HEAD --check --ignore-source
 ```
+
+The upstream job checks cep's `main` in two ways. `check-upstream` (§5.5.3) compares the two files the grammar is built from. Then a shallow checkout of cep and `sync-upstream --check --ignore-source` (§5.5.1) compare all 22 vendored files and cep's invalid set (owner's go-ahead, 2026-11-13). A cep commit that changes no vendored file passes both.
 
 The test job runs exactly T3 (`npm ci`, then `npm run gate`; owner, 2026-11-08, Q5). A tooling test (§6.4) fails unless it does. `npm run gate` includes the `.vsix` check and the clean-tree check.
 
@@ -887,6 +896,7 @@ Each test copies the real grammar JSON into a temporary directory (`fs.mkdtempSy
   - an invalid file in the source that is neither vendored nor reviewed → 1, naming only it, with nothing written; the same file landing after a sync → `--check` 1, naming it.
 - **A stale fixture:** a stale `.cep` already under `--out` → 1, naming it. The stale `.cep`, and a `.cep.snap` beside a current fixture, are still on disk afterwards.
 - **`--check`:** after a sync → 0, with the `22 files match` line; after one byte is flipped in a written file → 1, naming it; nothing is written in either run.
+- **`--ignore-source`:** after a sync and a cep commit that changes no vendored file, `--check` → 1, naming `SOURCE`; `--check --ignore-source` → 0, writing nothing; after one byte is flipped → 1, naming the file and not `SOURCE`. `--ignore-source` without `--check` → 1, writing nothing.
 
 **`check-upstream`** (§5.5.3):
 - both files the same, as `data:` URLs → 0;
@@ -917,12 +927,12 @@ Each test copies the real grammar JSON into a temporary directory (`fs.mkdtempSy
 
 **`check-clean`** (§5.5.6): a clean repo → 0; an untracked or a changed file → 1, naming the path; a directory that is not a git repo → 1.
 
-**`ci.yml`.** A line-based reader with no dependency reads `on:`, each job's `if:`, and each job's `steps[].run`. It fails on any line it cannot place. The test requires all of these:
+**`ci.yml`.** A line-based reader with no dependency reads `on:`, each job's `if:`, each job's `steps[].run`, and the upstream job's checkout steps. It fails on any line it cannot place. The test requires all of these:
 - `on:` includes `push` (branches `[main]`), `pull_request`, `schedule` and `workflow_dispatch`;
 - the test job has no `if:`, and its `run:` steps are exactly `npm ci` then `npm run gate`;
-- the `upstream` job's `if:` is the schedule-or-dispatch condition, and its only `run:` step is `node scripts/check-upstream.mjs`.
+- the `upstream` job's `if:` is the schedule-or-dispatch condition; its `run:` steps are exactly `node scripts/check-upstream.mjs` then `node scripts/sync-upstream.mjs cep --ref HEAD --check --ignore-source`; and an `actions/checkout` step with `repository: VORSAR/cep` and `path: cep` comes before the second.
 
-Red first: the test runs against PLAN v1's §5.6 file and against three mutations of the real one: `pull_request` dropped, an `if:` added to the test job, and the upstream step removed. Each must go red.
+Red first: the test runs against PLAN v1's §5.6 file and against five mutations of the real one: `pull_request` dropped, an `if:` added to the test job, the `check-upstream` step removed, the sync check removed, and cep's `repository:` removed. Each must go red.
 
 `test/toolchain.test.mjs` (built) covers `check-toolchain` (§5.5.7).
 
