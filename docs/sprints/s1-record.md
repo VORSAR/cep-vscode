@@ -186,6 +186,14 @@ At most two agents at once.
   - **The sync:** after the owner merged cep's PRs #38 and #39, cep's `main` = `origin/main` = `7c65dbf`. `node scripts/sync-upstream.mjs ../cep` exited 0 and wrote only `SOURCE`, and `--check` reported 22 files matching.
   - **Tests:** `npm test` exited 0 with no snapshot change, and the gate exited 0 at `7d65c55`.
   - **The release:** the owner said "do a release with changes upto now", so v0.1.3 is this re-sync alone, and the review and break-it move to v0.1.4.
+  - **The weekly upstream job**, which had never run (it reached `main` after the 2026-11-09 slot), was dispatched once on `main` at the owner's go-ahead: run 43418403967 passed.
+- **v0.1.3 released by CI (2026-11-13):**
+  - **CI:** the owner said "create the pr", so the coordinator pushed `sync/cep-7c65dbf` and opened PR #5, which ran green on `bd6e97f` (run 43418904154).
+  - **The merge:** the owner merged it on GitHub as a rebase-merge, so `main` = `fe48513`, whose tree equals the tested one. CI on `main`, run 43419025681, succeeded.
+  - **The tag:** at the owner's word ("do a release with changes upto now"), the coordinator tagged `fe48513` as `v0.1.3` and pushed the tag.
+  - **The release run**, 43419105888, exited 0 in 24 s: `npm ci`, the gate, `check-release` and `gh release create`.
+  - **The published asset:** `cep-0.1.3.vsix` holds 8 files, reports version 0.1.3, and its grammar and language configuration are byte-equal to the tag's.
+  - <https://github.com/VORSAR/cep-vscode/releases/tag/v0.1.3>
 - **PLAN corrections from lane B (2026-11-09):** §5.3's table now lists type, modifier, constant and reserved in `keywords.go` order (rule i). §6.1 pairs `ts_min` with dropping the leading edge `L`.
 - **Lane A's open items, for later:**
     - `--check` compares only the 21 targets, so an extra stale `.cep` is caught by `check-fixtures`, not by `--check`;
