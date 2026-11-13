@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-13):** v0.0.1, v0.1.0, v0.1.1 and v0.1.2 are released ([releases](https://github.com/VORSAR/cep-vscode/releases)). **v0.1.3 is being prepared:** the re-sync to cep `7c65dbf`, after cep's S1.1c-3 (only `SOURCE` changed). Next on the ladder (§7.0): v0.1.4 (S1.1), the review and break-it of the combined build with one fix round and the four-theme check; then v0.1.x, the lockfile refresh on or after 2026-11-13.
+**Status (2026-11-13):** v0.0.1, v0.1.0, v0.1.1, v0.1.2 and **v0.1.3** are released ([releases](https://github.com/VORSAR/cep-vscode/releases)); the vendored cep files are at `7c65dbf`. Next on the ladder (§7.0): v0.1.4 (S1.1), the review and break-it of the combined build with one fix round and the four-theme check; then v0.1.x, the lockfile refresh on or after 2026-11-13.
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 
