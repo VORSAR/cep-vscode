@@ -332,6 +332,42 @@ describe('sync-upstream', () => {
     assert.match(r.out, /^sync-upstream: .*test\/upstream\/lexer\.go/m);
     assert.equal(exists(out, 'test/upstream/lexer.go'), false);
   });
+
+  test('--check --ignore-source passes when only SOURCE differs, and still names a changed file', () => {
+    const cep = makeCep();
+    const out = newDir('out');
+    assert.equal(run('sync-upstream', [cep, '--ref', 'main', '--out', out]).status, 0);
+    write(cep, 'docs/language/SPEC.md', '# spec, revised\n');
+    commitAll(cep, 'a change to no vendored file');
+    const sha = git(cep, 'rev-parse', 'main').trim();
+
+    const strict = run('sync-upstream', [cep, '--ref', 'main', '--out', out, '--check']);
+    assert.equal(strict.status, 1, strict.out);
+    assert.match(strict.out, /^sync-upstream: .*test\/upstream\/SOURCE/m);
+
+    const clean = snapshot(out);
+    const ok = run('sync-upstream', [cep, '--ref', 'main', '--out', out, '--check', '--ignore-source']);
+    assert.equal(ok.status, 0, ok.out);
+    assert.match(ok.out, new RegExp(`^sync-upstream: ok \\(22 files match ${sha}\\)$`, 'm'));
+    assert.deepEqual(snapshot(out), clean);
+
+    const flipped = read(out, `test/fixtures/examples/${EXAMPLES[0]}`);
+    flipped[0] ^= 1;
+    write(out, `test/fixtures/examples/${EXAMPLES[0]}`, flipped);
+    const bad = run('sync-upstream', [cep, '--ref', 'main', '--out', out, '--check', '--ignore-source']);
+    assert.equal(bad.status, 1, bad.out);
+    assert.match(bad.out, new RegExp(`^sync-upstream: .*test/fixtures/examples/${re(EXAMPLES[0])}`, 'm'));
+    assert.doesNotMatch(bad.out, /SOURCE/);
+  });
+
+  test('--ignore-source without --check fails, naming both, and writes nothing', () => {
+    const cep = makeCep();
+    const out = newDir('out');
+    const r = run('sync-upstream', [cep, '--ref', 'main', '--out', out, '--ignore-source']);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /^sync-upstream: --ignore-source needs --check/m);
+    assert.deepEqual(listFiles(out), []);
+  });
 });
 
 // ---------------------------------------------------------------------------------------------
@@ -782,6 +818,7 @@ function readWorkflow(text) {
 }
 
 const UPSTREAM_IF = "github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'";
+const UPSTREAM_RUNS = ['node scripts/check-upstream.mjs', 'node scripts/sync-upstream.mjs cep --ref HEAD --check --ignore-source'];
 const isMap = (x) => x !== null && typeof x === 'object' && !Array.isArray(x);
 const runSteps = (job) => (Array.isArray(job?.steps) ? job.steps : []).filter((s) => isMap(s) && Object.hasOwn(s, 'run')).map((s) => s.run);
 
@@ -819,8 +856,15 @@ function workflowProblems(text) {
   } else {
     if (upstream.if !== UPSTREAM_IF) problems.push(`ci.yml: the upstream job's if: is ${JSON.stringify(upstream.if ?? null)}, not the schedule-or-dispatch condition`);
     const runs = runSteps(upstream);
-    if (JSON.stringify(runs) !== JSON.stringify(['node scripts/check-upstream.mjs'])) {
-      problems.push(`ci.yml: the upstream job runs ${JSON.stringify(runs)}, not ["node scripts/check-upstream.mjs"]`);
+    if (JSON.stringify(runs) !== JSON.stringify(UPSTREAM_RUNS)) {
+      problems.push(`ci.yml: the upstream job runs ${JSON.stringify(runs)}, not ${JSON.stringify(UPSTREAM_RUNS)}`);
+    }
+    const steps = Array.isArray(upstream.steps) ? upstream.steps : [];
+    const cepCheckout = steps.findIndex((s) => isMap(s) && typeof s.uses === 'string' && s.uses.startsWith('actions/checkout@')
+      && isMap(s.with) && s.with.repository === 'VORSAR/cep' && s.with.path === 'cep');
+    const syncCheck = steps.findIndex((s) => isMap(s) && s.run === UPSTREAM_RUNS[1]);
+    if (cepCheckout === -1 || cepCheckout > syncCheck) {
+      problems.push('ci.yml: the upstream job does not check out VORSAR/cep into cep before its sync check');
     }
   }
   return problems;
@@ -870,7 +914,7 @@ describe('ci.yml', () => {
     return out;
   }
 
-  test('the test job runs npm ci then npm run gate, and upstream runs only on schedule or by hand', () => {
+  test('the test job runs npm ci then npm run gate, and upstream runs only on schedule or by hand, checking cep in full', () => {
     assert.deepEqual(workflowProblems(realWorkflow()), []);
   });
 
@@ -899,7 +943,17 @@ describe('ci.yml', () => {
 
   test('the contract rejects the workflow with the upstream step removed', () => {
     const problems = workflowProblems(mutate(realWorkflow(), /^ {6}- run: node scripts\/check-upstream\.mjs\n/m, ''));
-    assert.ok(problems.some((p) => /upstream job runs \[\]/.test(p)), problems.join('\n'));
+    assert.ok(problems.some((p) => /upstream job runs \[(?!"node scripts\/check-upstream)/.test(p)), problems.join('\n'));
+  });
+
+  test('the contract rejects the workflow with the full sync check removed', () => {
+    const problems = workflowProblems(mutate(realWorkflow(), /^ {6}- run: node scripts\/sync-upstream\.mjs .*\n/m, ''));
+    assert.ok(problems.some((p) => /upstream job runs \["node scripts\/check-upstream\.mjs"\]/.test(p)), problems.join('\n'));
+  });
+
+  test("the contract rejects the upstream job without cep's checkout", () => {
+    const problems = workflowProblems(mutate(realWorkflow(), /^( {10})repository: VORSAR\/cep\n/m, ''));
+    assert.ok(problems.some((p) => /does not check out VORSAR\/cep into cep/.test(p)), problems.join('\n'));
   });
 
   test('the reader fails on a line it cannot place', () => {
