@@ -260,6 +260,31 @@ describe('sync-upstream', () => {
     assert.match(r.out, /^sync-upstream: .*e-txt-001-unsuffixed-text-operator\.cep/m);
   });
 
+  test('fails on an invalid file upstream that is neither vendored nor reviewed, naming only it, and writes nothing', () => {
+    const files = cepFiles();
+    files['docs/language/invalid/e-new-001-unreviewed.cep'] = 'language cep/0.1;\n-- new\n';
+    const cep = makeCep(files);
+    const out = newDir('out');
+    const r = run('sync-upstream', [cep, '--ref', 'main', '--out', out]);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /^sync-upstream: .*docs\/language\/invalid\/e-new-001-unreviewed\.cep/m);
+    assert.doesNotMatch(r.out, /e-dur-001/);
+    assert.deepEqual(listFiles(out), []);
+  });
+
+  test('--check fails on a new invalid file upstream that is neither vendored nor reviewed, naming it', () => {
+    const cep = makeCep();
+    const out = newDir('out');
+    assert.equal(run('sync-upstream', [cep, '--ref', 'main', '--out', out]).status, 0);
+    write(cep, 'docs/language/invalid/e-new-001-unreviewed.cep', 'language cep/0.1;\n-- new\n');
+    commitAll(cep, 'a new invalid example');
+    const clean = snapshot(out);
+    const r = run('sync-upstream', [cep, '--ref', 'main', '--out', out, '--check']);
+    assert.equal(r.status, 1, r.out);
+    assert.match(r.out, /^sync-upstream: .*docs\/language\/invalid\/e-new-001-unreviewed\.cep/m);
+    assert.deepEqual(snapshot(out), clean);
+  });
+
   test('fails on a stale fixture, naming it, and deletes nothing', () => {
     const cep = makeCep();
     const out = newDir('out');
