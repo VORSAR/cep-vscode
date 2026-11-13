@@ -1,6 +1,6 @@
 # Plan: CEP syntax highlighting for VS Code
 
-**Status (2026-11-13):** v0.0.1, v0.1.0, v0.1.1 and **v0.1.2** are released ([releases](https://github.com/VORSAR/cep-vscode/releases)); the vendored cep files are at `7c65dbf` (after cep S1.1c-3; unreleased, and only `SOURCE` changed since v0.1.2's `ebb8496`). Next on the ladder (§7.0): v0.1.3 (S1.1), the review and break-it of the combined build with one fix round and the four-theme check; then v0.1.x, the lockfile refresh on or after 2026-11-13.
+**Status (2026-11-13):** v0.0.1, v0.1.0, v0.1.1 and v0.1.2 are released ([releases](https://github.com/VORSAR/cep-vscode/releases)). **v0.1.3 is being prepared:** the re-sync to cep `7c65dbf`, after cep's S1.1c-3 (only `SOURCE` changed). Next on the ladder (§7.0): v0.1.4 (S1.1), the review and break-it of the combined build with one fix round and the four-theme check; then v0.1.x, the lockfile refresh on or after 2026-11-13.
 
 This is a build-ready spec. An agent should be able to build v1 from this file and the cep files it names, with nothing left to guess. Where a regex in §5.3 and a test in §6 disagree, the test is the authority: fix the regex.
 
@@ -950,8 +950,9 @@ The owner wants a working product as early as possible, then iteration towards t
 | **v0.1.0** (sprint S1) | The repo-built extension: lane B's test-first grammar and configuration, and lane A's tooling and CI. Then the 19 snapshots generated and reviewed, T3 (`npm ci && npm run gate`), CI green on the owner's PR, the owner's quick check (Dark 2026 and Light 2026, the editor basics, typing `'''`), merge and tag. | target 2026-11-09 |
 | **v0.1.1** | Re-sync to cep `75f541e`, which fixed this repo's findings F1–F4 (owner, 2026-11-09). `risk/2.5` divides in cep now, as the grammar already showed. Backticked names take cep's rule, a letter or `_` first, tested first. cep's new `e-syn-001-malformed-backticked-name.cep` is an 8th invalid fixture. | 2026-11-09 |
 | **v0.1.2** | Re-sync to cep `ebb8496` (only `SOURCE` changed; cep now reads keywords as whole words and added invalid examples for it). A unit guard for the end of every declaration keyword, which no test covered (owner, 2026-11-09: "if there is a change required lets do it and ship a new release"). | 2026-11-09 |
-| **v0.1.3** (S1.1) | The review and break-it of the combined build (architect, QA, the-fool), moved here from S1 by the owner (≠ R). Then one fix round, the owner's feedback from the preview and v0.1.0, and the full owner's check in four themes. | after v0.1.2 |
-| **v0.1.x** | The lockfile re-resolved with `--before` (today − 14 days), so the `@azure/identity` 4.14.1 fix is in; `npm audit` recorded (plan check card line 10). Moved here from before T3 by the owner, amending G0 Q3. It folds into v0.1.3 if that ships on or after the 13th. | on or after 2026-11-13 |
+| **v0.1.3** | Re-sync to cep `7c65dbf`, after cep's S1.1c-3 (only `SOURCE` changed; cep changed its diagnostics and documents, which v1 does not show), released alone (owner, 2026-11-13: "do a release with changes upto now"). | 2026-11-13 |
+| **v0.1.4** (S1.1) | The review and break-it of the combined build (architect, QA, the-fool), moved here from S1 by the owner (≠ R). Then one fix round, the owner's feedback from the preview and v0.1.0, and the full owner's check in four themes. | after v0.1.3 |
+| **v0.1.x** | The lockfile re-resolved with `--before` (today − 14 days), so the `@azure/identity` 4.14.1 fix is in; `npm audit` recorded (plan check card line 10). Moved here from before T3 by the owner, amending G0 Q3. It folds into v0.1.4 if that ships on or after the 13th. | on or after 2026-11-13 |
 | **later** | §9's items (snippets, store publishing, the language server) as the owner picks them, one release each. | — |
 
 Every release still runs the gate (`npm ci && npm run gate`) and CI before its merge, and every snapshot change is reviewed.
