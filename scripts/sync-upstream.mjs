@@ -1,23 +1,23 @@
 // sync-upstream: copy cep's keyword table, lexer and language fixtures into this repo, byte for byte.
-// Usage: node scripts/sync-upstream.mjs <path-to-cep-clone> [--ref <git-ref>] [--out <dir>] [--check]
+// Usage: node scripts/sync-upstream.mjs <path-to-cep-clone> [--ref <git-ref>] [--out <dir>] [--check [--ignore-source]]
 // It reads every file from <ref> (default main) through git's object store, never from cep's
 // working tree. --out (default: this repo's root) is where test/upstream and test/fixtures go.
-// --check writes nothing and only compares. To sync with the remote: git -C <cep> fetch origin,
-// then pass --ref origin/main.
+// --check writes nothing and only compares; --ignore-source leaves SOURCE out of that comparison
+// (CI's weekly job). To sync with the remote: git -C <cep> fetch origin, then pass --ref origin/main.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 const name = 'sync-upstream';
-const usage = 'usage: node scripts/sync-upstream.mjs <path-to-cep-clone> [--ref <git-ref>] [--out <dir>] [--check]';
+const usage = 'usage: node scripts/sync-upstream.mjs <path-to-cep-clone> [--ref <git-ref>] [--out <dir>] [--check [--ignore-source]]';
 const fail = (...lines) => {
   for (const line of lines) console.error(`${name}: ${line}`);
   process.exit(1);
 };
 
 const args = process.argv.slice(2);
-const opts = { ref: 'main', out: path.join(import.meta.dirname, '..'), check: false };
+const opts = { ref: 'main', out: path.join(import.meta.dirname, '..'), check: false, ignoreSource: false };
 const positional = [];
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
@@ -26,6 +26,8 @@ for (let i = 0; i < args.length; i++) {
     opts[a.slice(2)] = args[++i];
   } else if (a === '--check') {
     opts.check = true;
+  } else if (a === '--ignore-source') {
+    opts.ignoreSource = true;
   } else if (a.startsWith('--')) {
     fail(`unknown option ${a}; ${usage}`);
   } else {
@@ -33,8 +35,9 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 if (positional.length !== 1) fail(`give exactly one path, the cep clone; ${usage}`);
+if (opts.ignoreSource && !opts.check) fail(`--ignore-source needs --check: a sync always writes SOURCE; ${usage}`);
 const [cep] = positional;
-const { ref, out, check } = opts;
+const { ref, out, check, ignoreSource } = opts;
 
 // Run git in the cep clone. Any exit code other than 0 is a failure, even with an empty stdout.
 function git(gitArgs, what, encoding = 'utf8') {
@@ -134,10 +137,11 @@ const readOrNull = (file) => {
   }
 };
 
-// 6. --check: compare the targets and SOURCE with what a sync would write, and write nothing.
+// 6. --check: compare the targets and SOURCE (not with --ignore-source) with what a sync would
+// write, and write nothing.
 if (check) {
   const problems = [];
-  for (const f of files) {
+  for (const f of ignoreSource ? targets : files) {
     const have = readOrNull(outPath(f.dest));
     if (have === null) problems.push(`${f.dest} is missing`);
     else if (!have.equals(f.bytes)) problems.push(`${f.dest} differs from ${at}`);

@@ -194,6 +194,10 @@ At most two agents at once.
   - **The release run**, 43419105888, exited 0 in 24 s: `npm ci`, the gate, `check-release` and `gh release create`.
   - **The published asset:** `cep-0.1.3.vsix` holds 8 files, reports version 0.1.3, and its grammar and language configuration are byte-equal to the tag's.
   - <https://github.com/VORSAR/cep-vscode/releases/tag/v0.1.3>
+- **Upstream coverage (2026-11-13, at the owner's go-ahead, after v0.1.3):** two gaps in how cep changes reach this repo, each closed test-first.
+  - **New invalid files arrived silently:** the sync copies 8 of cep's 29 by name. It now holds the other 21 as reviewed, not vendored (`NOT_VENDORED`), and any invalid file on neither list fails the sync and `--check`, naming it. Red: 0 of 2 (`9bc0487`).
+  - **The weekly job watched 2 of 22 files:** it now also checks out cep and runs `sync-upstream --check --ignore-source`, which compares all 22 files and the invalid set but not `SOURCE`. Red: 5 of 11 (`563ba30`).
+  - **Proof on cep:** against a shallow clone of `7c65dbf` the job's command passes. In that scratch clone, a docs-only commit still passes, while an edited example and a new invalid file each fail, naming the file.
 - **PLAN corrections from lane B (2026-11-09):** §5.3's table now lists type, modifier, constant and reserved in `keywords.go` order (rule i). §6.1 pairs `ts_min` with dropping the leading edge `L`.
 - **Lane A's open items, for later:**
     - `--check` compares only the 21 targets, so an extra stale `.cep` is caught by `check-fixtures`, not by `--check`;
